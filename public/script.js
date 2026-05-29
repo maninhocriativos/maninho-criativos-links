@@ -178,7 +178,7 @@ const DEFAULT_LINKS = [
   { title:'Instagram', url:'https://instagram.com/maninhocriativos', color_from:'#f09433', color_to:'#bc1888' },
   { title:'YouTube',   url:'https://youtube.com/@maninhocriativos',  color_from:'#FF0000', color_to:'#cc0000' },
   { title:'TikTok',    url:'https://tiktok.com/@maninhocriativos',   color_from:'#010101', color_to:'#69C9D0' },
-  { title:'WhatsApp',  url:'https://wa.me/5500000000000',            color_from:'#25D366', color_to:'#128C7E' },
+  { title:'WhatsApp',  url:'https://wa.me/5592986096874',            color_from:'#25D366', color_to:'#128C7E' },
   { title:'Portfolio', url:'https://maninhocriativos.com',           color_from:'#00d4ff', color_to:'#0055ff' },
 ];
 
@@ -234,8 +234,8 @@ function initCarousel() {
   document.getElementById('carousel-next')?.addEventListener('click', () => { next(); resetAuto(); });
   document.getElementById('carousel-prev')?.addEventListener('click', () => { prev(); resetAuto(); });
 
-  /* Auto-play a cada 3.5s */
-  function startAuto() { autoTimer = setInterval(next, 3500); }
+  /* Auto-play a cada 5s */
+  function startAuto() { autoTimer = setInterval(next, 5000); }
   function resetAuto()  { clearInterval(autoTimer); startAuto(); }
   startAuto();
 

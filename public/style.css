@@ -205,8 +205,8 @@ body {
 }
 
 .link-banner:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,212,255,0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 56px rgba(0,0,0,0.75), 0 0 0 1px rgba(0,212,255,0.35), 0 0 24px rgba(0,212,255,0.08);
 }
 .link-banner:active { transform: translateY(-1px); }
 
@@ -435,14 +435,62 @@ body {
 .footer-admin { color: var(--text3); text-decoration: none; opacity: 0.4; transition: opacity 0.2s; }
 .footer-admin:hover { opacity: 0.8; }
 
-/* ══ RESPONSIVE ══ */
-@media (max-width: 600px) {
-  .hero-content { padding: 32px 24px 48px; gap: 20px; }
-  .links-wrap { padding: 0 16px; }
-  .link-banner { grid-template-columns: 70px 1fr 44px; height: 72px; }
-  .banner-name { font-size: 0.88rem; letter-spacing: 1px; }
-  .srv-grid { grid-template-columns: 1fr; }
-  .srv-title { font-size: 1.7rem; }
+/* ══════════════════════════════
+   MOBILE — independente do desktop
+   max-width: 768px
+   ══════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Hero mobile */
+  .hero-content {
+    padding: 100px 24px 52px;
+    gap: 18px;
+  }
+  .hero-logo { height: 40px; }
+  .hero-badge { font-size: 0.72rem; padding: 6px 13px; }
+  .hero-tools { gap: 6px; }
+  .tool-chip { font-size: 0.68rem; padding: 5px 10px; }
+  .scroll-btn { width: 38px; height: 38px; }
+
+  /* Links mobile — cartões mais altos e generosos */
+  .links-section { padding: 0 0 40px; }
+  .links-wrap { padding: 0 16px; gap: 10px; }
+
+  .link-banner {
+    grid-template-columns: 72px 1fr 46px;
+    height: 76px;
+    border-radius: 14px;
+  }
+  .banner-icon-svg { width: 24px; height: 24px; }
+  .banner-name { font-size: 0.95rem; letter-spacing: 1px; }
+  .banner-cta { font-size: 0.65rem; letter-spacing: 0.8px; }
+  .banner-text-block { padding: 0 16px; }
+
+  /* Serviços mobile — UMA coluna, sem texto cortado */
+  .services-section { padding: 64px 0; }
+  .services-inner { padding: 0 20px; }
+  .srv-title { font-size: 1.65rem; letter-spacing: -0.5px; margin-bottom: 36px; }
+  .srv-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .srv-card { padding: 24px 22px; gap: 12px; }
+  .srv-card-title { font-size: 1rem; }
+  .srv-card-desc { font-size: 0.85rem; }
+
+  /* Ensaio mobile */
+  .ensaio-section { padding: 64px 0 56px; }
+  .ensaio-inner { gap: 36px; padding: 0 20px; }
+  .ensaio-sub { font-size: 0.88rem; }
+  .carousel-slide { width: 180px; }
+  .carousel-btn { width: 36px; height: 36px; }
+  .carousel-btn.prev { left: 4px; }
+  .carousel-btn.next { right: 4px; }
+  .btn-ensaio { padding: 14px 28px; font-size: 0.92rem; }
+
+  /* Bio mobile */
+  .bio-section { padding: 52px 20px 60px; }
+  .bio-desc { font-size: 0.85rem; }
 }
 
 /* ══ PARALLAX ══ */
@@ -672,32 +720,48 @@ body {
 .srv-card {
   position: relative;
   background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 20px;
-  padding: 32px 28px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 22px;
+  padding: 36px 30px;
   display: flex;
   flex-direction: column;
   gap: 14px;
   overflow: hidden;
-  transition: transform 0.28s var(--ease), border-color 0.28s, box-shadow 0.28s;
+  transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s;
   cursor: default;
 }
 
+/* Luz de canto — aparece no hover */
 .srv-card::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(0,212,255,0.06), transparent 60%);
+  top: -60px; left: -60px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(0,212,255,0.12), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+/* Linha inferior colorida */
+.srv-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 10%; right: 10%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--cyan), transparent);
   opacity: 0;
   transition: opacity 0.3s;
+  border-radius: 2px;
 }
 
 .srv-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(0,212,255,0.3);
-  box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,212,255,0.15);
+  transform: translateY(-8px);
+  border-color: rgba(0,212,255,0.25);
+  box-shadow: 0 32px 72px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,212,255,0.12);
 }
 .srv-card:hover::before { opacity: 1; }
+.srv-card:hover::after  { opacity: 1; }
 
 .srv-icon-wrap {
   width: 52px;
