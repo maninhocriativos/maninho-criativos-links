@@ -794,9 +794,10 @@ body {
   .hero-tags { justify-content: center; }
   .hero-actions { justify-content: center; }
   .hero-bio { margin: 0 auto 24px; }
-  .hero-img-frame { width: 280px; }
-  .hero-photo { aspect-ratio: 1; border-radius: 50%; }
-  .ring-1, .ring-2 { border-radius: 50%; }
+  .hero-img-frame { width: 260px; }
+  .hero-photo { aspect-ratio: 3/4; border-radius: 24px; }
+  .ring-1 { inset: -12px; }
+  .ring-2 { inset: -22px; }
 
   /* Links grid */
   .links-grid { grid-template-columns: 1fr; }
@@ -807,9 +808,9 @@ body {
     gap: 48px;
     text-align: center;
   }
-  .sobre-img-wrap { max-width: 320px; margin: 0 auto; }
+  .sobre-img-wrap { max-width: 320px; margin: 0 auto; padding-bottom: 32px; }
   .sobre-stats { gap: 12px; }
-  .sobre-badge-float { right: 0; }
+  .sobre-badge-float { right: 0; bottom: 0; }
 
   /* Section */
   .section { padding: 72px 0; }

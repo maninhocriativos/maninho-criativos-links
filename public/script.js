@@ -21,13 +21,29 @@ navLinks?.querySelectorAll('a').forEach(a => {
 /* ── Intersection Observer for animations ── */
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
-}, { threshold: 0.15 });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 
 document.querySelectorAll('[data-animate], [data-animate-delay]').forEach(el => observer.observe(el));
+
+/* Garante que elementos do hero já visíveis aparecem sem esperar scroll */
+requestAnimationFrame(() => {
+  document.querySelectorAll('.hero [data-animate], .hero [data-animate-delay]').forEach(el => {
+    el.classList.add('visible');
+    observer.unobserve(el);
+  });
+});
 
 /* ── Load links from API ── */
 async function loadLinks() {
   const container = document.getElementById('links-container');
+
+  /* Timeout de segurança: se a API demorar >4s mostra fallback */
+  const fallbackTimer = setTimeout(() => {
+    if (container.querySelector('.link-card-skeleton')) {
+      container.innerHTML = FALLBACK_LINKS_HTML;
+      setupLinkEvents();
+    }
+  }, 4000);
 
   try {
     const [profileRes, linksRes] = await Promise.all([
@@ -43,6 +59,7 @@ async function loadLinks() {
       }
     }
 
+    clearTimeout(fallbackTimer);
     if (!linksRes.ok) throw new Error('API error');
     const { links } = await linksRes.json();
 
@@ -60,6 +77,7 @@ async function loadLinks() {
 
     setupLinkEvents();
   } catch {
+    clearTimeout(fallbackTimer);
     container.innerHTML = FALLBACK_LINKS_HTML;
     setupLinkEvents();
   }
