@@ -5,63 +5,82 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Maninho Criativos — Design 3D, IA Generativa e Criatividade Digital" />
   <meta property="og:title" content="Maninho Criativos" />
-  <meta property="og:description" content="Design 3D · IA Generativa · Tutoriais" />
   <meta property="og:image" content="/Images/Logotipo.PNG" />
   <title>Maninho Criativos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <!-- ══ HERO ══ -->
   <section class="hero">
-    <!-- fundo: foto do criador -->
-    <div class="hero-photo-bg">
-      <img src="Images/foto-real.jpg" alt="" class="hero-bg-img"
+    <div class="hero-bg"></div><!-- foto via CSS para pc/mobile -->
+    <div class="hero-overlay"></div>
+    <div class="hero-grid-lines"></div>
+
+    <div class="hero-content">
+      <img src="Images/Logotipo.PNG" alt="Maninho Criativos" class="hero-logo"
            onerror="this.style.display='none'" />
-      <div class="hero-bg-overlay"></div>
-      <div class="hero-bg-grid"></div>
-    </div>
 
-    <!-- conteúdo sobreposto -->
-    <div class="hero-body">
-      <!-- badge de ferramentas -->
-      <div class="tool-badges">
-        <span class="tool-badge">✦ Design 3D</span>
-        <span class="tool-badge">✦ IA Generativa</span>
-        <span class="tool-badge">✦ Blender</span>
-        <span class="tool-badge">✦ Midjourney</span>
+      <div class="hero-badge">
+        <span class="badge-dot"></span> Criador de Conteúdo Digital
       </div>
 
-      <!-- foto central (se não tiver foto-real.jpg usa esta) -->
-      <div class="hero-portrait-wrap">
-        <img src="Images/foto-real.jpg" alt="Maninho Criativos"
-             class="hero-portrait"
-             onerror="this.src='Images/Maninho.png'" />
-        <div class="portrait-glow"></div>
+      <div class="hero-tools">
+        <span class="tool-chip">Blender</span>
+        <span class="tool-chip">Midjourney</span>
+        <span class="tool-chip">Photoshop</span>
+        <span class="tool-chip">IA Generativa</span>
       </div>
 
-      <!-- identidade -->
-      <div class="hero-identity">
-        <img src="Images/Logotipo.PNG" alt="Maninho Criativos" class="hero-logo"
-             onerror="this.style.display='none'" />
-        <h1 class="hero-name">Maninho Criativos</h1>
-        <p class="hero-role">Designer 3D &amp; Criador de Conteúdo</p>
-      </div>
-
-      <!-- scroll cue -->
-      <a href="#links" class="scroll-cue" aria-label="Ver links">
-        <div class="scroll-cue-inner">↓</div>
+      <a href="#links" class="scroll-btn" aria-label="Ver links">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
       </a>
+    </div>
+  </section>
+
+  <!-- ══ SERVIÇOS ══ -->
+  <section class="services-section" id="servicos">
+    <div class="services-inner">
+      <p class="srv-label">O que eu faço</p>
+      <h2 class="srv-title">Transformo ideias em<br><span class="gtext">experiências visuais</span></h2>
+      <div class="srv-grid">
+        <div class="srv-card" data-reveal>
+          <div class="srv-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8.5 15.5l3.5-4.47 2.5 3.01L17 11l4 5H3z"/></svg>
+          </div>
+          <h3 class="srv-card-title">Design 3D</h3>
+          <p class="srv-card-desc">Personagens, cenários e arte 3D gerada com Blender, com acabamento cinematográfico e identidade única.</p>
+          <span class="srv-card-tag">Blender · Cinema 4D</span>
+        </div>
+        <div class="srv-card" data-reveal>
+          <div class="srv-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93V18c0-.55-.45-1-1-1s-1 .45-1 1v1.93C7.06 19.48 4.52 16.94 4.07 13H6c.55 0 1-.45 1-1s-.45-1-1-1H4.07C4.52 7.06 7.06 4.52 11 4.07V6c0 .55.45 1 1 1s1-.45 1-1V4.07C16.94 4.52 19.48 7.06 19.93 11H18c-.55 0-1 .45-1 1s.45 1 1 1h1.93c-.45 3.94-2.99 6.48-6.93 6.93zM12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+          </div>
+          <h3 class="srv-card-title">IA Generativa</h3>
+          <p class="srv-card-desc">Criação de imagens, vídeos e arte com inteligência artificial — Midjourney, Sora, Runway e outras ferramentas de ponta.</p>
+          <span class="srv-card-tag">Midjourney · Sora · RunwayML</span>
+        </div>
+        <div class="srv-card" data-reveal>
+          <div class="srv-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M10 8v8l6-4-6-4zm11-5H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z"/></svg>
+          </div>
+          <h3 class="srv-card-title">Conteúdo & Tutoriais</h3>
+          <p class="srv-card-desc">Conteúdo educativo para criadores que querem dominar as ferramentas digitais e transformar criatividade em renda.</p>
+          <span class="srv-card-tag">YouTube · Instagram · TikTok</span>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ══ LINK BANNERS ══ -->
   <section class="links-section" id="links">
     <div class="links-wrap" id="links-container">
-      <!-- Skeleton -->
+      <div class="banner-skeleton"></div>
       <div class="banner-skeleton"></div>
       <div class="banner-skeleton"></div>
       <div class="banner-skeleton"></div>
@@ -72,25 +91,23 @@
   <section class="bio-section">
     <div class="bio-inner">
       <div class="bio-avatar-wrap">
-        <img src="Images/Maninho.png" alt="Maninho Criativos" class="bio-avatar"
-             onerror="this.src='Images/Manitinha.png'" />
-        <div class="bio-avatar-ring"></div>
+        <img src="Images/Maninho.png" alt="Maninho Criativos" class="bio-avatar" />
+        <div class="bio-ring"></div>
       </div>
       <div class="bio-name-row">
         <span class="bio-name" id="bio-name">MANINHO CRIATIVOS</span>
-        <span class="bio-verified">✔</span>
+        <span class="bio-check">✓</span>
       </div>
-      <p class="bio-text" id="bio-text">
-        Criatividade sem limites — Design 3D, Inteligência Artificial e muito conteúdo para você evoluir.
+      <p class="bio-desc" id="bio-text">
+        Criatividade sem limites — Design 3D, Inteligência Artificial e conteúdo criativo para você evoluir.
       </p>
       <div class="bio-socials" id="bio-socials"></div>
     </div>
   </section>
 
-  <!-- ══ FOOTER ══ -->
   <footer class="site-footer">
-    <span>© 2025 Maninho Criativos — Todos os direitos reservados</span>
-    <a href="admin.html" class="footer-admin" title="Admin">⚙</a>
+    <span>© 2025 Maninho Criativos</span>
+    <a href="admin.html" class="footer-admin">⚙</a>
   </footer>
 
   <script src="script.js"></script>
