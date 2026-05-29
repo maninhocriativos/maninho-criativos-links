@@ -1,17 +1,34 @@
+/* ══ Auth ══ */
 const TOKEN_KEY = 'mc_admin_token';
+const token = () => sessionStorage.getItem(TOKEN_KEY);
 
-function getToken() { return sessionStorage.getItem(TOKEN_KEY); }
-function setToken(t) { sessionStorage.setItem(TOKEN_KEY, t); }
-function clearToken() { sessionStorage.removeItem(TOKEN_KEY); }
+async function doLogin() {
+  const pwd = document.getElementById('pwd-input').value.trim();
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+  if (!pwd) { errEl.textContent = 'Digite a senha.'; return; }
+
+  const res = await fetch('/api/admin/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pwd })
+  });
+
+  if (res.ok) {
+    const { token: t } = await res.json();
+    sessionStorage.setItem(TOKEN_KEY, t);
+    showPanel();
+  } else {
+    errEl.textContent = 'Senha incorreta.';
+    document.getElementById('pwd-input').value = '';
+  }
+}
 
 async function checkAuth() {
-  const token = getToken();
-  if (!token) return showLogin();
-  const res = await fetch('/api/admin/verify', {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (res.ok) showPanel();
-  else showLogin();
+  const t = token();
+  if (!t) return showLogin();
+  const res = await fetch('/api/admin/verify', { headers: { Authorization: `Bearer ${t}` } });
+  res.ok ? showPanel() : showLogin();
 }
 
 function showLogin() {
@@ -21,206 +38,306 @@ function showLogin() {
 
 function showPanel() {
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('admin-panel').style.display = 'flex';
-  loadAdminData();
+  document.getElementById('admin-panel').style.display = 'grid';
+  loadAllData();
 }
-
-async function doLogin() {
-  const pwd = document.getElementById('pwd-input').value;
-  const err = document.getElementById('login-error');
-  err.textContent = '';
-  if (!pwd) { err.textContent = 'Digite a senha.'; return; }
-
-  const res = await fetch('/api/admin/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: pwd })
-  });
-
-  if (res.ok) {
-    const { token } = await res.json();
-    setToken(token);
-    showPanel();
-  } else {
-    err.textContent = 'Senha incorreta.';
-    document.getElementById('pwd-input').value = '';
-  }
-}
-
-document.getElementById('pwd-input')?.addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
 
 function logout() {
-  clearToken();
+  sessionStorage.removeItem(TOKEN_KEY);
   showLogin();
 }
 
-function toggleForm(id) {
-  const el = document.getElementById(id);
-  el.classList.toggle('open');
+function togglePwd() {
+  const inp = document.getElementById('pwd-input');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
 }
 
-async function loadAdminData() {
-  const token = getToken();
-  const headers = { Authorization: `Bearer ${token}` };
+document.getElementById('pwd-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-  const [profileRes, linksRes] = await Promise.all([
-    fetch('/api/admin/profile', { headers }),
-    fetch('/api/admin/links', { headers })
-  ]);
-
-  if (profileRes.ok) {
-    const { profile } = await profileRes.json();
-    if (profile) {
-      document.getElementById('p-name').value = profile.name || '';
-      document.getElementById('p-bio').value = profile.bio || '';
-      document.getElementById('p-avatar').value = profile.avatar_url || '';
-      document.getElementById('p-bg-from').value = profile.bg_from || '#0f0c29';
-      document.getElementById('p-bg-via').value = profile.bg_via || '#302b63';
-      document.getElementById('p-bg-to').value = profile.bg_to || '#24243e';
-    }
-  }
-
-  if (linksRes.ok) {
-    const { links } = await linksRes.json();
-    renderAdminLinks(links);
-  }
+/* ══ Tabs ══ */
+function setTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('admin-page-title').textContent =
+    name === 'links' ? 'Gerenciar Links' : 'Editar Perfil';
+  closeSidebar();
 }
 
-function renderAdminLinks(links) {
-  const list = document.getElementById('admin-links-list');
-  list.innerHTML = '';
+/* ══ Mobile sidebar ══ */
+const sidebar = document.getElementById('sidebar');
+document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+  sidebar?.classList.toggle('open');
+});
+function closeSidebar() { sidebar?.classList.remove('open'); }
 
-  if (!links || links.length === 0) {
-    list.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:24px 0">Nenhum link ainda.</p>';
+/* ══ Load data ══ */
+async function loadAllData() {
+  await Promise.all([loadLinks(), loadProfile()]);
+}
+
+async function loadLinks() {
+  const res = await authFetch('/api/admin/links');
+  if (!res) return;
+  const { links } = await res.json();
+  renderLinks(links || []);
+}
+
+async function loadProfile() {
+  const res = await authFetch('/api/admin/profile');
+  if (!res) return;
+  const { profile } = await res.json();
+  if (!profile) return;
+  setVal('p-name',        profile.name        || '');
+  setVal('p-bio',         profile.bio         || '');
+  setVal('p-avatar',      profile.avatar_url  || '');
+  setColorField('p-bg-from', profile.bg_from  || '#030810');
+  setColorField('p-bg-via',  profile.bg_via   || '#070e1c');
+  setColorField('p-bg-to',   profile.bg_to    || '#0c1728');
+}
+
+/* ══ Render links table ══ */
+function renderLinks(links) {
+  const table = document.getElementById('links-table');
+  document.getElementById('links-count').textContent = `${links.length} link${links.length !== 1 ? 's' : ''}`;
+
+  if (!links.length) {
+    table.innerHTML = '<p style="padding:32px;text-align:center;color:var(--text3)">Nenhum link cadastrado ainda.</p>';
     return;
   }
 
+  table.innerHTML = '';
   links.forEach(link => {
-    const card = document.createElement('div');
-    card.className = 'admin-link-card';
-    card.dataset.id = link.id;
+    const row = document.createElement('div');
+    row.className = 'table-row';
+    row.dataset.id = link.id;
 
-    card.innerHTML = `
-      <span class="admin-link-icon">${link.icon}</span>
-      <div class="admin-link-info">
-        <strong>${escapeHtml(link.title)}</strong>
-        <span>${escapeHtml(link.url)}</span>
+    row.innerHTML = `
+      <div class="table-row-icon" style="background:linear-gradient(135deg,${esc(link.color_from)},${esc(link.color_to)})">
+        ${esc(link.icon)}
       </div>
-      <span class="stats-chip">👆 ${link.click_count || 0}</span>
-      <div class="admin-link-actions">
-        <button class="toggle-badge ${link.is_active ? 'active' : 'inactive'}"
-          onclick="toggleLink(${link.id}, ${link.is_active})">
-          ${link.is_active ? 'Ativo' : 'Inativo'}
+      <div class="table-row-info">
+        <div class="table-row-title">
+          ${esc(link.title)}
+          <span class="click-count">👆 ${link.click_count || 0}</span>
+        </div>
+        <div class="table-row-url">${esc(link.url)}</div>
+      </div>
+      <div class="table-row-actions">
+        <button class="status-badge ${link.is_active ? 'on' : 'off'}"
+          onclick="toggleActive(${link.id}, ${link.is_active})">
+          ${link.is_active ? '● Ativo' : '○ Inativo'}
         </button>
-        <button class="btn btn-danger" onclick="deleteLink(${link.id})">✕</button>
+        <button class="btn-icon" onclick="openEdit(${link.id})" title="Editar">✏️</button>
+        <button class="btn-danger" onclick="deleteLink(${link.id})" title="Excluir">🗑</button>
       </div>
     `;
-    list.appendChild(card);
+    table.appendChild(row);
   });
 }
 
-async function saveProfile() {
-  const token = getToken();
-  const body = {
-    name: document.getElementById('p-name').value,
-    bio: document.getElementById('p-bio').value,
-    avatar_url: document.getElementById('p-avatar').value,
-    bg_from: document.getElementById('p-bg-from').value,
-    bg_via: document.getElementById('p-bg-via').value,
-    bg_to: document.getElementById('p-bg-to').value,
-  };
-
-  const res = await fetch('/api/admin/profile', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify(body)
-  });
-
-  if (res.ok) {
-    toggleForm('profile-form');
-    showToast('Perfil salvo ✓');
-  } else {
-    showToast('Erro ao salvar perfil', true);
-  }
-}
-
-async function createLink() {
-  const token = getToken();
-  const body = {
-    title: document.getElementById('l-title').value,
-    url: document.getElementById('l-url').value,
-    icon: document.getElementById('l-icon').value || '🔗',
-    color_from: document.getElementById('l-color-from').value,
-    color_to: document.getElementById('l-color-to').value,
-    order_index: parseInt(document.getElementById('l-order').value) || 0,
-  };
-
-  if (!body.title || !body.url) { showToast('Título e URL obrigatórios', true); return; }
-
-  const res = await fetch('/api/admin/links', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify(body)
-  });
-
-  if (res.ok) {
-    toggleForm('new-link-form');
-    document.getElementById('l-title').value = '';
-    document.getElementById('l-url').value = '';
-    document.getElementById('l-icon').value = '';
-    showToast('Link adicionado ✓');
-    loadAdminData();
-  } else {
-    showToast('Erro ao criar link', true);
-  }
-}
-
-async function toggleLink(id, currentState) {
-  const token = getToken();
-  const res = await fetch(`/api/admin/links/${id}`, {
+/* ══ Toggle active ══ */
+async function toggleActive(id, current) {
+  const res = await authFetch(`/api/admin/links/${id}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ is_active: currentState ? 0 : 1 })
+    body: JSON.stringify({ is_active: current ? 0 : 1 })
   });
-  if (res.ok) loadAdminData();
+  if (res?.ok) { toast('Status atualizado ✓'); loadLinks(); }
+  else toast('Erro ao atualizar', true);
 }
 
+/* ══ Delete link ══ */
 async function deleteLink(id) {
-  if (!confirm('Excluir este link?')) return;
-  const token = getToken();
-  const res = await fetch(`/api/admin/links/${id}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (res.ok) {
-    showToast('Link removido');
-    loadAdminData();
+  if (!confirm('Excluir este link permanentemente?')) return;
+  const res = await authFetch(`/api/admin/links/${id}`, { method: 'DELETE' });
+  if (res?.ok) { toast('Link removido'); loadLinks(); }
+  else toast('Erro ao remover', true);
+}
+
+/* ══ Panel toggle ══ */
+function togglePanel(id) {
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open') || el.querySelector('.link-form');
+  const inner = el.querySelector('.link-form');
+  if (!inner) return;
+  if (el.dataset.collapsed === '1') {
+    el.dataset.collapsed = '0';
+    inner.style.display = '';
+    el.querySelector('.panel-card-header button').textContent = '✕';
+  } else {
+    el.dataset.collapsed = '1';
+    inner.style.display = 'none';
+    el.querySelector('.panel-card-header button').textContent = '+';
   }
 }
 
-function showToast(msg, isError = false) {
-  const t = document.createElement('div');
-  t.textContent = msg;
-  t.style.cssText = `
-    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-    background:${isError ? 'rgba(239,68,68,0.9)' : 'rgba(34,197,94,0.9)'};
-    color:#fff;padding:10px 20px;border-radius:10px;
-    font-size:.9rem;font-weight:600;z-index:9999;
-    box-shadow:0 4px 20px rgba(0,0,0,0.3);
-    animation:slideUp .3s ease;
-  `;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2800);
+/* ══ Create link ══ */
+async function submitNewLink(e) {
+  e.preventDefault();
+  const body = {
+    title:       getVal('l-title'),
+    url:         getVal('l-url'),
+    icon:        getVal('l-icon') || '🔗',
+    color_from:  getVal('l-color-from'),
+    color_to:    getVal('l-color-to'),
+    order_index: parseInt(getVal('l-order')) || 0,
+  };
+
+  const res = await authFetch('/api/admin/links', { method: 'POST', body: JSON.stringify(body) });
+  if (res?.ok) {
+    e.target.reset();
+    resetColorDefaults();
+    toast('Link adicionado ✓');
+    loadLinks();
+    togglePanel('add-link-panel');
+  } else {
+    toast('Erro ao criar link', true);
+  }
 }
 
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+/* ══ Edit modal ══ */
+let editingLinks = [];
+
+async function openEdit(id) {
+  const res = await authFetch('/api/admin/links');
+  if (!res) return;
+  const { links } = await res.json();
+  const link = links.find(l => l.id === id);
+  if (!link) return;
+
+  setVal('edit-id',    link.id);
+  setVal('edit-title', link.title);
+  setVal('edit-icon',  link.icon);
+  setVal('edit-url',   link.url);
+  setColorField('edit-cf', link.color_from);
+  setColorField('edit-ct', link.color_to);
+  setVal('edit-order', link.order_index);
+
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('edit-modal')) return;
+  document.getElementById('edit-modal').classList.remove('open');
+}
+
+async function submitEditLink(e) {
+  e.preventDefault();
+  const id = getVal('edit-id');
+  const body = {
+    title:       getVal('edit-title'),
+    url:         getVal('edit-url'),
+    icon:        getVal('edit-icon') || '🔗',
+    color_from:  getVal('edit-cf'),
+    color_to:    getVal('edit-ct'),
+    order_index: parseInt(getVal('edit-order')) || 0,
+  };
+
+  const res = await authFetch(`/api/admin/links/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
+  if (res?.ok) {
+    closeModal();
+    toast('Link atualizado ✓');
+    loadLinks();
+  } else {
+    toast('Erro ao salvar', true);
+  }
+}
+
+/* ══ Save profile ══ */
+async function submitProfile(e) {
+  e.preventDefault();
+  const body = {
+    name:       getVal('p-name'),
+    bio:        getVal('p-bio'),
+    avatar_url: getVal('p-avatar'),
+    bg_from:    getVal('p-bg-from'),
+    bg_via:     getVal('p-bg-via'),
+    bg_to:      getVal('p-bg-to'),
+  };
+
+  const res = await authFetch('/api/admin/profile', { method: 'PUT', body: JSON.stringify(body) });
+  if (res?.ok) toast('Perfil salvo ✓');
+  else toast('Erro ao salvar perfil', true);
+}
+
+/* ══ Live preview for new link form ══ */
+['l-title','l-icon','l-color-from','l-color-to'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', updatePreview);
+});
+
+function updatePreview() {
+  const title = getVal('l-title') || 'Título do link';
+  const icon  = getVal('l-icon')  || '🔗';
+  const cf    = getVal('l-color-from') || '#667eea';
+  const ct    = getVal('l-color-to')   || '#764ba2';
+  const prevEl = document.getElementById('link-preview');
+  if (!prevEl) return;
+  document.getElementById('prev-title').textContent = title;
+  document.getElementById('prev-icon').textContent  = icon;
+  document.getElementById('prev-icon').style.background = `linear-gradient(135deg,${cf},${ct})`;
+}
+
+/* ══ Color sync ══ */
+function syncColor(picker, txtId) {
+  document.getElementById(txtId).value = picker.value;
+  updatePreview();
+}
+
+document.querySelectorAll('.color-text').forEach(input => {
+  input.addEventListener('input', function() {
+    if (/^#[0-9a-fA-F]{6}$/.test(this.value)) {
+      const pickerId = this.id.replace('-txt', '');
+      const picker = document.getElementById(pickerId);
+      if (picker) picker.value = this.value;
+      updatePreview();
+    }
+  });
+});
+
+function setColorField(id, value) {
+  const picker = document.getElementById(id);
+  const txt    = document.getElementById(id + '-txt');
+  if (picker) picker.value = value;
+  if (txt)    txt.value    = value;
+}
+
+function resetColorDefaults() {
+  setColorField('l-color-from', '#667eea');
+  setColorField('l-color-to',   '#764ba2');
+}
+
+/* ══ Helpers ══ */
+async function authFetch(url, opts = {}) {
+  const t = token();
+  if (!t) { showLogin(); return null; }
+  const res = await fetch(url, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${t}`,
+      ...(opts.headers || {})
+    }
+  });
+  if (res.status === 401) { showLogin(); return null; }
+  return res;
+}
+
+function getVal(id) { return document.getElementById(id)?.value ?? ''; }
+function setVal(id, v) { const el = document.getElementById(id); if (el) el.value = v; }
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function toast(msg, isErr = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (isErr ? 'error' : 'success');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.classList.remove('show'); }, 2800);
 }
 
 checkAuth();

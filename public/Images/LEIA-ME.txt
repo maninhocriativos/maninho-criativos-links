@@ -1,0 +1,14 @@
+COLOQUE AS IMAGENS AQUI COM ESTES NOMES EXATOS:
+
+  logo.png        — Logo "Maninho Criativos" azul neon (fundo transparente ou cinza)
+  foto-hero.jpg   — Foto sua com a personagem 3D (usada no hero)
+  foto-creator.jpg — Foto sua no setup/estúdio (usada na seção Sobre)
+
+Formatos aceitos: JPG, PNG, WEBP
+Tamanho recomendado: logo 400px largura • fotos 800x1000px ou maior
+
+Após colocar as imagens, faça:
+  git add public/images/
+  git commit -m "feat: add profile images"
+  git push
+→ deploy automático em ~25 segundos!

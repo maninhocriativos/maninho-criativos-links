@@ -6,127 +6,237 @@
   <title>Admin — Maninho Criativos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
-  <div class="bg-orbs" aria-hidden="true">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-  </div>
 
-  <!-- Login screen -->
-  <div id="login-screen" class="login-screen" style="display:none">
-    <div class="login-box">
-      <h2>🔐 Admin</h2>
-      <div class="form-group">
-        <label for="pwd-input">Senha</label>
-        <input id="pwd-input" type="password" placeholder="••••••••" autocomplete="current-password" />
+  <!-- ── LOGIN ── -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <img src="Images/Logotipo.PNG" alt="Maninho Criativos" class="login-logo"
+           onerror="this.style.display='none'" />
+      <h1 class="login-title">Painel Admin</h1>
+      <p class="login-sub">Digite sua senha para continuar</p>
+      <div class="input-wrap">
+        <input id="pwd-input" type="password" class="admin-input" placeholder="Senha••••••" autocomplete="current-password" />
+        <button class="btn-icon" onclick="togglePwd()" title="Ver senha">👁</button>
       </div>
-      <button class="btn btn-primary" onclick="doLogin()">Entrar</button>
+      <button class="btn-primary full" onclick="doLogin()">Entrar</button>
       <p class="error-msg" id="login-error"></p>
     </div>
   </div>
 
-  <!-- Admin panel -->
-  <main id="admin-panel" class="container admin-container" style="display:none">
-    <div class="admin-header">
-      <h1>⚙️ Admin</h1>
-      <div style="display:flex;gap:8px;align-items:center">
-        <a href="/" class="btn btn-ghost">← Ver página</a>
-        <button class="btn btn-ghost" onclick="logout()">Sair</button>
-      </div>
-    </div>
+  <!-- ── PAINEL ── -->
+  <div id="admin-panel" style="display:none">
 
-    <!-- Profile section -->
-    <section style="margin-bottom:28px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h2 style="font-size:1rem;font-weight:700;color:var(--text-secondary)">PERFIL</h2>
-        <button class="btn btn-ghost" onclick="toggleForm('profile-form')">✏️ Editar</button>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <img src="Images/Logotipo.PNG" alt="Logo" class="sidebar-logo-img"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+        <span class="sidebar-logo-text" style="display:none">MC Admin</span>
       </div>
-      <div id="profile-form" class="form-card">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Nome</label>
-            <input id="p-name" type="text" placeholder="Maninho Criativos" />
+      <nav class="sidebar-nav">
+        <button class="snav-item active" data-tab="links" onclick="setTab('links',this)">
+          <span class="snav-icon">🔗</span><span>Links</span>
+        </button>
+        <button class="snav-item" data-tab="profile" onclick="setTab('profile',this)">
+          <span class="snav-icon">👤</span><span>Perfil</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/" class="snav-item ghost" target="_blank">
+          <span class="snav-icon">🌐</span><span>Ver página</span>
+        </a>
+        <button class="snav-item ghost" onclick="logout()">
+          <span class="snav-icon">🚪</span><span>Sair</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="admin-main">
+      <!-- Header -->
+      <header class="admin-topbar">
+        <button class="btn-icon mobile-menu-btn" id="mobile-menu-btn">☰</button>
+        <h2 class="admin-page-title" id="admin-page-title">Gerenciar Links</h2>
+        <div id="tab-actions"></div>
+      </header>
+
+      <!-- ── TAB: LINKS ── -->
+      <section id="tab-links" class="tab-content active">
+        <!-- Add link form -->
+        <div class="panel-card" id="add-link-panel">
+          <div class="panel-card-header">
+            <h3>➕ Novo link</h3>
+            <button class="btn-icon" onclick="togglePanel('add-link-panel')">✕</button>
           </div>
-          <div class="form-group">
-            <label>Avatar URL</label>
-            <input id="p-avatar" type="url" placeholder="https://..." />
+          <form class="link-form" id="add-link-form" onsubmit="submitNewLink(event)">
+            <div class="form-row">
+              <div class="form-field">
+                <label>Título *</label>
+                <input class="admin-input" id="l-title" type="text" placeholder="ex: Instagram" required />
+              </div>
+              <div class="form-field">
+                <label>Ícone (emoji)</label>
+                <input class="admin-input" id="l-icon" type="text" placeholder="📸" maxlength="4" />
+              </div>
+            </div>
+            <div class="form-field">
+              <label>URL *</label>
+              <input class="admin-input" id="l-url" type="url" placeholder="https://instagram.com/..." required />
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label>Cor início</label>
+                <div class="color-wrap">
+                  <input class="admin-input color-text" id="l-color-from-txt" type="text" value="#667eea" maxlength="7" />
+                  <input class="color-picker" id="l-color-from" type="color" value="#667eea" oninput="syncColor(this,'l-color-from-txt')" />
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Cor fim</label>
+                <div class="color-wrap">
+                  <input class="admin-input color-text" id="l-color-to-txt" type="text" value="#764ba2" maxlength="7" />
+                  <input class="color-picker" id="l-color-to" type="color" value="#764ba2" oninput="syncColor(this,'l-color-to-txt')" />
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Ordem</label>
+                <input class="admin-input" id="l-order" type="number" value="0" min="0" style="max-width:80px" />
+              </div>
+            </div>
+            <!-- Preview -->
+            <div class="link-preview" id="link-preview">
+              <div class="preview-icon" id="prev-icon">🔗</div>
+              <span class="preview-title" id="prev-title">Título do link</span>
+              <span class="preview-arrow">→</span>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" onclick="togglePanel('add-link-panel')">Cancelar</button>
+              <button type="submit" class="btn-primary">Adicionar link</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Links table -->
+        <div class="links-table-wrap">
+          <div class="table-header-row">
+            <span class="table-count" id="links-count">0 links</span>
+            <button class="btn-primary small" onclick="togglePanel('add-link-panel')">+ Novo link</button>
           </div>
-          <div class="form-group full">
-            <label>Bio</label>
-            <input id="p-bio" type="text" placeholder="Criatividade sem limites ✨" />
-          </div>
-          <div class="form-group">
-            <label>Cor fundo (início)</label>
-            <input id="p-bg-from" type="color" value="#0f0c29" />
-          </div>
-          <div class="form-group">
-            <label>Cor fundo (meio)</label>
-            <input id="p-bg-via" type="color" value="#302b63" />
-          </div>
-          <div class="form-group">
-            <label>Cor fundo (fim)</label>
-            <input id="p-bg-to" type="color" value="#24243e" />
+          <div id="links-table" class="links-table">
+            <div class="table-skeleton"></div>
+            <div class="table-skeleton"></div>
+            <div class="table-skeleton"></div>
           </div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
-          <button class="btn btn-ghost" onclick="toggleForm('profile-form')">Cancelar</button>
-          <button class="btn btn-primary" onclick="saveProfile()">Salvar perfil</button>
+      </section>
+
+      <!-- ── TAB: PROFILE ── -->
+      <section id="tab-profile" class="tab-content">
+        <div class="panel-card">
+          <form class="link-form" id="profile-form" onsubmit="submitProfile(event)">
+            <div class="form-row">
+              <div class="form-field">
+                <label>Nome exibido</label>
+                <input class="admin-input" id="p-name" type="text" placeholder="Maninho Criativos" />
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Bio / descrição</label>
+              <input class="admin-input" id="p-bio" type="text" placeholder="Criatividade sem limites ✨" />
+            </div>
+            <div class="form-field">
+              <label>URL do avatar (opcional)</label>
+              <input class="admin-input" id="p-avatar" type="url" placeholder="https://..." />
+            </div>
+            <div class="form-row three">
+              <div class="form-field">
+                <label>Cor fundo início</label>
+                <div class="color-wrap">
+                  <input class="admin-input color-text" id="p-bg-from-txt" type="text" value="#030810" maxlength="7" />
+                  <input class="color-picker" id="p-bg-from" type="color" value="#030810" oninput="syncColor(this,'p-bg-from-txt')" />
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Cor fundo meio</label>
+                <div class="color-wrap">
+                  <input class="admin-input color-text" id="p-bg-via-txt" type="text" value="#070e1c" maxlength="7" />
+                  <input class="color-picker" id="p-bg-via" type="color" value="#070e1c" oninput="syncColor(this,'p-bg-via-txt')" />
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Cor fundo fim</label>
+                <div class="color-wrap">
+                  <input class="admin-input color-text" id="p-bg-to-txt" type="text" value="#0c1728" maxlength="7" />
+                  <input class="color-picker" id="p-bg-to" type="color" value="#0c1728" oninput="syncColor(this,'p-bg-to-txt')" />
+                </div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">Salvar perfil</button>
+            </div>
+          </form>
         </div>
-      </div>
-    </section>
+      </section>
+    </main>
+  </div>
 
-    <!-- Links section -->
-    <section>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h2 style="font-size:1rem;font-weight:700;color:var(--text-secondary)">LINKS</h2>
-        <button class="btn btn-primary" onclick="toggleForm('new-link-form')">+ Novo link</button>
+  <!-- ── EDIT MODAL ── -->
+  <div id="edit-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Editar link</h3>
+        <button class="btn-icon" onclick="closeModal()">✕</button>
       </div>
-
-      <!-- New link form -->
-      <div id="new-link-form" class="form-card">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Título</label>
-            <input id="l-title" type="text" placeholder="Instagram" />
+      <form id="edit-link-form" onsubmit="submitEditLink(event)">
+        <input type="hidden" id="edit-id" />
+        <div class="form-row">
+          <div class="form-field">
+            <label>Título *</label>
+            <input class="admin-input" id="edit-title" type="text" required />
           </div>
-          <div class="form-group">
-            <label>Ícone (emoji)</label>
-            <input id="l-icon" type="text" placeholder="📸" maxlength="4" />
+          <div class="form-field">
+            <label>Ícone</label>
+            <input class="admin-input" id="edit-icon" type="text" maxlength="4" />
           </div>
-          <div class="form-group full">
-            <label>URL</label>
-            <input id="l-url" type="url" placeholder="https://instagram.com/..." />
+        </div>
+        <div class="form-field">
+          <label>URL *</label>
+          <input class="admin-input" id="edit-url" type="url" required />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Cor início</label>
+            <div class="color-wrap">
+              <input class="admin-input color-text" id="edit-cf-txt" type="text" maxlength="7" />
+              <input class="color-picker" id="edit-cf" type="color" oninput="syncColor(this,'edit-cf-txt')" />
+            </div>
           </div>
-          <div class="form-group">
-            <label>Cor (início)</label>
-            <input id="l-color-from" type="color" value="#667eea" />
+          <div class="form-field">
+            <label>Cor fim</label>
+            <div class="color-wrap">
+              <input class="admin-input color-text" id="edit-ct-txt" type="text" maxlength="7" />
+              <input class="color-picker" id="edit-ct" type="color" oninput="syncColor(this,'edit-ct-txt')" />
+            </div>
           </div>
-          <div class="form-group">
-            <label>Cor (fim)</label>
-            <input id="l-color-to" type="color" value="#764ba2" />
-          </div>
-          <div class="form-group">
+          <div class="form-field">
             <label>Ordem</label>
-            <input id="l-order" type="number" value="0" min="0" />
+            <input class="admin-input" id="edit-order" type="number" min="0" style="max-width:80px" />
           </div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
-          <button class="btn btn-ghost" onclick="toggleForm('new-link-form')">Cancelar</button>
-          <button class="btn btn-primary" onclick="createLink()">Adicionar link</button>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button type="submit" class="btn-primary">Salvar alterações</button>
         </div>
-      </div>
+      </form>
+    </div>
+  </div>
 
-      <!-- Links list -->
-      <div id="admin-links-list" class="admin-links-list">
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-      </div>
-    </section>
-  </main>
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
 
   <script src="admin.js"></script>
 </body>
