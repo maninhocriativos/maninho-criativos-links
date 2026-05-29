@@ -38,12 +38,12 @@ body {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: url('Images/banner pc.png') center top / cover no-repeat;
+  background: url('Images/banner-pc.png') center top / cover no-repeat;
   z-index: 0;
 }
 
 @media (max-width: 600px) {
-  .hero-bg { background-image: url('Images/banner mobile.png'); background-position: right top; }
+  .hero-bg { background-image: url('Images/banner-mobile.png'); background-position: right top; }
 }
 
 .hero-overlay {
@@ -445,9 +445,183 @@ body {
   .srv-title { font-size: 1.7rem; }
 }
 
-/* ══ PARALLAX — JS controla via CSS var ══ */
-.hero-bg {
+/* ══ PARALLAX ══ */
+.hero-bg { will-change: transform; }
+
+/* ══ ENSAIO FOTOGRÁFICO ══ */
+.ensaio-section {
+  background: var(--dark);
+  padding: 88px 0 80px;
+  overflow: hidden;
+}
+
+.ensaio-inner {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+
+.ensaio-header { text-align: center; }
+
+.ensaio-sub {
+  font-size: 1rem;
+  color: var(--text2);
+  line-height: 1.7;
+  max-width: 520px;
+  margin: 12px auto 0;
+}
+
+/* ── Carrossel ── */
+.carousel-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.carousel {
+  overflow: hidden;
+  border-radius: 20px;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.carousel.grabbing { cursor: grabbing; }
+
+.carousel-track {
+  display: flex;
+  gap: 16px;
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform;
+  padding: 0 4px;
+}
+
+/* Cada slide */
+.carousel-slide {
+  flex-shrink: 0;
+  width: 260px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.07);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+
+.carousel-slide:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,212,255,0.2);
+}
+
+.carousel-slide img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+/* Overlay sutil no hover */
+.carousel-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,212,255,0.1), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.carousel-slide:hover::after { opacity: 1; }
+
+/* Botões ← → */
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(6,10,18,0.85);
+  border: 1px solid rgba(0,212,255,0.25);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s var(--ease);
+  backdrop-filter: blur(8px);
+}
+.carousel-btn:hover {
+  background: rgba(0,212,255,0.15);
+  border-color: var(--cyan);
+  color: var(--cyan);
+  transform: translateY(-50%) scale(1.1);
+}
+.carousel-btn.prev { left: -18px; }
+.carousel-btn.next { right: -18px; }
+
+/* Dots */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 24px;
+}
+.carousel-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s var(--ease);
+}
+.carousel-dot.active {
+  background: var(--cyan);
+  width: 22px;
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(0,212,255,0.5);
+}
+
+/* CTA ensaio */
+.ensaio-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.ensaio-price-tag {
+  font-size: 0.78rem;
+  color: var(--text2);
+  letter-spacing: 0.3px;
+}
+
+.btn-ensaio {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 36px;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: #fff;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  box-shadow: 0 0 32px rgba(37,211,102,0.3), 0 8px 24px rgba(0,0,0,0.4);
+  transition: all 0.25s var(--ease);
+}
+.btn-ensaio:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 48px rgba(37,211,102,0.5), 0 12px 32px rgba(0,0,0,0.4);
+}
+
+@media (max-width: 600px) {
+  .carousel-slide { width: 200px; }
+  .carousel-btn.prev { left: 4px; }
+  .carousel-btn.next { right: 4px; }
 }
 
 /* ══ SERVIÇOS ══ */

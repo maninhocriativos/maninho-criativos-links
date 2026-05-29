@@ -183,6 +183,89 @@ const DEFAULT_LINKS = [
 ];
 
 loadPage();
+initCarousel();
+
+/* ══ CARROSSEL DE ENSAIO FOTOGRÁFICO ══ */
+function initCarousel() {
+  const TOTAL   = 22;
+  const VISIBLE = () => window.innerWidth <= 600 ? 2 : window.innerWidth <= 900 ? 3 : 4;
+  const SLIDE_W = () => window.innerWidth <= 600 ? 200 + 16 : 260 + 16; // width + gap
+
+  const track  = document.getElementById('carousel-track');
+  const dotsWrap = document.getElementById('carousel-dots');
+  if (!track) return;
+
+  /* Cria slides com lazy-loading */
+  for (let i = 1; i <= TOTAL; i++) {
+    const slide = document.createElement('div');
+    slide.className = 'carousel-slide';
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.alt = `Ensaio fotográfico com IA — foto ${i}`;
+    img.src = `ensaio/foto-${i}.webp`;
+    slide.appendChild(img);
+    track.appendChild(slide);
+  }
+
+  /* Dots */
+  const totalDots = Math.ceil(TOTAL / VISIBLE());
+  for (let i = 0; i < totalDots; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+    btn.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(btn);
+  }
+
+  let current = 0;
+  let autoTimer;
+
+  function goTo(index) {
+    const dots = dotsWrap.querySelectorAll('.carousel-dot');
+    const max  = Math.ceil(TOTAL / VISIBLE()) - 1;
+    current = Math.max(0, Math.min(index, max));
+    track.style.transform = `translateX(-${current * VISIBLE() * SLIDE_W()}px)`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  function next() { goTo(current + 1 >= Math.ceil(TOTAL / VISIBLE()) ? 0 : current + 1); }
+  function prev() { goTo(current - 1 < 0 ? Math.ceil(TOTAL / VISIBLE()) - 1 : current - 1); }
+
+  document.getElementById('carousel-next')?.addEventListener('click', () => { next(); resetAuto(); });
+  document.getElementById('carousel-prev')?.addEventListener('click', () => { prev(); resetAuto(); });
+
+  /* Auto-play a cada 3.5s */
+  function startAuto() { autoTimer = setInterval(next, 3500); }
+  function resetAuto()  { clearInterval(autoTimer); startAuto(); }
+  startAuto();
+
+  /* Pause on hover */
+  const carousel = document.getElementById('carousel');
+  carousel?.addEventListener('mouseenter', () => clearInterval(autoTimer));
+  carousel?.addEventListener('mouseleave', startAuto);
+
+  /* Swipe / drag */
+  let startX = 0, isDragging = false;
+
+  carousel?.addEventListener('pointerdown', (e) => {
+    startX = e.clientX;
+    isDragging = true;
+    carousel.classList.add('grabbing');
+    clearInterval(autoTimer);
+  });
+
+  window.addEventListener('pointerup', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    carousel?.classList.remove('grabbing');
+    const diff = e.clientX - startX;
+    if (Math.abs(diff) > 40) { diff < 0 ? next() : prev(); }
+    resetAuto();
+  });
+
+  /* Recalcula no resize */
+  window.addEventListener('resize', () => goTo(current), { passive: true });
+}
 
 /* ══ PARALLAX no hero background ══ */
 (function () {

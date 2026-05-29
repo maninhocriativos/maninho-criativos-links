@@ -10,6 +10,7 @@
     "db:migrate:prod": "npx wrangler d1 execute maninho-links-db --remote --file=./schema.sql"
   },
   "devDependencies": {
-    "wrangler": "^4.0.0"
+    "wrangler": "^4.0.0",
+    "sharp": "^0.34.0"
   }
 }
