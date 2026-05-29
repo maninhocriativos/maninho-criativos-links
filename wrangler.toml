@@ -1,0 +1,8 @@
+name = "maninho-criativos-links"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "maninho-links-db"
+database_id = "807715b6-58cd-4b3f-894d-1920ff97ff68"
