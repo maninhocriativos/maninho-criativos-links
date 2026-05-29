@@ -3,182 +3,94 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Maninho Criativos — criador de conteúdo, designer 3D e especialista em IA criativa." />
+  <meta name="description" content="Maninho Criativos — Design 3D, IA Generativa e Criatividade Digital" />
   <meta property="og:title" content="Maninho Criativos" />
-  <meta property="og:description" content="Criatividade sem limites — links, redes e projetos" />
+  <meta property="og:description" content="Design 3D · IA Generativa · Tutoriais" />
   <meta property="og:image" content="/Images/Logotipo.PNG" />
   <title>Maninho Criativos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ── NAVBAR ── -->
-  <header class="navbar" id="navbar">
-    <div class="nav-inner">
-      <a href="#hero" class="nav-logo">
-        <img src="Images/Logotipo.PNG" alt="Maninho Criativos" class="nav-logo-img"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-        <span class="nav-logo-text" style="display:none">Maninho<span>Criativos</span></span>
-      </a>
-      <nav class="nav-links" id="nav-links">
-        <a href="#links" class="nav-item">Redes</a>
-        <a href="#sobre" class="nav-item">Sobre</a>
-        <a href="#contato" class="nav-item">Contato</a>
-      </nav>
-      <a href="#links" class="btn btn-glow nav-cta">Me seguir</a>
-      <button class="hamburger" id="hamburger" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-
-  <!-- ── HERO ── -->
-  <section class="hero" id="hero">
-    <div class="hero-bg">
-      <div class="hero-orb orb-a"></div>
-      <div class="hero-orb orb-b"></div>
-      <div class="hero-grid"></div>
+  <!-- ══ HERO ══ -->
+  <section class="hero">
+    <!-- fundo: foto do criador -->
+    <div class="hero-photo-bg">
+      <img src="Images/foto-real.jpg" alt="" class="hero-bg-img"
+           onerror="this.style.display='none'" />
+      <div class="hero-bg-overlay"></div>
+      <div class="hero-bg-grid"></div>
     </div>
 
-    <div class="hero-inner">
-      <div class="hero-content" data-animate>
-        <div class="hero-badge">
-          <span class="badge-dot"></span>
-          Criador de Conteúdo & Designer
-        </div>
-        <h1 class="hero-title">
-          Criatividade<br />
-          <span class="gradient-text">sem limites</span>
-        </h1>
-        <p class="hero-bio" id="hero-bio">
-          Design 3D, Inteligência Artificial e muito conteúdo criativo para você se inspirar e aprender.
-        </p>
-        <div class="hero-tags">
-          <span class="tag">✦ Design 3D</span>
-          <span class="tag">✦ IA Generativa</span>
-          <span class="tag">✦ Tutoriais</span>
-        </div>
-        <div class="hero-actions">
-          <a href="#links" class="btn btn-glow btn-lg">Ver todos os links</a>
-          <a href="https://instagram.com/maninhocriativos" target="_blank" rel="noopener" class="btn btn-outline btn-lg">Instagram</a>
-        </div>
+    <!-- conteúdo sobreposto -->
+    <div class="hero-body">
+      <!-- badge de ferramentas -->
+      <div class="tool-badges">
+        <span class="tool-badge">✦ Design 3D</span>
+        <span class="tool-badge">✦ IA Generativa</span>
+        <span class="tool-badge">✦ Blender</span>
+        <span class="tool-badge">✦ Midjourney</span>
       </div>
 
-      <div class="hero-visual" data-animate-delay>
-        <div class="hero-img-frame">
-          <div class="frame-ring ring-1"></div>
-          <div class="frame-ring ring-2"></div>
-          <img src="Images/Manitinha.png" alt="Maninho Criativos" class="hero-photo"
-               onerror="this.parentElement.classList.add('img-fallback')" />
-        </div>
-      </div>
-    </div>
-
-    <a href="#links" class="scroll-indicator" aria-label="Rolar para baixo">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </a>
-  </section>
-
-  <!-- ── LINKS / SOCIAL ── -->
-  <section class="section links-section" id="links">
-    <div class="section-inner">
-      <div class="section-header" data-animate>
-        <p class="section-label">Conecte-se</p>
-        <h2 class="section-title">Me siga <span class="gradient-text">nas redes</span></h2>
-        <p class="section-sub">Escolha a plataforma e fique por dentro de tudo que rola no canal</p>
+      <!-- foto central (se não tiver foto-real.jpg usa esta) -->
+      <div class="hero-portrait-wrap">
+        <img src="Images/foto-real.jpg" alt="Maninho Criativos"
+             class="hero-portrait"
+             onerror="this.src='Images/Maninho.png'" />
+        <div class="portrait-glow"></div>
       </div>
 
-      <div class="links-grid" id="links-container">
-        <div class="link-card-skeleton"></div>
-        <div class="link-card-skeleton"></div>
-        <div class="link-card-skeleton"></div>
-        <div class="link-card-skeleton"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── SOBRE ── -->
-  <section class="section sobre-section" id="sobre">
-    <div class="section-inner sobre-inner">
-      <div class="sobre-img-wrap" data-animate>
-        <div class="sobre-img-frame">
-          <img src="Images/Maninho.png" alt="Maninho Criativos no estúdio" class="sobre-photo"
-               onerror="this.parentElement.classList.add('img-fallback')" />
-        </div>
-        <div class="sobre-badge-float">
-          <span>🎨</span> Designer & Criador
-        </div>
-      </div>
-
-      <div class="sobre-content" data-animate>
-        <p class="section-label">Quem sou eu</p>
-        <h2 class="section-title">Olá, sou o <span class="gradient-text">Maninho</span></h2>
-        <p class="sobre-text">
-          Apaixonado por criatividade digital, trabalho com design 3D, inteligência artificial aplicada à arte e produção de conteúdo educativo para criadores.
-        </p>
-        <p class="sobre-text">
-          Aqui você encontra tutoriais, projetos e muito conteúdo para expandir sua criatividade e dominar as ferramentas digitais.
-        </p>
-        <div class="sobre-stats">
-          <div class="stat-item">
-            <span class="stat-num gradient-text">3D</span>
-            <span class="stat-label">Design & Arte</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-num gradient-text">IA</span>
-            <span class="stat-label">Criação Generativa</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-num gradient-text">∞</span>
-            <span class="stat-label">Criatividade</span>
-          </div>
-        </div>
-        <a href="#links" class="btn btn-glow">Ver meus links →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── CONTATO CTA ── -->
-  <section class="cta-section" id="contato">
-    <div class="cta-bg">
-      <div class="cta-orb"></div>
-    </div>
-    <div class="section-inner cta-inner" data-animate>
-      <div class="cta-logo">
-        <img src="Images/Logotipo.PNG" alt="Maninho Criativos" class="cta-logo-img"
+      <!-- identidade -->
+      <div class="hero-identity">
+        <img src="Images/Logotipo.PNG" alt="Maninho Criativos" class="hero-logo"
              onerror="this.style.display='none'" />
+        <h1 class="hero-name">Maninho Criativos</h1>
+        <p class="hero-role">Designer 3D &amp; Criador de Conteúdo</p>
       </div>
-      <h2 class="cta-title">Vamos criar algo <span class="gradient-text">incrível</span> juntos?</h2>
-      <p class="cta-sub">Me manda uma mensagem no WhatsApp ou no Instagram.</p>
-      <div class="cta-actions">
-        <a href="https://wa.me/5500000000000" target="_blank" rel="noopener" class="btn btn-glow btn-lg">
-          💬 WhatsApp
-        </a>
-        <a href="https://instagram.com/maninhocriativos" target="_blank" rel="noopener" class="btn btn-outline btn-lg">
-          📸 Instagram
-        </a>
-      </div>
+
+      <!-- scroll cue -->
+      <a href="#links" class="scroll-cue" aria-label="Ver links">
+        <div class="scroll-cue-inner">↓</div>
+      </a>
     </div>
   </section>
 
-  <!-- ── FOOTER ── -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-logo">
-        <img src="Images/Logotipo.PNG" alt="Maninho Criativos" class="footer-logo-img"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
-        <span class="footer-logo-text" style="display:none">Maninho Criativos</span>
-      </div>
-      <p class="footer-copy">© 2025 Maninho Criativos. Todos os direitos reservados.</p>
-      <a href="admin.html" class="footer-admin" title="Admin">⚙</a>
+  <!-- ══ LINK BANNERS ══ -->
+  <section class="links-section" id="links">
+    <div class="links-wrap" id="links-container">
+      <!-- Skeleton -->
+      <div class="banner-skeleton"></div>
+      <div class="banner-skeleton"></div>
+      <div class="banner-skeleton"></div>
     </div>
+  </section>
+
+  <!-- ══ BIO ══ -->
+  <section class="bio-section">
+    <div class="bio-inner">
+      <div class="bio-avatar-wrap">
+        <img src="Images/Maninho.png" alt="Maninho Criativos" class="bio-avatar"
+             onerror="this.src='Images/Manitinha.png'" />
+        <div class="bio-avatar-ring"></div>
+      </div>
+      <div class="bio-name-row">
+        <span class="bio-name" id="bio-name">MANINHO CRIATIVOS</span>
+        <span class="bio-verified">✔</span>
+      </div>
+      <p class="bio-text" id="bio-text">
+        Criatividade sem limites — Design 3D, Inteligência Artificial e muito conteúdo para você evoluir.
+      </p>
+      <div class="bio-socials" id="bio-socials"></div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="site-footer">
+    <span>© 2025 Maninho Criativos — Todos os direitos reservados</span>
+    <a href="admin.html" class="footer-admin" title="Admin">⚙</a>
   </footer>
 
   <script src="script.js"></script>

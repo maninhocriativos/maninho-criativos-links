@@ -1,47 +1,10 @@
-/* ── Navbar scroll effect ── */
-const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 20);
-}, { passive: true });
-
-/* ── Mobile menu ── */
-const hamburger = document.getElementById('hamburger');
-const navLinks  = document.getElementById('nav-links');
-hamburger?.addEventListener('click', () => {
-  hamburger.classList.toggle('open');
-  navLinks.classList.toggle('open');
-});
-navLinks?.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => {
-    hamburger.classList.remove('open');
-    navLinks.classList.remove('open');
-  });
-});
-
-/* ── Intersection Observer for animations ── */
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
-}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-
-document.querySelectorAll('[data-animate], [data-animate-delay]').forEach(el => observer.observe(el));
-
-/* Garante que elementos do hero já visíveis aparecem sem esperar scroll */
-requestAnimationFrame(() => {
-  document.querySelectorAll('.hero [data-animate], .hero [data-animate-delay]').forEach(el => {
-    el.classList.add('visible');
-    observer.unobserve(el);
-  });
-});
-
-/* ── Load links from API ── */
-async function loadLinks() {
+/* ══ Carrega dados do banco D1 ══ */
+async function loadPage() {
   const container = document.getElementById('links-container');
 
-  /* Timeout de segurança: se a API demorar >4s mostra fallback */
   const fallbackTimer = setTimeout(() => {
-    if (container.querySelector('.link-card-skeleton')) {
-      container.innerHTML = FALLBACK_LINKS_HTML;
-      setupLinkEvents();
+    if (container.querySelector('.banner-skeleton')) {
+      renderBanners(DEFAULT_LINKS);
     }
   }, 4000);
 
@@ -51,78 +14,128 @@ async function loadLinks() {
       fetch('/api/links')
     ]);
 
+    clearTimeout(fallbackTimer);
+
     if (profileRes.ok) {
       const { profile } = await profileRes.json();
-      if (profile?.bio) {
-        const bioEl = document.getElementById('hero-bio');
-        if (bioEl) bioEl.textContent = profile.bio;
-      }
+      if (profile) applyProfile(profile);
     }
 
-    clearTimeout(fallbackTimer);
-    if (!linksRes.ok) throw new Error('API error');
+    if (!linksRes.ok) throw new Error();
     const { links } = await linksRes.json();
+    renderBanners(links?.length ? links : DEFAULT_LINKS);
 
-    container.innerHTML = '';
-
-    if (!links?.length) {
-      container.innerHTML = FALLBACK_LINKS_HTML;
-      setupLinkEvents();
-      return;
-    }
-
-    links.forEach((link, i) => {
-      container.appendChild(buildCard(link, i));
-    });
-
-    setupLinkEvents();
   } catch {
     clearTimeout(fallbackTimer);
-    container.innerHTML = FALLBACK_LINKS_HTML;
-    setupLinkEvents();
+    renderBanners(DEFAULT_LINKS);
   }
 }
 
-function buildCard(link, i) {
+/* ══ Aplica perfil na bio ══ */
+function applyProfile(p) {
+  if (p.name) {
+    const el = document.getElementById('bio-name');
+    if (el) el.textContent = p.name.toUpperCase();
+  }
+  if (p.bio) {
+    const el = document.getElementById('bio-text');
+    if (el) el.textContent = p.bio;
+  }
+}
+
+/* ══ Renderiza banners ══ */
+function renderBanners(links) {
+  const container = document.getElementById('links-container');
+  container.innerHTML = '';
+
+  links.forEach((link, i) => {
+    const a = buildBanner(link, i);
+    container.appendChild(a);
+  });
+
+  /* Animação de entrada sequencial */
+  container.querySelectorAll('.link-banner').forEach((el, i) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(18px)';
+    el.style.transition = `opacity 0.4s ease ${i * 80}ms, transform 0.4s ease ${i * 80}ms`;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }));
+  });
+
+  /* Popula bio socials */
+  renderSocials(links);
+}
+
+/* ══ Constrói cada banner ══ */
+function buildBanner(link, i) {
   const a = document.createElement('a');
-  a.href = link.url;
+  a.href  = link.url;
   a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  a.className = 'link-card-premium';
-  a.dataset.id = link.id;
-  a.style.cssText = `--card-grad: linear-gradient(135deg,${link.color_from},${link.color_to}); animation-delay:${i*60}ms`;
+  a.rel   = 'noopener noreferrer';
+  a.className = 'link-banner';
+  a.dataset.id = link.id || '';
+
+  const cf = link.color_from || '#00d4ff';
+  const ct = link.color_to   || '#0055ff';
+
+  a.style.setProperty('--card-grad', `linear-gradient(135deg,${cf},${ct})`);
+  a.style.setProperty('--card-grad-start', hexToRgba(cf, 0.15));
 
   a.innerHTML = `
-    <div class="card-icon-wrap">${link.icon}</div>
-    <div class="card-info">
-      <span class="card-platform">${escHtml(link.title)}</span>
-      <span class="card-handle">${escHtml(extractHandle(link.url))}</span>
+    <div class="banner-left">
+      <div class="banner-left-bg"></div>
+      <div class="banner-left-noise"></div>
+      <span class="banner-icon">${esc(link.icon || '🔗')}</span>
     </div>
-    <div class="card-arrow">→</div>
+    <div class="banner-right">
+      <span class="banner-platform">${esc(link.title)}</span>
+      <span class="banner-handle">${esc(extractHandle(link.url))}</span>
+      <span class="banner-cta">Acessar →</span>
+    </div>
+    <div class="banner-arrow">→</div>
   `;
 
-  /* entrance animation */
-  a.style.opacity = '0';
-  a.style.transform = 'translateY(20px)';
-  a.style.transition = `opacity 0.45s ease ${i*70}ms, transform 0.45s ease ${i*70}ms`;
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    a.style.opacity = '1';
-    a.style.transform = 'translateY(0)';
-  }));
+  a.addEventListener('click', (e) => {
+    addRipple(e, a);
+    if (link.id) fetch(`/api/links/${link.id}/click`, { method: 'POST' }).catch(() => {});
+  });
 
   return a;
 }
 
-function setupLinkEvents() {
-  document.querySelectorAll('.link-card-premium').forEach(card => {
-    card.addEventListener('click', (e) => {
-      addRipple(e, card);
-      const id = card.dataset.id;
-      if (id) fetch(`/api/links/${id}/click`, { method: 'POST' }).catch(() => {});
-    });
+/* ══ Bio socials (pega os primeiros 5 links principais) ══ */
+const SOCIAL_ICONS = {
+  instagram: '📸',
+  youtube:   '▶️',
+  tiktok:    '🎵',
+  whatsapp:  '💬',
+  twitter:   '𝕏',
+  linkedin:  '💼',
+  behance:   '🅱',
+  pinterest: '📌',
+};
+
+function renderSocials(links) {
+  const wrap = document.getElementById('bio-socials');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  links.slice(0, 6).forEach(link => {
+    const key = Object.keys(SOCIAL_ICONS).find(k => link.url.toLowerCase().includes(k));
+    const icon = key ? SOCIAL_ICONS[key] : (link.icon || '🔗');
+    const a = document.createElement('a');
+    a.href = link.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.className = 'bio-social-link';
+    a.title = link.title;
+    a.textContent = icon;
+    wrap.appendChild(a);
   });
 }
 
+/* ══ Helpers ══ */
 function addRipple(e, el) {
   const rect = el.getBoundingClientRect();
   const size = Math.max(rect.width, rect.height);
@@ -137,33 +150,31 @@ function extractHandle(url) {
   try {
     const u = new URL(url);
     const parts = u.pathname.replace(/\/$/, '').split('/').filter(Boolean);
-    if (parts.length) return '@' + parts[parts.length - 1];
-    return u.hostname;
+    if (parts.length) return u.hostname.replace('www.','') + '/' + parts[parts.length-1];
+    return u.hostname.replace('www.','');
   } catch { return url; }
 }
 
-function escHtml(s) {
-  return String(s)
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function esc(s) {
+  return String(s ?? '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* Fallback cards rendered as HTML strings (no API) */
-const FALLBACK_LINKS_HTML = [
-  { title:'Instagram', icon:'📸', url:'https://instagram.com/maninhocriativos', from:'#f09433', to:'#bc1888' },
-  { title:'YouTube',   icon:'▶️', url:'https://youtube.com/@maninhocriativos',  from:'#FF0000', to:'#cc0000' },
-  { title:'TikTok',    icon:'🎵', url:'https://tiktok.com/@maninhocriativos',   from:'#010101', to:'#69C9D0' },
-  { title:'WhatsApp',  icon:'💬', url:'https://wa.me/5500000000000',            from:'#25D366', to:'#128C7E' },
-].map((l,i) => `
-  <a href="${l.url}" target="_blank" rel="noopener" class="link-card-premium"
-     style="--card-grad:linear-gradient(135deg,${l.from},${l.to})">
-    <div class="card-icon-wrap">${l.icon}</div>
-    <div class="card-info">
-      <span class="card-platform">${l.title}</span>
-      <span class="card-handle">${extractHandle(l.url)}</span>
-    </div>
-    <div class="card-arrow">→</div>
-  </a>
-`).join('');
+/* ══ Dados de fallback (quando API não responde) ══ */
+const DEFAULT_LINKS = [
+  { title:'Instagram', icon:'📸', url:'https://instagram.com/maninhocriativos', color_from:'#f09433', color_to:'#bc1888' },
+  { title:'YouTube',   icon:'▶️', url:'https://youtube.com/@maninhocriativos',  color_from:'#FF0000', color_to:'#cc0000' },
+  { title:'TikTok',    icon:'🎵', url:'https://tiktok.com/@maninhocriativos',   color_from:'#010101', color_to:'#69C9D0' },
+  { title:'WhatsApp',  icon:'💬', url:'https://wa.me/5500000000000',            color_from:'#25D366', color_to:'#128C7E' },
+  { title:'Portfolio', icon:'🎨', url:'https://maninhocriativos.com',           color_from:'#00d4ff', color_to:'#0055ff' },
+];
 
-loadLinks();
+loadPage();
