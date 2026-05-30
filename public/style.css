@@ -101,13 +101,17 @@ body {
 .hero-whatsapp-btn {
   display: inline-flex !important;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   padding: 16px 36px;
   background: linear-gradient(135deg, #25D366, #128C7E);
   color: #fff !important;
+  border: none;
   border-radius: 50px;
   font-size: 1.05rem;
   font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
   text-decoration: none !important;
   box-shadow: 0 0 40px rgba(37,211,102,0.4), 0 8px 24px rgba(0,0,0,0.4);
   transition: all 0.25s var(--ease);
@@ -852,7 +856,7 @@ body {
   .hero-tools      { order: 3; }
   .scroll-btn      { display: none; }
   .hero-mobile-spacer { order: 4; display: block; flex-shrink: 0; height: 42dvh; }
-  .hero-headline   { order: 5; font-size: clamp(2.2rem, 8vw, 3.2rem); letter-spacing: -1.5px; }
+  .hero-headline   { order: 5; font-size: clamp(1.9rem, 7.5vw, 2.8rem); letter-spacing: -1px; line-height: 1.05; }
   .hero-whatsapp-btn {
     order: 6;
     width: 100%;
