@@ -205,4 +205,57 @@ function esc(s) {
   return String(s?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ══ MODAL DE CONTATO ══
+function openModal() {
+  document.getElementById('contact-modal')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('f-name')?.focus(), 320);
+}
+
+function closeModal() {
+  document.getElementById('contact-modal')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+(function initModal() {
+  const overlay  = document.getElementById('contact-modal');
+  const closeBtn = document.getElementById('modal-close');
+  const form     = document.getElementById('contact-form');
+  const errEl    = document.getElementById('modal-error');
+
+  closeBtn?.addEventListener('click', closeModal);
+  overlay?.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  form?.addEventListener('submit', e => {
+    e.preventDefault();
+    errEl.textContent = '';
+
+    const name    = document.getElementById('f-name').value.trim();
+    const phone   = document.getElementById('f-phone').value.trim();
+    const insta   = document.getElementById('f-insta').value.trim();
+    const service = document.getElementById('f-service').value;
+    const msg     = document.getElementById('f-msg').value.trim();
+
+    if (!name)  { errEl.textContent = 'Por favor, informe seu nome.';      return; }
+    if (!phone) { errEl.textContent = 'Por favor, informe seu WhatsApp.';  return; }
+
+    const text = [
+      '🎯 *Nova mensagem pelo portfólio!*',
+      '',
+      `👤 *Nome:* ${name}`,
+      `📱 *WhatsApp:* ${phone}`,
+      insta ? `📸 *Instagram:* ${insta.startsWith('@') ? insta : '@' + insta}` : null,
+      `✨ *Serviço de interesse:* ${service}`,
+      msg ? `\n💬 *Mensagem:* ${msg}` : null,
+      '',
+      '_Mensagem enviada pelo portfólio maninhocriativos.com.br_',
+    ].filter(l => l !== null).join('\n');
+
+    window.open(`https://wa.me/5592986096874?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+    closeModal();
+    form.reset();
+  });
+})();
+
 init();
