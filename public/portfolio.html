@@ -3,18 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Portfólio — Maninho Criativos | Design 3D, IA Generativa, Ensaio Fotográfico" />
-  <meta property="og:title" content="Portfólio — Maninho Criativos" />
-  <meta property="og:image" content="/Images/Logotipo.PNG" />
+  <meta name="description" content="Portfólio — Maninho Criativos | Trabalhos realizados em Design 3D, IA, Apps e Automação" />
   <title>Portfólio — Maninho Criativos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="portfolio.css" />
 </head>
 <body>
 
-  <!-- ══ NAVBAR ══ -->
+  <!-- ══ NAV ══ -->
   <header class="pf-nav">
     <div class="pf-nav-inner">
       <a href="/" class="pf-nav-back">
@@ -27,81 +25,138 @@
         <span class="pf-logo-text" style="display:none">Maninho Criativos</span>
       </a>
       <a href="https://wa.me/5592986096874" target="_blank" rel="noopener" class="pf-nav-cta">
-        Contratar
+        💬 Contratar
       </a>
     </div>
   </header>
 
-  <!-- ══ HERO ══ -->
+  <!-- ══ HERO HEADER ══ -->
   <section class="pf-hero">
-    <div class="pf-hero-orb orb-a"></div>
-    <div class="pf-hero-orb orb-b"></div>
-    <div class="pf-hero-content">
-      <p class="pf-label">Trabalhos realizados</p>
-      <h1 class="pf-hero-title">Meu <span class="gtext">Portfólio</span></h1>
-      <p class="pf-hero-sub">Design 3D, IA Generativa e Ensaio Fotográfico com Inteligência Artificial</p>
+    <div class="pf-hero-bg">
+      <div class="pf-hero-orb a"></div>
+      <div class="pf-hero-orb b"></div>
+      <div class="pf-hero-grid"></div>
+    </div>
+    <div class="pf-hero-inner">
+      <span class="pf-hero-tag">
+        <span class="pf-tag-dot"></span>
+        Trabalhos entregues
+      </span>
+      <h1 class="pf-hero-title">
+        Trabalhos<br><em>Realizados</em>
+      </h1>
+      <p class="pf-hero-desc">
+        Projetos reais, resultados concretos — do ensaio fotográfico com IA
+        ao desenvolvimento de aplicações e automação de vendas.
+      </p>
+      <div class="pf-hero-stats">
+        <div class="pf-stat">
+          <span class="pf-stat-n" id="stat-count">31</span>
+          <span class="pf-stat-l">Projetos</span>
+        </div>
+        <div class="pf-stat-sep"></div>
+        <div class="pf-stat">
+          <span class="pf-stat-n">6</span>
+          <span class="pf-stat-l">Categorias</span>
+        </div>
+        <div class="pf-stat-sep"></div>
+        <div class="pf-stat">
+          <span class="pf-stat-n">100%</span>
+          <span class="pf-stat-l">Satisfação</span>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- ══ FILTROS ══ -->
-  <div class="pf-filters" id="pf-filters">
-    <div class="pf-filters-inner">
-      <button class="pf-filter active" data-cat="Todos">Todos</button>
-      <button class="pf-filter" data-cat="Ensaio Fotográfico">📸 Ensaio Fotográfico</button>
-      <button class="pf-filter" data-cat="Design 3D">🎨 Design 3D</button>
-      <button class="pf-filter" data-cat="IA Generativa">🤖 IA Generativa</button>
-      <button class="pf-filter" data-cat="Desenvolvimento de Apps">📱 Apps</button>
-      <button class="pf-filter" data-cat="CRM & Meta">📊 CRM & Meta</button>
-      <button class="pf-filter" data-cat="Automação de IA">⚡ Automação IA</button>
+  <!-- ══ ABAS ══ -->
+  <div class="pf-tabs-wrap" id="pf-tabs-wrap">
+    <div class="pf-tabs" id="pf-tabs" role="tablist">
+      <button class="pf-tab active" data-cat="Todos" role="tab" aria-selected="true">
+        <span class="tab-icon">✦</span><span class="tab-label">Todos</span>
+      </button>
+      <button class="pf-tab" data-cat="Ensaio Fotográfico" role="tab">
+        <span class="tab-icon">📸</span><span class="tab-label">Ensaio com IA</span>
+      </button>
+      <button class="pf-tab" data-cat="Design 3D" role="tab">
+        <span class="tab-icon">🎨</span><span class="tab-label">Design 3D</span>
+      </button>
+      <button class="pf-tab" data-cat="IA Generativa" role="tab">
+        <span class="tab-icon">🤖</span><span class="tab-label">IA Generativa</span>
+      </button>
+      <button class="pf-tab" data-cat="Desenvolvimento de Apps" role="tab">
+        <span class="tab-icon">📱</span><span class="tab-label">Apps</span>
+      </button>
+      <button class="pf-tab" data-cat="CRM & Meta" role="tab">
+        <span class="tab-icon">📊</span><span class="tab-label">CRM & Meta</span>
+      </button>
+      <button class="pf-tab" data-cat="Automação de IA" role="tab">
+        <span class="tab-icon">⚡</span><span class="tab-label">Automação IA</span>
+      </button>
     </div>
+    <!-- indicador deslizante -->
+    <div class="pf-tab-indicator" id="pf-tab-indicator"></div>
+    <div class="pf-tabs-fade-l"></div>
+    <div class="pf-tabs-fade-r"></div>
   </div>
 
   <!-- ══ GRID ══ -->
-  <main class="pf-main">
-    <div class="pf-grid" id="pf-grid">
-      <!-- Skeletons -->
-      <div class="pf-skeleton"></div>
-      <div class="pf-skeleton tall"></div>
-      <div class="pf-skeleton"></div>
-      <div class="pf-skeleton tall"></div>
-      <div class="pf-skeleton"></div>
-      <div class="pf-skeleton"></div>
+  <main class="pf-main" id="pf-main" role="tabpanel">
+    <!-- categoria label -->
+    <div class="pf-cat-header" id="pf-cat-header">
+      <h2 class="pf-cat-title" id="pf-cat-title">Todos os trabalhos</h2>
+      <span class="pf-cat-count" id="pf-cat-count"></span>
     </div>
-    <p class="pf-empty" id="pf-empty" style="display:none">Nenhum trabalho nesta categoria ainda.</p>
+
+    <div class="pf-grid" id="pf-grid">
+      <div class="pf-skel"></div>
+      <div class="pf-skel tall"></div>
+      <div class="pf-skel"></div>
+      <div class="pf-skel tall"></div>
+      <div class="pf-skel"></div>
+      <div class="pf-skel"></div>
+      <div class="pf-skel tall"></div>
+      <div class="pf-skel"></div>
+    </div>
+    <p class="pf-empty" id="pf-empty" style="display:none">
+      Nenhum projeto nesta categoria ainda.
+    </p>
   </main>
 
   <!-- ══ CTA ══ -->
-  <section class="pf-cta-section">
-    <div class="pf-cta-orb"></div>
+  <section class="pf-cta">
+    <div class="pf-cta-bg"></div>
     <div class="pf-cta-inner">
-      <h2 class="pf-cta-title">Quer um trabalho <span class="gtext">assim?</span></h2>
-      <p class="pf-cta-sub">Me manda uma mensagem e vamos criar algo incrível juntos.</p>
-      <a href="https://wa.me/5592986096874?text=Oi+Maninho%2C+vi+seu+portfólio+e+quero+contratar!" target="_blank" rel="noopener" class="pf-cta-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        Quero contratar pelo WhatsApp
+      <p class="pf-cta-tag">Pronto para começar?</p>
+      <h2 class="pf-cta-title">Quer um projeto <em>assim</em>?</h2>
+      <p class="pf-cta-desc">Me conta o que você precisa e a gente transforma em realidade.</p>
+      <a href="https://wa.me/5592986096874?text=Oi+Maninho%2C+vi+seu+portfólio+e+quero+contratar!"
+         target="_blank" rel="noopener" class="pf-cta-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Falar no WhatsApp
       </a>
     </div>
   </section>
 
   <!-- ══ LIGHTBOX ══ -->
-  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Visualizar imagem">
+  <div id="lightbox" class="lightbox" aria-modal="true" role="dialog">
     <button class="lb-close" id="lb-close" aria-label="Fechar">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
     </button>
-    <button class="lb-nav lb-prev" id="lb-prev" aria-label="Anterior">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    <button class="lb-arrow lb-prev" id="lb-prev" aria-label="Anterior">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
     </button>
-    <button class="lb-nav lb-next" id="lb-next" aria-label="Próximo">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    <button class="lb-arrow lb-next" id="lb-next" aria-label="Próximo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
     </button>
-    <div class="lb-img-wrap">
+    <figure class="lb-figure">
       <img id="lb-img" src="" alt="" />
-      <div class="lb-info">
+      <figcaption class="lb-caption">
         <span class="lb-title" id="lb-title"></span>
-        <span class="lb-cat"   id="lb-cat"></span>
-      </div>
-    </div>
-    <div class="lb-counter" id="lb-counter">1 / 22</div>
+        <span class="lb-cat" id="lb-cat"></span>
+        <span class="lb-desc" id="lb-desc"></span>
+      </figcaption>
+    </figure>
+    <div class="lb-counter" id="lb-counter"></div>
   </div>
 
   <script src="portfolio.js"></script>

@@ -1,37 +1,106 @@
-/* ══ Estado global ══ */
-let allItems    = [];
-let filtered    = [];
-let currentIdx  = 0;
-let activeFilter = 'Todos';
+/* ═══════════════════════════════════════════
+   Portfólio — Maninho Criativos
+   ═══════════════════════════════════════════ */
 
-/* ══ Carrega portfólio da API ══ */
-async function loadPortfolio(cat = 'Todos') {
-  activeFilter = cat;
-  const grid  = document.getElementById('pf-grid');
-  const empty = document.getElementById('pf-empty');
+let allItems = [];
+let filtered = [];
+let activeIdx = 0;
 
-  /* Skeletons enquanto carrega */
-  grid.innerHTML = [
-    '<div class="pf-skeleton"></div>',
-    '<div class="pf-skeleton tall"></div>',
-    '<div class="pf-skeleton"></div>',
-    '<div class="pf-skeleton tall"></div>',
-    '<div class="pf-skeleton"></div>',
-    '<div class="pf-skeleton"></div>',
-  ].join('');
-  empty.style.display = 'none';
-
+/* ══ Carrega dados da API ══ */
+async function init() {
   try {
-    const url = cat === 'Todos'
-      ? '/api/portfolio'
-      : `/api/portfolio?category=${encodeURIComponent(cat)}`;
-
-    const res = await fetch(url);
+    const res = await fetch('/api/portfolio');
     if (!res.ok) throw new Error();
     const { items } = await res.json();
+    allItems = items || [];
+  } catch {
+    allItems = [];
+  }
 
-    allItems = cat === 'Todos' ? items : allItems; // mantém todos para lightbox
-    filtered = items || [];
+  /* Atualiza contador no hero */
+  const statEl = document.getElementById('stat-count');
+  if (statEl && allItems.length) statEl.textContent = allItems.length;
+
+  /* Inicializa abas e mostra "Todos" */
+  initTabs();
+  showCategory('Todos');
+}
+
+/* ══ Abas com indicador deslizante ══ */
+function initTabs() {
+  const tabs = document.querySelectorAll('.pf-tab');
+  const indicator = document.getElementById('pf-tab-indicator');
+  const wrap = document.getElementById('pf-tabs-wrap');
+
+  function moveIndicator(btn) {
+    const tabsEl = document.getElementById('pf-tabs');
+    const tabsRect = tabsEl.getBoundingClientRect();
+    const btnRect  = btn.getBoundingClientRect();
+    indicator.style.left  = (btn.offsetLeft) + 'px';
+    indicator.style.width = btn.offsetWidth + 'px';
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected','true');
+      moveIndicator(tab);
+
+      /* Scroll para a aba ativa */
+      tab.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
+
+      showCategory(tab.dataset.cat);
+    });
+  });
+
+  /* Posiciona no active inicial */
+  const firstActive = document.querySelector('.pf-tab.active');
+  if (firstActive) {
+    /* Aguarda layout */
+    requestAnimationFrame(() => moveIndicator(firstActive));
+  }
+
+  /* Recalcula no resize */
+  window.addEventListener('resize', () => {
+    const a = document.querySelector('.pf-tab.active');
+    if (a) moveIndicator(a);
+  }, { passive: true });
+}
+
+/* ══ Filtra e exibe categoria ══ */
+function showCategory(cat) {
+  const grid  = document.getElementById('pf-grid');
+  const empty = document.getElementById('pf-empty');
+  const title = document.getElementById('pf-cat-title');
+  const count = document.getElementById('pf-cat-count');
+
+  /* Skeleton enquanto "carrega" (micro-delay visual) */
+  grid.innerHTML = `
+    <div class="pf-skel"></div><div class="pf-skel tall"></div>
+    <div class="pf-skel"></div><div class="pf-skel tall"></div>
+    <div class="pf-skel"></div><div class="pf-skel"></div>`;
+  empty.style.display = 'none';
+
+  const catLabels = {
+    'Todos':                  'Todos os trabalhos',
+    'Ensaio Fotográfico':     'Ensaio Fotográfico com IA',
+    'Design 3D':              'Design 3D',
+    'IA Generativa':          'IA Generativa',
+    'Desenvolvimento de Apps':'Desenvolvimento de Apps',
+    'CRM & Meta':             'CRM Integrado à Meta',
+    'Automação de IA':        'Automação de IA para Vendas',
+  };
+  title.textContent = catLabels[cat] || cat;
+
+  setTimeout(() => {
+    filtered = cat === 'Todos'
+      ? allItems
+      : allItems.filter(i => i.category === cat);
+
+    count.textContent = filtered.length
+      ? `${filtered.length} projeto${filtered.length > 1 ? 's' : ''}`
+      : '';
 
     if (!filtered.length) {
       grid.innerHTML = '';
@@ -40,11 +109,7 @@ async function loadPortfolio(cat = 'Todos') {
     }
 
     renderGrid(filtered);
-  } catch {
-    grid.innerHTML = '';
-    empty.style.display = 'block';
-    empty.textContent = 'Erro ao carregar o portfólio. Tente novamente.';
-  }
+  }, 180);
 }
 
 /* ══ Renderiza cards ══ */
@@ -55,58 +120,43 @@ function renderGrid(items) {
   items.forEach((item, i) => {
     const card = document.createElement('div');
     card.className = 'pf-card';
-    card.dataset.idx = i;
 
-    /* Wrapper interno para o scale funcionar sem clip no pai */
     const inner = document.createElement('div');
     inner.className = 'pf-card-inner';
 
-    /* Imagem ou card de projeto (SVG/gradiente) */
-    const isSVG = item.image_url.endsWith('.svg');
-    const media = document.createElement('img');
-    media.src      = item.image_url;
-    media.alt      = item.title;
-    media.loading  = 'lazy';
-    media.decoding = 'async';
-    if (isSVG) media.style.cssText = 'width:100%;display:block;';
+    const img = document.createElement('img');
+    img.src = item.image_url;
+    img.alt = item.title;
+    img.loading = 'lazy';
+    img.decoding = 'async';
 
     const overlay = document.createElement('div');
-    overlay.className = 'pf-card-overlay';
+    overlay.className = 'pf-overlay';
     overlay.innerHTML = `
-      <div class="pf-card-info">
-        <span class="pf-card-title">${esc(item.title)}</span>
-        <span class="pf-card-cat">${esc(item.category)}</span>
-      </div>`;
+      <span class="pf-overlay-title">${esc(item.title)}</span>
+      <span class="pf-overlay-cat">${esc(item.category)}</span>`;
 
-    inner.appendChild(media);
+    inner.appendChild(img);
     inner.appendChild(overlay);
     card.appendChild(inner);
     grid.appendChild(card);
 
     card.addEventListener('click', () => openLightbox(i));
 
-    requestAnimationFrame(() => {
-      setTimeout(() => card.classList.add('visible'), i * 40);
-    });
+    /* Stagger */
+    requestAnimationFrame(() =>
+      setTimeout(() => card.classList.add('in'), i * 38)
+    );
   });
 }
 
-/* ══ Filtros ══ */
-document.querySelectorAll('.pf-filter').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.pf-filter').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    loadPortfolio(btn.dataset.cat);
-  });
-});
-
 /* ══ LIGHTBOX ══ */
 function openLightbox(idx) {
-  currentIdx = idx;
+  activeIdx = idx;
   const lb = document.getElementById('lightbox');
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
-  showLightboxItem(idx);
+  renderLightbox(idx);
 }
 
 function closeLightbox() {
@@ -114,64 +164,61 @@ function closeLightbox() {
   document.body.style.overflow = '';
 }
 
-function showLightboxItem(idx) {
-  const item  = filtered[idx];
+function renderLightbox(idx) {
+  const item = filtered[idx];
   if (!item) return;
+
   const img   = document.getElementById('lb-img');
   const title = document.getElementById('lb-title');
   const cat   = document.getElementById('lb-cat');
+  const desc  = document.getElementById('lb-desc');
   const ctr   = document.getElementById('lb-counter');
 
-  /* Fade swap */
   img.style.opacity = '0';
   setTimeout(() => {
     img.src = item.image_url;
     img.alt = item.title;
     img.onload = () => { img.style.opacity = '1'; };
-  }, 120);
+  }, 100);
 
   title.textContent = item.title;
   cat.textContent   = item.category;
+  desc.textContent  = item.description || '';
   ctr.textContent   = `${idx + 1} / ${filtered.length}`;
-  currentIdx = idx;
+  activeIdx = idx;
 }
 
-function lbNext() { showLightboxItem((currentIdx + 1) % filtered.length); }
-function lbPrev() { showLightboxItem((currentIdx - 1 + filtered.length) % filtered.length); }
+const lbNext = () => renderLightbox((activeIdx + 1) % filtered.length);
+const lbPrev = () => renderLightbox((activeIdx - 1 + filtered.length) % filtered.length);
 
 document.getElementById('lb-close')?.addEventListener('click', closeLightbox);
 document.getElementById('lb-next')?.addEventListener('click', lbNext);
 document.getElementById('lb-prev')?.addEventListener('click', lbPrev);
 
-document.getElementById('lightbox')?.addEventListener('click', (e) => {
-  if (e.target === document.getElementById('lightbox')) closeLightbox();
+document.getElementById('lightbox')?.addEventListener('click', e => {
+  if (e.target.id === 'lightbox') closeLightbox();
 });
 
-/* Teclado: ← → Esc */
-document.addEventListener('keydown', (e) => {
-  const lb = document.getElementById('lightbox');
-  if (!lb.classList.contains('open')) return;
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
   if (e.key === 'ArrowRight') lbNext();
   if (e.key === 'ArrowLeft')  lbPrev();
   if (e.key === 'Escape')     closeLightbox();
 });
 
-/* Swipe no lightbox (mobile) */
-let lbStartX = 0;
-document.getElementById('lightbox')?.addEventListener('touchstart', (e) => {
-  lbStartX = e.touches[0].clientX;
+let lbTouchX = 0;
+document.getElementById('lightbox')?.addEventListener('touchstart', e => {
+  lbTouchX = e.touches[0].clientX;
 }, { passive: true });
-document.getElementById('lightbox')?.addEventListener('touchend', (e) => {
-  const diff = e.changedTouches[0].clientX - lbStartX;
-  if (Math.abs(diff) > 50) { diff < 0 ? lbNext() : lbPrev(); }
+document.getElementById('lightbox')?.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - lbTouchX;
+  if (Math.abs(dx) > 50) { dx < 0 ? lbNext() : lbPrev(); }
 }, { passive: true });
 
-/* ══ Helper ══ */
 function esc(s) {
   return String(s ?? '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* ══ Inicia ══ */
-loadPortfolio();
+init();
