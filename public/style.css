@@ -30,7 +30,7 @@ body {
   position: relative;
   min-height: 100dvh;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   overflow: hidden;
 }
 
@@ -73,7 +73,7 @@ body {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 48px 64px;
+  padding: 120px 48px 64px;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -796,7 +796,8 @@ body {
 @media (max-width: 768px) {
 
   /* ── Hero ── */
-  .hero-content { padding: 100px 24px 52px; gap: 18px; }
+  .hero-content { padding: 80px 24px 40px; gap: 18px; }
+  .hero { align-items: flex-start; }
   .hero-logo { height: 40px; }
   .hero-badge { font-size: 0.72rem; padding: 6px 13px; }
   .hero-tools { gap: 6px; }
