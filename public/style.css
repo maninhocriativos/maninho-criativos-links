@@ -79,6 +79,43 @@ body {
   gap: 28px;
 }
 
+/* Headline forte do hero */
+.hero-headline {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -2px;
+  color: #fff;
+  max-width: 520px;
+}
+.hero-headline-em {
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Botão WhatsApp do hero */
+.hero-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 32px;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: #fff;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 0 32px rgba(37,211,102,0.35);
+  transition: all 0.25s var(--ease);
+  width: fit-content;
+}
+.hero-whatsapp-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 52px rgba(37,211,102,0.55);
+}
+
 .hero-logo {
   height: 48px;
   width: auto;
@@ -798,6 +835,8 @@ body {
   /* ── Hero ── */
   .hero-content { padding: 80px 24px 40px; gap: 18px; }
   .hero { align-items: flex-start; }
+  .hero-headline { font-size: clamp(1.8rem, 7vw, 2.6rem); letter-spacing: -1px; }
+  .hero-whatsapp-btn { padding: 13px 24px; font-size: .9rem; }
   .hero-logo { height: 40px; }
   .hero-badge { font-size: 0.72rem; padding: 6px 13px; }
   .hero-tools { gap: 6px; }
