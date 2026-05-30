@@ -63,12 +63,13 @@ em{font-style:normal;
   background:
     linear-gradient(90deg,
       rgba(0,0,0,1)   0%,
-      rgba(0,0,0,.92) 38%,
-      rgba(0,0,0,.35) 62%,
-      transparent     82%
+      rgba(0,0,0,.95) 28%,
+      rgba(0,0,0,.7)  38%,
+      rgba(0,0,0,.1)  50%,
+      transparent     60%
     ),
     linear-gradient(180deg,
-      transparent 60%,
+      transparent 55%,
       rgba(0,0,0,.7) 82%,
       rgba(0,0,0,1)  100%
     );
@@ -89,7 +90,7 @@ em{font-style:normal;
 }
 @keyframes orbdrift{from{transform:translate(0,0)}to{transform:translate(40px,-50px)}}
 
-.pf-hero-inner{position:relative;z-index:1;max-width:800px}
+.pf-hero-inner{position:relative;z-index:1;max-width:480px}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:8px;
