@@ -49,8 +49,8 @@ em{font-style:normal;
 .top-nav-cta:hover{transform:translateY(-1px);box-shadow:0 0 36px rgba(0,212,255,.45)}
 
 /* ── HERO ── */
-.pf-hero{position:relative;overflow:hidden;padding:120px 32px 72px}
-.pf-hero-bg{position:absolute;inset:0;z-index:0}
+.pf-hero{position:relative;overflow:hidden;padding:120px 32px 72px;background:url('/Images/banner-hero-2.webp') center/cover no-repeat}
+.pf-hero-bg{position:absolute;inset:0;z-index:0;background:rgba(0,0,0,.35)}
 .orb{
   position:absolute;border-radius:50%;
   filter:blur(100px);opacity:.15;
