@@ -435,64 +435,6 @@ body {
 .footer-admin { color: var(--text3); text-decoration: none; opacity: 0.4; transition: opacity 0.2s; }
 .footer-admin:hover { opacity: 0.8; }
 
-/* ══════════════════════════════
-   MOBILE — independente do desktop
-   max-width: 768px
-   ══════════════════════════════ */
-@media (max-width: 768px) {
-
-  /* Hero mobile */
-  .hero-content {
-    padding: 100px 24px 52px;
-    gap: 18px;
-  }
-  .hero-logo { height: 40px; }
-  .hero-badge { font-size: 0.72rem; padding: 6px 13px; }
-  .hero-tools { gap: 6px; }
-  .tool-chip { font-size: 0.68rem; padding: 5px 10px; }
-  .scroll-btn { width: 38px; height: 38px; }
-
-  /* Links mobile — cartões mais altos e generosos */
-  .links-section { padding: 0 0 40px; }
-  .links-wrap { padding: 0 16px; gap: 10px; }
-
-  .link-banner {
-    grid-template-columns: 72px 1fr 46px;
-    height: 76px;
-    border-radius: 14px;
-  }
-  .banner-icon-svg { width: 24px; height: 24px; }
-  .banner-name { font-size: 0.95rem; letter-spacing: 1px; }
-  .banner-cta { font-size: 0.65rem; letter-spacing: 0.8px; }
-  .banner-text-block { padding: 0 16px; }
-
-  /* Serviços mobile — UMA coluna, sem texto cortado */
-  .services-section { padding: 64px 0; }
-  .services-inner { padding: 0 20px; }
-  .srv-title { font-size: 1.65rem; letter-spacing: -0.5px; margin-bottom: 36px; }
-  .srv-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-  .srv-card { padding: 24px 22px; gap: 12px; }
-  .srv-card-title { font-size: 1rem; }
-  .srv-card-desc { font-size: 0.85rem; }
-
-  /* Ensaio mobile */
-  .ensaio-section { padding: 64px 0 56px; }
-  .ensaio-inner { gap: 36px; padding: 0 20px; }
-  .ensaio-sub { font-size: 0.88rem; }
-  .carousel-slide { width: 180px; }
-  .carousel-btn { width: 36px; height: 36px; }
-  .carousel-btn.prev { left: 4px; }
-  .carousel-btn.next { right: 4px; }
-  .btn-ensaio { padding: 14px 28px; font-size: 0.92rem; }
-
-  /* Bio mobile */
-  .bio-section { padding: 52px 20px 60px; }
-  .bio-desc { font-size: 0.85rem; }
-}
-
 /* ══ PARALLAX ══ */
 .hero-bg { will-change: transform; }
 
@@ -813,4 +755,59 @@ body {
 [data-reveal].revealed {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* ══════════════════════════════════════════════
+   MOBILE — totalmente independente do desktop
+   Regras aqui sobrescrevem as anteriores ✓
+   max-width: 768px
+   ══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── Hero ── */
+  .hero-content { padding: 100px 24px 52px; gap: 18px; }
+  .hero-logo { height: 40px; }
+  .hero-badge { font-size: 0.72rem; padding: 6px 13px; }
+  .hero-tools { gap: 6px; }
+  .tool-chip { font-size: 0.68rem; padding: 5px 10px; }
+  .scroll-btn { width: 38px; height: 38px; }
+
+  /* ── Links ── */
+  .links-section { padding: 0 0 40px; }
+  .links-wrap { padding: 0 16px; gap: 10px; }
+  .link-banner {
+    grid-template-columns: 72px 1fr 46px;
+    height: 76px;
+    border-radius: 14px;
+  }
+  .banner-icon-svg { width: 24px; height: 24px; }
+  .banner-name { font-size: 0.95rem; letter-spacing: 1px; }
+  .banner-cta { font-size: 0.65rem; letter-spacing: 0.8px; }
+  .banner-text-block { padding: 0 16px; }
+
+  /* ── Serviços: UMA coluna, sem overflow ── */
+  .services-section { padding: 64px 0; }
+  .services-inner { padding: 0 20px; }
+  .srv-title { font-size: 1.65rem; letter-spacing: -0.5px; margin-bottom: 36px; }
+  .srv-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+  .srv-card { padding: 24px 22px; gap: 12px; border-radius: 18px; }
+  .srv-card-title { font-size: 1rem; }
+  .srv-card-desc { font-size: 0.85rem; }
+
+  /* ── Ensaio ── */
+  .ensaio-section { padding: 64px 0 56px; }
+  .ensaio-inner { gap: 36px; padding: 0 20px; }
+  .ensaio-sub { font-size: 0.88rem; }
+  .carousel-slide { width: 180px; }
+  .carousel-btn { width: 36px; height: 36px; }
+  .carousel-btn.prev { left: 4px; }
+  .carousel-btn.next { right: 4px; }
+  .btn-ensaio { padding: 14px 28px; font-size: 0.92rem; }
+
+  /* ── Bio ── */
+  .bio-section { padding: 52px 20px 60px; }
+  .bio-desc { font-size: 0.85rem; }
 }
