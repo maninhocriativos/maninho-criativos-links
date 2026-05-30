@@ -6,7 +6,6 @@ let allItems = [];
 let filtered  = [];
 let activeIdx = 0;
 
-/* ══ Init ══ */
 async function init() {
   try {
     const res = await fetch('/api/portfolio');
@@ -22,7 +21,6 @@ async function init() {
 
   setupNav();
 
-  /* Cartões de serviço na home apontam para a respectiva aba */
   document.querySelectorAll('.srv-big-card').forEach(card => {
     card.addEventListener('click', () => {
       const cat = card.dataset.goto;
@@ -32,10 +30,8 @@ async function init() {
   });
 }
 
-/* ══ Navegação por abas ══ */
 function setupNav() {
   const buttons = document.querySelectorAll('.cat-btn');
-
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
       buttons.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
@@ -53,13 +49,11 @@ function setupNav() {
   });
 }
 
-/* ══ Mostra home de vendas ══ */
 function showHome() {
   document.getElementById('pf-home').style.display    = 'block';
   document.getElementById('pf-gallery').style.display = 'none';
 }
 
-/* ══ Mostra galeria de uma categoria ══ */
 function showGallery(cat) {
   document.getElementById('pf-home').style.display    = 'none';
   document.getElementById('pf-gallery').style.display = 'block';
@@ -70,18 +64,12 @@ function showGallery(cat) {
   const count  = document.getElementById('gallery-count');
 
   const labels = {
-    'Ensaio Fotográfico':     'Ensaio Fotográfico com IA',
-    'Design 3D':              'Design 3D',
-    'IA Generativa':          'IA Generativa',
-    'Desenvolvimento de Apps':'Apps & Landing Pages',
-    'CRM & Meta':             'CRM Integrado à Meta',
-    'Automação de IA':        'Automação de IA para Vendas',
+    'Ensaio Fotográfico':'Ensaio Fotográfico com IA','Design 3D':'Design 3D','IA Generativa':'IA Generativa',
+    'Desenvolvimento de Apps':'Apps & Landing Pages','CRM & Meta':'CRM Integrado à Meta','Automação de IA':'Automação de IA para Vendas',
   };
   title.textContent = labels[cat] || cat;
 
-  /* Skeleton */
-  grid.innerHTML = Array(6).fill(0).map((_,i) =>
-    `<div class="pf-skel${i%3===1?' tall':''}"></div>`).join('');
+  grid.innerHTML = Array(6).fill(0).map((_,i) => `<div class="pf-skel${i%3===1?' tall':''}"></div>`).join('');
   empty.style.display = 'none';
 
   setTimeout(() => {
@@ -97,24 +85,38 @@ function showGallery(cat) {
   }, 160);
 }
 
-/* ══ Renderiza cards ══ */
 function renderGrid(items) {
   const grid = document.getElementById('pf-grid');
   grid.innerHTML = '';
 
   items.forEach((item, i) => {
-    const card  = document.createElement('div');
+    const card = document.createElement('div');
     card.className = 'pf-card';
 
     const inner = document.createElement('div');
     inner.className = 'pf-card-inner';
 
-    const img = document.createElement('img');
-    img.src = item.image_url;
-    img.alt = item.title;
-    img.loading = 'lazy';
-    img.decoding = 'async';
+    /* Desktop screenshot (esquerda, grande) */
+    const desktop = document.createElement('div');
+    desktop.className = 'pf-screenshot desktop';
+    const deskImg = document.createElement('img');
+    deskImg.src = item.image_url;
+    deskImg.alt = `${item.title} - Desktop`;
+    deskImg.loading = 'lazy';
+    deskImg.decoding = 'async';
+    desktop.appendChild(deskImg);
 
+    /* Mobile screenshot (direita, pequeno) */
+    const mobile = document.createElement('div');
+    mobile.className = 'pf-screenshot mobile';
+    const mobImg = document.createElement('img');
+    mobImg.src = item.image_mobile_url || item.image_url;
+    mobImg.alt = `${item.title} - Mobile`;
+    mobImg.loading = 'lazy';
+    mobImg.decoding = 'async';
+    mobile.appendChild(mobImg);
+
+    /* Overlay com info */
     const ov = document.createElement('div');
     ov.className = 'pf-overlay';
     ov.innerHTML = `
@@ -123,12 +125,12 @@ function renderGrid(items) {
         <span class="pf-overlay-cat">${esc(item.category)}</span>
       </div>
       ${item.project_url ? `
-        <a href="${esc(item.project_url)}" target="_blank" rel="noopener"
-           class="pf-overlay-link" onclick="event.stopPropagation()">
+        <a href="${esc(item.project_url)}" target="_blank" rel="noopener" class="pf-overlay-link" onclick="event.stopPropagation()">
           Ver projeto →
         </a>` : ''}`;
 
-    inner.appendChild(img);
+    inner.appendChild(desktop);
+    inner.appendChild(mobile);
     inner.appendChild(ov);
     card.appendChild(inner);
     grid.appendChild(card);
@@ -138,18 +140,19 @@ function renderGrid(items) {
   });
 }
 
-/* ══ Lightbox ══ */
 function openLightbox(idx) {
   activeIdx = idx;
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
   renderLB(idx);
 }
+
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   document.body.style.overflow = '';
   document.getElementById('lb-open-btn')?.remove();
 }
+
 function renderLB(idx) {
   const item = filtered[idx];
   if (!item) return;
