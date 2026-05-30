@@ -225,18 +225,43 @@ em { font-style:normal;
 /* Overlay */
 .pf-overlay {
   position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(to top,rgba(0,0,0,.9) 0%,transparent 55%);
+  background:linear-gradient(to top,rgba(0,0,0,.92) 0%,transparent 60%);
   opacity:0; transition:opacity .3s;
   display:flex; flex-direction:column; justify-content:flex-end;
-  padding:14px 12px;
+  padding:14px 12px; gap:8px;
 }
-.pf-card:hover .pf-overlay { opacity:1; }
+.pf-card:hover .pf-overlay { opacity:1; pointer-events:all; }
 
+.pf-overlay-info { display:flex; flex-direction:column; gap:3px; }
 .pf-overlay-title { font-size:.78rem; font-weight:800; line-height:1.25; }
 .pf-overlay-cat {
   font-size:.62rem; font-weight:700; color:var(--cyan);
-  text-transform:uppercase; letter-spacing:.5px; margin-top:3px;
+  text-transform:uppercase; letter-spacing:.5px;
 }
+
+.pf-overlay-link {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:5px 10px; border-radius:6px;
+  background:rgba(0,212,255,.18); border:1px solid rgba(0,212,255,.35);
+  color:var(--cyan); font-size:.65rem; font-weight:700;
+  text-decoration:none; letter-spacing:.4px;
+  transition:background .2s;
+  width:fit-content;
+}
+.pf-overlay-link:hover { background:rgba(0,212,255,.32); }
+
+/* Botão no lightbox */
+.lb-project-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:11px 24px; border-radius:50px;
+  background:linear-gradient(135deg,var(--cyan),var(--blue));
+  color:#fff; font-size:.88rem; font-weight:700;
+  text-decoration:none;
+  box-shadow:0 0 24px rgba(0,212,255,.3);
+  transition:all .22s var(--ease);
+  margin-top:4px;
+}
+.lb-project-btn:hover { transform:translateY(-2px); box-shadow:0 0 40px rgba(0,212,255,.5); }
 
 /* Skeleton */
 .pf-skel {

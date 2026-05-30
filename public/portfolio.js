@@ -133,8 +133,16 @@ function renderGrid(items) {
     const overlay = document.createElement('div');
     overlay.className = 'pf-overlay';
     overlay.innerHTML = `
-      <span class="pf-overlay-title">${esc(item.title)}</span>
-      <span class="pf-overlay-cat">${esc(item.category)}</span>`;
+      <div class="pf-overlay-info">
+        <span class="pf-overlay-title">${esc(item.title)}</span>
+        <span class="pf-overlay-cat">${esc(item.category)}</span>
+      </div>
+      ${item.project_url ? `
+      <a href="${esc(item.project_url)}" target="_blank" rel="noopener"
+         class="pf-overlay-link" onclick="event.stopPropagation()">
+        Ver projeto →
+      </a>` : ''}
+    `;
 
     inner.appendChild(img);
     inner.appendChild(overlay);
@@ -186,6 +194,20 @@ function renderLightbox(idx) {
   desc.textContent  = item.description || '';
   ctr.textContent   = `${idx + 1} / ${filtered.length}`;
   activeIdx = idx;
+
+  /* Botão "Abrir projeto" no lightbox */
+  const existing = document.getElementById('lb-open-btn');
+  if (existing) existing.remove();
+  if (item.project_url) {
+    const btn = document.createElement('a');
+    btn.id = 'lb-open-btn';
+    btn.href = item.project_url;
+    btn.target = '_blank';
+    btn.rel = 'noopener noreferrer';
+    btn.className = 'lb-project-btn';
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6m0 0v6m0-6L10 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg> Abrir projeto`;
+    document.querySelector('.lb-figure')?.appendChild(btn);
+  }
 }
 
 const lbNext = () => renderLightbox((activeIdx + 1) % filtered.length);

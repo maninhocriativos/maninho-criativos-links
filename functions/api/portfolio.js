@@ -5,10 +5,10 @@ export async function onRequestGet({ env, request }) {
     const cat = url.searchParams.get('category');
 
     const query = cat && cat !== 'Todos'
-      ? `SELECT id, title, category, description, image_url, order_index
+      ? `SELECT id, title, category, description, image_url, project_url, order_index
          FROM portfolio WHERE is_active = 1 AND category = ?
          ORDER BY order_index ASC, id ASC`
-      : `SELECT id, title, category, description, image_url, order_index
+      : `SELECT id, title, category, description, image_url, project_url, order_index
          FROM portfolio WHERE is_active = 1
          ORDER BY order_index ASC, id ASC`;
 
