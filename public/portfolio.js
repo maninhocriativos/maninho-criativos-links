@@ -205,4 +205,25 @@ function esc(s) {
   return String(s?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ══ MANITINHA TECH ANIMATION ══
+function animateManitinha() {
+  const img = document.getElementById('manitinha');
+  if (!img) return;
+
+  const frames = [
+    '/Images/manitinha-1.webp',
+    '/Images/manitinha-2.webp',
+    '/Images/manitinha-3.webp',
+    '/Images/manitinha-4.webp'
+  ];
+
+  let frameIdx = 0;
+  setInterval(() => {
+    frameIdx = (frameIdx + 1) % frames.length;
+    img.src = frames[frameIdx];
+  }, 600); // 600ms per frame = 2.4s full cycle
+}
+
+document.addEventListener('DOMContentLoaded', animateManitinha);
+
 init();

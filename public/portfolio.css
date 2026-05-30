@@ -67,7 +67,7 @@ em{font-style:normal;
 }
 @keyframes orbdrift{from{transform:translate(0,0)}to{transform:translate(40px,-50px)}}
 
-.pf-hero-inner{position:relative;z-index:1;max-width:800px}
+.pf-hero-inner{position:relative;z-index:1;max-width:800px;display:flex;align-items:center;gap:60px}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:8px;
@@ -409,12 +409,24 @@ em{font-style:normal;
   background:rgba(255,255,255,.06);padding:4px 12px;border-radius:20px;
 }
 
+/* ══ MANITINHA TECH ══ */
+@keyframes manitinha-float{0%{transform:translateY(0)}50%{transform:translateY(-20px)}100%{transform:translateY(0)}}
+@keyframes glow-pulse{0%,100%{box-shadow:0 0 20px rgba(0,212,255,.6),0 0 40px rgba(0,85,255,.3),inset 0 0 20px rgba(0,212,255,.2)}50%{box-shadow:0 0 40px rgba(0,212,255,1),0 0 80px rgba(0,85,255,.6),inset 0 0 30px rgba(0,212,255,.4)}}
+@keyframes frame-rotate{0%{opacity:1}24%{opacity:1}25%{opacity:0}50%{opacity:0;transform:scale(1.02)}50.1%{opacity:1;transform:scale(1)}74%{opacity:1}75%{opacity:0}100%{opacity:0}}
+
+.manitinha-container{position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:2;width:280px;height:350px;perspective:1200px}
+.manitinha-frame{position:relative;width:100%;height:100%;animation:manitinha-float 3s ease-in-out infinite}
+.manitinha-img{position:absolute;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 30px rgba(0,212,255,.5));animation:frame-rotate 2.4s steps(4,end) infinite}
+.manitinha-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(0,212,255,.2) 0%,transparent 70%);border-radius:50%;animation:glow-pulse 2.5s ease-in-out infinite;filter:blur(20px)}
+
 /* ════════════════════════════
    MOBILE
    ════════════════════════════ */
 @media (max-width:1100px){
   .service-cards{grid-template-columns:repeat(2,1fr)}
   .pf-grid{columns:2 260px;gap:14px}
+  .manitinha-container{width:220px;height:280px}
+  .pf-hero-inner{gap:40px}
 }
 @media (max-width:800px){
   .pf-grid{columns:2 160px;gap:12px}
@@ -423,6 +435,7 @@ em{font-style:normal;
 @media (max-width:640px){
   .top-nav-inner{padding:12px 16px}
   .pf-hero{padding:104px 20px 56px}
+  .pf-hero-inner{flex-direction:column;gap:32px}
   .hero-title{letter-spacing:-2px}
   .hero-stats{gap:16px;padding:14px 18px}
   .hstat-n{font-size:1.3rem}
@@ -434,6 +447,7 @@ em{font-style:normal;
   .pf-home{padding:36px 0 60px}
   .pf-home-inner{padding:0 16px}
   .pf-gallery{padding:24px 14px 60px}
+  .manitinha-container{position:static;width:100%;height:250px;transform:none;margin-top:24px}
 
   /* Grid em vez de columns para mobile */
   .pf-grid{
