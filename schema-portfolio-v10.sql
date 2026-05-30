@@ -1,0 +1,28 @@
+-- Migração v10: adicionar 26 novas fotos de ensaio fotográfico com IA
+
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #23', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-23.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #24', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-24.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #25', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-25.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #26', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-26.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #27', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-27.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #28', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-28.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #29', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-29.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #30', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-30.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #31', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-31.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #32', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-32.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #33', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-33.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #34', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-34.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #35', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-35.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #36', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-36.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #37', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-37.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #38', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-38.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #39', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-39.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #40', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-40.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #41', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-41.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #42', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-42.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #43', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-43.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #44', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-44.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #45', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-45.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #46', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-46.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #47', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-47.webp', 1);
+INSERT INTO portfolio (title, category, description, image_url, is_active) VALUES ('Ensaio com IA #48', 'Ensaio Fotográfico', 'Ensaio fotográfico premium com inteligência artificial.', '/ensaio/foto-48.webp', 1);

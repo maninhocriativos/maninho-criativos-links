@@ -306,7 +306,7 @@ function closeModal() {
 
 /* ══ CARROSSEL INFINITO — loop contínuo suave ══ */
 function initCarousel() {
-  const TOTAL = 22;
+  const TOTAL = 48;
   const track    = document.getElementById('carousel-track');
   const carousel = document.getElementById('carousel');
   const dotsWrap = document.getElementById('carousel-dots');
