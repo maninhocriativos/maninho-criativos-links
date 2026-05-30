@@ -30,7 +30,7 @@ body {
   position: relative;
   min-height: 100dvh;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   overflow: hidden;
 }
 
@@ -76,7 +76,8 @@ body {
   padding: 120px 48px 64px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  justify-content: space-between;
+  gap: 24px;
 }
 
 /* Headline forte do hero */
@@ -854,9 +855,9 @@ body {
   .hero-logo       { order: 1; }
   .hero-badge      { order: 2; }
   .hero-tools      { order: 3; }
-  .scroll-btn      { display: none; }
+  .scroll-btn      { order: 7; display: flex; align-self: center; }
   .hero-mobile-spacer { order: 4; display: block; flex-shrink: 0; height: 42dvh; }
-  .hero-headline   { order: 5; font-size: clamp(1.9rem, 7.5vw, 2.8rem); letter-spacing: -1px; line-height: 1.05; }
+  .hero-headline   { order: 5; font-size: clamp(1.9rem, 7.5vw, 2.8rem); letter-spacing: -1px; line-height: 1.05; text-align: center; width: 100%; }
   .hero-whatsapp-btn {
     order: 6;
     width: 100%;
