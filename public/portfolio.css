@@ -50,14 +50,29 @@ em{font-style:normal;
 
 /* ── HERO ── */
 .pf-hero{
-  position:relative;overflow:hidden;padding:120px 32px 72px;
+  position:relative;overflow:hidden;padding:120px 32px 80px;
   background-color:var(--dark);
   background-image:url('/Images/hero-desktop-clean.webp');
   background-repeat:no-repeat;
   background-position:right center;
   background-size:auto 100%;
 }
-.pf-hero-bg{position:absolute;inset:0;z-index:0;background:linear-gradient(90deg,rgba(0,0,0,1) 0%,rgba(0,0,0,.9) 40%,rgba(0,0,0,.3) 65%,transparent 100%)}
+/* overlay: escurece esquerda p/ texto + fade suave no rodapé */
+.pf-hero-bg{
+  position:absolute;inset:0;z-index:0;
+  background:
+    linear-gradient(90deg,
+      rgba(0,0,0,1)   0%,
+      rgba(0,0,0,.92) 38%,
+      rgba(0,0,0,.35) 62%,
+      transparent     82%
+    ),
+    linear-gradient(180deg,
+      transparent 60%,
+      rgba(0,0,0,.7) 82%,
+      rgba(0,0,0,1)  100%
+    );
+}
 .orb{
   position:absolute;border-radius:50%;
   filter:blur(100px);opacity:.15;
@@ -431,10 +446,23 @@ em{font-style:normal;
 @media (max-width:640px){
   .top-nav-inner{padding:12px 16px}
   .pf-hero{
-    padding:104px 20px 380px;
+    padding:90px 20px 420px;
     background-image:url('/Images/hero-mobile-clean.webp');
     background-position:bottom center;
     background-size:100% auto;
+  }
+  /* no mobile o overlay é: escurece topo p/ texto + fade rodapé */
+  .pf-hero-bg{
+    background:
+      linear-gradient(180deg,
+        rgba(0,0,0,.95)  0%,
+        rgba(0,0,0,.85)  30%,
+        rgba(0,0,0,.4)   52%,
+        rgba(0,0,0,.1)   65%,
+        rgba(0,0,0,.0)   75%,
+        rgba(0,0,0,.6)   88%,
+        rgba(0,0,0,1)    100%
+      );
   }
   .hero-title{letter-spacing:-2px}
   .hero-stats{gap:16px;padding:14px 18px}
