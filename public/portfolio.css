@@ -251,6 +251,7 @@ em{font-style:normal;
 /* ── Cards ── */
 .pf-card{
   break-inside:avoid;margin-bottom:12px;
+  width:100%;max-width:100%;
   border-radius:14px;position:relative;z-index:1;
   cursor:zoom-in;
   opacity:0;transform:translateY(14px);
@@ -366,7 +367,7 @@ em{font-style:normal;
   .pf-grid{columns:4 150px}
 }
 @media (max-width:800px){
-  .pf-grid{columns:3 140px}
+  .pf-grid{columns:3 120px;gap:10px}
   .service-cards{grid-template-columns:1fr}
 }
 @media (max-width:640px){
@@ -383,11 +384,24 @@ em{font-style:normal;
   .pf-home{padding:36px 0 60px}
   .pf-home-inner{padding:0 16px}
   .pf-gallery{padding:24px 14px 60px}
-  .pf-grid{columns:2 130px;gap:9px}
-  .pf-card{margin-bottom:9px}
+
+  /* Grid em vez de columns para mobile */
+  .pf-grid{
+    columns:auto;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+  }
+  .pf-card{margin-bottom:0}
+  .pf-skel{height:160px;margin-bottom:0;break-inside:auto}
+  .pf-skel.tall{height:160px}
+
   .pf-card:hover .pf-card-inner{transform:scale(1.06)}
-  .pf-skel{height:160px}.pf-skel.tall{height:240px}
   .lb-arrow{width:38px;height:38px}
   .lb-prev{left:8px}.lb-next{right:8px}
   .home-cta-btn{padding:14px 28px;font-size:.92rem}
+}
+
+@media (max-width:420px){
+  .pf-grid{grid-template-columns:1fr}
 }
