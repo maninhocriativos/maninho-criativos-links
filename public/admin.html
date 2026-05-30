@@ -41,6 +41,9 @@
         <button class="snav-item active" data-tab="links" onclick="setTab('links',this)">
           <span class="snav-icon">🔗</span><span>Links</span>
         </button>
+        <button class="snav-item" data-tab="portfolio" onclick="setTab('portfolio',this)">
+          <span class="snav-icon">🖼</span><span>Portfólio</span>
+        </button>
         <button class="snav-item" data-tab="profile" onclick="setTab('profile',this)">
           <span class="snav-icon">👤</span><span>Perfil</span>
         </button>
@@ -48,6 +51,9 @@
       <div class="sidebar-footer">
         <a href="/" class="snav-item ghost" target="_blank">
           <span class="snav-icon">🌐</span><span>Ver página</span>
+        </a>
+        <a href="/portfolio.html" class="snav-item ghost" target="_blank">
+          <span class="snav-icon">🖼</span><span>Ver portfólio</span>
         </a>
         <button class="snav-item ghost" onclick="logout()">
           <span class="snav-icon">🚪</span><span>Sair</span>
@@ -127,6 +133,63 @@
             <button class="btn-primary small" onclick="togglePanel('add-link-panel')">+ Novo link</button>
           </div>
           <div id="links-table" class="links-table">
+            <div class="table-skeleton"></div>
+            <div class="table-skeleton"></div>
+            <div class="table-skeleton"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB: PORTFÓLIO ── -->
+      <section id="tab-portfolio" class="tab-content">
+        <div class="panel-card" id="add-portfolio-panel">
+          <div class="panel-card-header">
+            <h3>➕ Novo item</h3>
+            <button class="btn-icon" onclick="togglePanel('add-portfolio-panel')">✕</button>
+          </div>
+          <form class="link-form" id="add-portfolio-form" onsubmit="submitNewPortfolio(event)">
+            <div class="form-row">
+              <div class="form-field">
+                <label>Título *</label>
+                <input class="admin-input" id="pf-title" type="text" placeholder="ex: Personagem 3D" required />
+              </div>
+              <div class="form-field">
+                <label>Categoria</label>
+                <select class="admin-input" id="pf-cat">
+                  <option value="Ensaio Fotográfico">📸 Ensaio Fotográfico</option>
+                  <option value="Design 3D">🎨 Design 3D</option>
+                  <option value="IA Generativa">🤖 IA Generativa</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>URL da imagem *</label>
+              <input class="admin-input" id="pf-url" type="url" placeholder="https://... ou /ensaio/foto-1.webp" required />
+            </div>
+            <div class="form-field">
+              <label>Descrição (opcional)</label>
+              <input class="admin-input" id="pf-desc" type="text" placeholder="Breve descrição do trabalho" />
+            </div>
+            <div class="form-field">
+              <label>Ordem</label>
+              <input class="admin-input" id="pf-order" type="number" value="0" min="0" style="max-width:80px" />
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" onclick="togglePanel('add-portfolio-panel')">Cancelar</button>
+              <button type="submit" class="btn-primary">Adicionar</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="links-table-wrap">
+          <div class="table-header-row">
+            <span class="table-count" id="portfolio-count">0 itens</span>
+            <div style="display:flex;gap:8px">
+              <a href="/portfolio.html" target="_blank" class="btn-secondary small" style="text-decoration:none;font-size:0.8rem;padding:7px 14px">Ver portfólio ↗</a>
+              <button class="btn-primary small" onclick="togglePanel('add-portfolio-panel')">+ Novo item</button>
+            </div>
+          </div>
+          <div id="portfolio-table" class="links-table">
             <div class="table-skeleton"></div>
             <div class="table-skeleton"></div>
             <div class="table-skeleton"></div>

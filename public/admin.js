@@ -58,10 +58,11 @@ document.getElementById('pwd-input')?.addEventListener('keydown', e => { if (e.k
 function setTab(name, btn) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'));
-  document.getElementById(`tab-${name}`).classList.add('active');
+  document.getElementById(`tab-${name}`)?.classList.add('active');
   btn.classList.add('active');
-  document.getElementById('admin-page-title').textContent =
-    name === 'links' ? 'Gerenciar Links' : 'Editar Perfil';
+  const titles = { links: 'Gerenciar Links', portfolio: 'Portfólio', profile: 'Editar Perfil' };
+  document.getElementById('admin-page-title').textContent = titles[name] || name;
+  if (name === 'portfolio') loadPortfolioAdmin();
   closeSidebar();
 }
 
@@ -76,6 +77,9 @@ function closeSidebar() { sidebar?.classList.remove('open'); }
 async function loadAllData() {
   await Promise.all([loadLinks(), loadProfile()]);
 }
+
+/* ══ setTab — estendido para portfólio ══ */
+const _origSetTab = typeof setTab === 'function' ? setTab : null;
 
 async function loadLinks() {
   const res = await authFetch('/api/admin/links');
@@ -341,3 +345,85 @@ function toast(msg, isErr = false) {
 }
 
 checkAuth();
+
+/* ══════════════════════════════════
+   PORTFÓLIO ADMIN
+   ══════════════════════════════════ */
+
+async function loadPortfolioAdmin() {
+  const res = await authFetch('/api/admin/portfolio');
+  if (!res) return;
+  const { items } = await res.json();
+  renderPortfolioTable(items || []);
+}
+
+function renderPortfolioTable(items) {
+  const table = document.getElementById('portfolio-table');
+  const count = document.getElementById('portfolio-count');
+  if (!table) return;
+  count && (count.textContent = `${items.length} item${items.length !== 1 ? 's' : ''}`);
+
+  if (!items.length) {
+    table.innerHTML = '<p style="padding:32px;text-align:center;color:var(--text3)">Nenhum item ainda.</p>';
+    return;
+  }
+
+  table.innerHTML = '';
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'table-row';
+    row.innerHTML = `
+      <div class="table-row-icon" style="background:var(--surface2);border-radius:10px;overflow:hidden;padding:0">
+        <img src="${esc(item.image_url)}" alt="" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+      </div>
+      <div class="table-row-info">
+        <div class="table-row-title">${esc(item.title)}</div>
+        <div class="table-row-url">${esc(item.category)}</div>
+      </div>
+      <div class="table-row-actions">
+        <button class="status-badge ${item.is_active ? 'on' : 'off'}"
+          onclick="togglePortfolioItem(${item.id}, ${item.is_active})">
+          ${item.is_active ? '● Ativo' : '○ Inativo'}
+        </button>
+        <button class="btn-danger" onclick="deletePortfolioItem(${item.id})">🗑</button>
+      </div>
+    `;
+    table.appendChild(row);
+  });
+}
+
+async function submitNewPortfolio(e) {
+  e.preventDefault();
+  const body = {
+    title:       getVal('pf-title'),
+    category:    getVal('pf-cat'),
+    description: getVal('pf-desc'),
+    image_url:   getVal('pf-url'),
+    order_index: parseInt(getVal('pf-order')) || 0,
+  };
+  const res = await authFetch('/api/admin/portfolio', { method: 'POST', body: JSON.stringify(body) });
+  if (res?.ok) {
+    e.target.reset();
+    togglePanel('add-portfolio-panel');
+    toast('Item adicionado ✓');
+    loadPortfolioAdmin();
+  } else {
+    toast('Erro ao adicionar', true);
+  }
+}
+
+async function togglePortfolioItem(id, current) {
+  const res = await authFetch(`/api/admin/portfolio/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ is_active: current ? 0 : 1 })
+  });
+  if (res?.ok) { toast('Status atualizado ✓'); loadPortfolioAdmin(); }
+  else toast('Erro ao atualizar', true);
+}
+
+async function deletePortfolioItem(id) {
+  if (!confirm('Remover este item do portfólio?')) return;
+  const res = await authFetch(`/api/admin/portfolio/${id}`, { method: 'DELETE' });
+  if (res?.ok) { toast('Item removido'); loadPortfolioAdmin(); }
+  else toast('Erro ao remover', true);
+}
