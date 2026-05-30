@@ -49,8 +49,15 @@ em{font-style:normal;
 .top-nav-cta:hover{transform:translateY(-1px);box-shadow:0 0 36px rgba(0,212,255,.45)}
 
 /* ── HERO ── */
-.pf-hero{position:relative;overflow:hidden;padding:120px 32px 72px;background:url('/Images/banner-hero-2.webp') center/cover no-repeat}
-.pf-hero-bg{position:absolute;inset:0;z-index:0;background:rgba(0,0,0,.35)}
+.pf-hero{
+  position:relative;overflow:hidden;padding:120px 32px 72px;
+  background-color:var(--dark);
+  background-image:url('/Images/banner-hero-desktop-clean.webp');
+  background-repeat:no-repeat;
+  background-position:right center;
+  background-size:auto 100%;
+}
+.pf-hero-bg{position:absolute;inset:0;z-index:0;background:linear-gradient(90deg,rgba(0,0,0,1) 0%,rgba(0,0,0,.85) 38%,rgba(0,0,0,.2) 65%,transparent 100%)}
 .orb{
   position:absolute;border-radius:50%;
   filter:blur(100px);opacity:.15;
@@ -423,7 +430,12 @@ em{font-style:normal;
 }
 @media (max-width:640px){
   .top-nav-inner{padding:12px 16px}
-  .pf-hero{padding:104px 20px 56px;background:url('/Images/banner-hero-mobile.webp') center/cover no-repeat}
+  .pf-hero{
+    padding:104px 20px 360px;
+    background-image:url('/Images/banner-hero-mobile-clean.webp');
+    background-position:bottom center;
+    background-size:100% auto;
+  }
   .hero-title{letter-spacing:-2px}
   .hero-stats{gap:16px;padding:14px 18px}
   .hstat-n{font-size:1.3rem}
