@@ -810,4 +810,233 @@ body {
   /* ── Bio ── */
   .bio-section { padding: 52px 20px 60px; }
   .bio-desc { font-size: 0.85rem; }
+
+  /* ── Modal mobile ── */
+  .modal-card { padding: 28px 20px 24px; border-radius: 20px; max-height: 90dvh; }
+  .modal-title { font-size: 1.1rem; }
+  .modal-form { gap: 13px; }
 }
+
+/* ══════════════════════════════════════════════
+   LINK BANNERS — melhorias premium
+   ══════════════════════════════════════════════ */
+
+/* Shimmer animado no hover */
+.link-banner::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  transition: left 0.55s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+.link-banner:hover::after { left: 140%; }
+
+/* Ícone maior e com sombra colorida */
+.banner-icon-block { position: relative; }
+.banner-icon-svg { width: 32px; height: 32px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4)); }
+.banner-icon-svg svg { width: 100%; height: 100%; fill: white; display: block; }
+
+/* Texto premium */
+.banner-name { font-size: 1rem; font-weight: 900; letter-spacing: 1.8px; text-transform: uppercase; line-height: 1; }
+.banner-cta { font-size: 0.68rem; font-weight: 700; color: var(--cyan); letter-spacing: 1.2px; text-transform: uppercase; opacity: 0.85; }
+
+/* Seta com transição premium */
+.banner-arrow { font-size: 0; } /* remove o arrow text, só SVG */
+.banner-arrow svg { transition: transform 0.25s var(--ease), color 0.25s; }
+.link-banner:hover .banner-arrow svg { transform: translateX(3px); }
+
+/* ══════════════════════════════════════════════
+   MODAL DE CONTATO — premium dark
+   ══════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease);
+}
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-card {
+  background: #080e1c;
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 24px;
+  padding: 36px 32px 30px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 92dvh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,212,255,0.08);
+  transform: translateY(24px) scale(0.97);
+  transition: transform 0.35s var(--ease);
+}
+.modal-overlay.open .modal-card {
+  transform: translateY(0) scale(1);
+}
+
+/* Barra de brilho no topo */
+.modal-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--cyan), transparent);
+  border-radius: 1px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 0.2s;
+}
+.modal-close:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+
+.modal-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.modal-icon-wrap {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin-bottom: 4px;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.modal-sub {
+  font-size: 0.85rem;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+/* Form */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-field label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.modal-field input,
+.modal-field select,
+.modal-field textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.modal-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9l6 6 6-6' stroke='%2300d4ff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.modal-field select option { background: #080e1c; color: #fff; }
+
+.modal-field textarea { resize: none; line-height: 1.6; }
+
+.modal-field input:focus,
+.modal-field select:focus,
+.modal-field textarea:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+  background: rgba(0,212,255,0.04);
+}
+.modal-field input::placeholder,
+.modal-field textarea::placeholder { color: rgba(255,255,255,0.25); }
+
+.modal-error {
+  font-size: 0.8rem;
+  color: #f87171;
+  text-align: center;
+  min-height: 16px;
+  margin-top: -4px;
+}
+
+.modal-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  box-shadow: 0 0 32px rgba(37,211,102,0.25);
+  transition: all 0.25s var(--ease);
+  margin-top: 4px;
+}
+.modal-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 48px rgba(37,211,102,0.4), 0 8px 24px rgba(0,0,0,0.3);
+}
+.modal-submit:active { transform: translateY(0); }

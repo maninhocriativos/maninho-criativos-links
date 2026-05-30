@@ -99,11 +99,11 @@ function renderBanners(links) {
 
 function buildBanner(link, i) {
   const a = document.createElement('a');
-  a.href   = link.url;
-  a.target = '_blank';
-  a.rel    = 'noopener noreferrer';
+  a.href   = '#';  /* interceptado pelo modal */
   a.className = 'link-banner';
-  a.dataset.id = link.id || '';
+  a.dataset.id  = link.id  || '';
+  a.dataset.url = link.url || '';
+  a.dataset.title = link.title || '';
 
   const cf = link.color_from || '#00d4ff';
   const ct = link.color_to   || '#0055ff';
@@ -118,7 +118,7 @@ function buildBanner(link, i) {
     </div>
     <div class="banner-text-block">
       <span class="banner-name">${esc(link.title)}</span>
-      <span class="banner-cta">Acessar →</span>
+      <span class="banner-cta">Falar sobre isso →</span>
     </div>
     <div class="banner-arrow">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -128,8 +128,10 @@ function buildBanner(link, i) {
   `;
 
   a.addEventListener('click', (e) => {
+    e.preventDefault();
     addRipple(e, a);
     if (link.id) fetch(`/api/links/${link.id}/click`, { method: 'POST' }).catch(() => {});
+    openModal(link);
   });
 
   return a;
@@ -184,6 +186,99 @@ const DEFAULT_LINKS = [
 
 loadPage();
 initCarousel();
+initModal();
+
+/* ══ MODAL DE CONTATO ══ */
+const SERVICE_MAP = {
+  instagram:  'Ensaio Fotográfico com IA',
+  youtube:    'Conteúdo & Tutoriais',
+  tiktok:     'Conteúdo & Tutoriais',
+  whatsapp:   'Ensaio Fotográfico com IA',
+  portfolio:  'Design 3D',
+  behance:    'Design 3D',
+  default:    'Ensaio Fotográfico com IA',
+};
+
+function initModal() {
+  const overlay = document.getElementById('contact-modal');
+  const closeBtn = document.getElementById('modal-close');
+  const form    = document.getElementById('contact-form');
+  const errEl   = document.getElementById('modal-error');
+
+  /* Fechar */
+  closeBtn?.addEventListener('click', closeModal);
+  overlay?.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  /* Submit */
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    errEl.textContent = '';
+
+    const name    = document.getElementById('f-name').value.trim();
+    const phone   = document.getElementById('f-phone').value.trim();
+    const insta   = document.getElementById('f-insta').value.trim();
+    const service = document.getElementById('f-service').value;
+    const msg     = document.getElementById('f-msg').value.trim();
+
+    if (!name)  { errEl.textContent = 'Por favor, informe seu nome.'; return; }
+    if (!phone) { errEl.textContent = 'Por favor, informe seu WhatsApp.'; return; }
+
+    const text = [
+      '🎯 *Nova mensagem pelo site!*',
+      '',
+      `👤 *Nome:* ${name}`,
+      `📱 *WhatsApp:* ${phone}`,
+      insta ? `📸 *Instagram:* ${insta.startsWith('@') ? insta : '@' + insta}` : null,
+      `✨ *Serviço de interesse:* ${service}`,
+      msg ? `\n💬 *Mensagem:* ${msg}` : null,
+      '',
+      '_Mensagem enviada pelo site maninhocriativos.com.br_',
+    ].filter(l => l !== null).join('\n');
+
+    const url = `https://wa.me/5592986096874?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    closeModal();
+    form.reset();
+  });
+}
+
+function openModal(link) {
+  const overlay  = document.getElementById('contact-modal');
+  const iconEl   = document.getElementById('modal-icon');
+  const titleEl  = document.getElementById('modal-title');
+  const serviceEl = document.getElementById('f-service');
+
+  /* Detecta rede e pré-preenche */
+  const url   = (link.url || '').toLowerCase();
+  const title = link.title || 'este serviço';
+  const icon  = link.icon  || '✨';
+
+  /* Ícone e título do modal */
+  if (iconEl) {
+    iconEl.style.background = `linear-gradient(135deg,${link.color_from||'#00d4ff'},${link.color_to||'#0055ff'})`;
+    iconEl.innerHTML = `<div class="banner-icon-svg" style="width:28px;height:28px">${getIcon(link.url, title)}</div>`;
+  }
+  if (titleEl) titleEl.textContent = `Falar sobre ${title}`;
+
+  /* Pré-seleciona o serviço mais relevante */
+  if (serviceEl) {
+    const key = Object.keys(SERVICE_MAP).find(k => url.includes(k)) || 'default';
+    const val = SERVICE_MAP[key];
+    const opt = [...serviceEl.options].find(o => o.value === val);
+    if (opt) serviceEl.value = val;
+  }
+
+  document.getElementById('modal-error').textContent = '';
+  overlay?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('f-name')?.focus(), 320);
+}
+
+function closeModal() {
+  document.getElementById('contact-modal')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
 
 /* ══ CARROSSEL DE ENSAIO FOTOGRÁFICO ══ */
 function initCarousel() {
