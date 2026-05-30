@@ -837,13 +837,13 @@ body {
 @media (max-width: 768px) {
 
   /* ── Hero mobile ── */
-  .hero { align-items: stretch; min-height: 100dvh; }
+  .hero { align-items: stretch; min-height: auto; }
   .hero-content {
-    padding: 72px 24px 48px;
-    gap: 14px;
+    padding: 72px 24px 40px;
+    gap: 12px;
     display: flex;
     flex-direction: column;
-    min-height: 100dvh;
+    min-height: auto;
   }
 
   /* Reordenação mobile: logo/badge/chips → foto → headline → WA */
@@ -851,19 +851,26 @@ body {
   .hero-badge      { order: 2; }
   .hero-tools      { order: 3; }
   .scroll-btn      { display: none; }
-  .hero-mobile-spacer { order: 4; display: block; flex-shrink: 0; height: 38dvh; }
+  .hero-mobile-spacer { order: 4; display: block; flex-shrink: 0; height: 42dvh; }
   .hero-headline   { order: 5; font-size: clamp(2.2rem, 8vw, 3.2rem); letter-spacing: -1.5px; }
-  .hero-whatsapp-btn { order: 6; padding: 13px 24px; font-size: .9rem; }
+  .hero-whatsapp-btn {
+    order: 6;
+    width: 100%;
+    justify-content: center;
+    padding: 16px 24px;
+    font-size: 1rem;
+    border-radius: 16px;
+  }
 
-  /* Overlay mobile: escurece topo (texto) e fundo (texto), transparente no meio (foto) */
+  /* Overlay mobile */
   .hero-overlay {
     background:
       linear-gradient(to bottom,
         rgba(0,0,0,.88) 0%,
-        rgba(0,0,0,.6)  22%,
-        rgba(0,0,0,.05) 40%,
+        rgba(0,0,0,.6)  20%,
+        rgba(0,0,0,.05) 38%,
         rgba(0,0,0,.05) 58%,
-        rgba(0,0,0,.75) 80%,
+        rgba(0,0,0,.75) 78%,
         rgba(0,0,0,.95) 100%
       );
   }
