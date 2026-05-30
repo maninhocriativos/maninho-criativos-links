@@ -47,6 +47,9 @@
         <button class="snav-item" data-tab="profile" onclick="setTab('profile',this)">
           <span class="snav-icon">👤</span><span>Perfil</span>
         </button>
+        <button class="snav-item" data-tab="leads" onclick="setTab('leads',this)">
+          <span class="snav-icon">📋</span><span>Leads</span>
+        </button>
       </nav>
       <div class="sidebar-footer">
         <a href="/" class="snav-item ghost" target="_blank">
@@ -242,6 +245,37 @@
               <button type="submit" class="btn-primary">Salvar perfil</button>
             </div>
           </form>
+        </div>
+      </section>
+
+      <!-- ── TAB: LEADS ── -->
+      <section id="tab-leads" class="tab-content">
+        <div class="panel-card">
+          <div class="panel-card-header">
+            <h3>📋 Leads captados pelo modal</h3>
+            <button class="btn-secondary" onclick="loadLeads()">↻ Atualizar</button>
+          </div>
+          <div id="leads-stats" class="leads-stats"></div>
+          <div class="table-wrap">
+            <table class="leads-table" id="leads-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nome</th>
+                  <th>WhatsApp</th>
+                  <th>Instagram</th>
+                  <th>Serviço</th>
+                  <th>Mensagem</th>
+                  <th>Página</th>
+                  <th>Data</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="leads-tbody">
+                <tr><td colspan="9" style="text-align:center;color:#666;padding:32px">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </main>

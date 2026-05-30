@@ -605,3 +605,49 @@ html, body {
   .table-header-row { padding: 14px 16px; }
   .table-row { padding: 14px 16px; }
 }
+
+/* ══ LEADS TABLE ══ */
+.leads-stats {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.lead-stat {
+  display: flex; flex-direction: column; gap: 2px;
+  background: rgba(0,212,255,.06); border: 1px solid rgba(0,212,255,.15);
+  border-radius: 12px; padding: 12px 20px; min-width: 120px;
+}
+.lead-stat span { font-size: 1.6rem; font-weight: 900; color: #00d4ff; }
+.lead-stat small { font-size: .7rem; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .5px; }
+
+.table-wrap { overflow-x: auto; }
+.leads-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.leads-table th {
+  text-align: left; padding: 10px 14px;
+  font-size: .68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; color: rgba(255,255,255,.35);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.leads-table td {
+  padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,.05);
+  color: rgba(255,255,255,.8); vertical-align: top;
+}
+.leads-table tr:hover td { background: rgba(255,255,255,.03); }
+.lead-wa { color: #25D366; text-decoration: none; font-weight: 600; }
+.lead-wa:hover { text-decoration: underline; }
+.lead-tag {
+  display: inline-block; padding: 3px 9px; border-radius: 20px;
+  background: rgba(0,212,255,.1); border: 1px solid rgba(0,212,255,.2);
+  color: #00d4ff; font-size: .72rem; font-weight: 600; white-space: nowrap;
+}
+.lead-msg { max-width: 200px; color: rgba(255,255,255,.5); font-size: .78rem; }
+.lead-page { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: .7rem; font-weight: 700; }
+.lead-page-links { background: rgba(0,85,255,.15); color: #6699ff; }
+.lead-page-portfolio { background: rgba(118,75,162,.15); color: #c084fc; }
+.lead-date { color: rgba(255,255,255,.35); font-size: .75rem; white-space: nowrap; }
+.btn-danger-sm {
+  padding: 4px 10px; border-radius: 6px; border: none;
+  background: rgba(248,113,113,.15); color: #f87171;
+  cursor: pointer; font-size: .78rem; transition: background .2s;
+}
+.btn-danger-sm:hover { background: rgba(248,113,113,.3); }
+

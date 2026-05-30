@@ -262,6 +262,14 @@ function initModal() {
 
     const url = `https://wa.me/5592986096874?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
+
+    // Salva lead no banco silenciosamente
+    fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, instagram: insta, service, message: msg, page: 'links' })
+    }).catch(() => {});
+
     closeModal();
     form.reset();
   });

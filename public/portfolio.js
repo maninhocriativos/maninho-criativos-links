@@ -253,6 +253,13 @@ function closeModal() {
     ].filter(l => l !== null).join('\n');
 
     window.open(`https://wa.me/5592986096874?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+
+    fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, instagram: insta, service, message: msg, page: 'portfolio' })
+    }).catch(() => {});
+
     closeModal();
     form.reset();
   });

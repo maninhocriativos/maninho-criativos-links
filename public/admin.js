@@ -60,9 +60,10 @@ function setTab(name, btn) {
   document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'));
   document.getElementById(`tab-${name}`)?.classList.add('active');
   btn.classList.add('active');
-  const titles = { links: 'Gerenciar Links', portfolio: 'Portfólio', profile: 'Editar Perfil' };
+  const titles = { links: 'Gerenciar Links', portfolio: 'Portfólio', profile: 'Editar Perfil', leads: 'Leads Captados' };
   document.getElementById('admin-page-title').textContent = titles[name] || name;
   if (name === 'portfolio') loadPortfolioAdmin();
+  if (name === 'leads') loadLeads();
   closeSidebar();
 }
 
@@ -426,4 +427,66 @@ async function deletePortfolioItem(id) {
   const res = await authFetch(`/api/admin/portfolio/${id}`, { method: 'DELETE' });
   if (res?.ok) { toast('Item removido'); loadPortfolioAdmin(); }
   else toast('Erro ao remover', true);
+}
+
+/* ══ LEADS ══ */
+async function loadLeads() {
+  const tbody = document.getElementById('leads-tbody');
+  const stats = document.getElementById('leads-stats');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#666">Carregando...</td></tr>';
+
+  const data = await authFetch('/api/admin/leads');
+  if (!data || !data.leads) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#f87171">Erro ao carregar leads.</td></tr>';
+    return;
+  }
+
+  const leads = data.leads;
+  if (stats) {
+    const total = leads.length;
+    const hoje = leads.filter(l => l.created_at?.startsWith(new Date().toISOString().slice(0, 10))).length;
+    stats.innerHTML = `
+      <div class="lead-stat"><span>${total}</span><small>Total de leads</small></div>
+      <div class="lead-stat"><span>${hoje}</span><small>Hoje</small></div>
+      <div class="lead-stat"><span>${leads.filter(l=>l.page==='portfolio').length}</span><small>Via portfólio</small></div>
+      <div class="lead-stat"><span>${leads.filter(l=>l.page==='links').length}</span><small>Via página de links</small></div>
+    `;
+  }
+
+  if (leads.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#666">Nenhum lead ainda.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = leads.map(l => `
+    <tr>
+      <td>${l.id}</td>
+      <td><strong>${esc(l.name)}</strong></td>
+      <td><a href="https://wa.me/55${l.phone.replace(/\D/g,'')}" target="_blank" class="lead-wa">${esc(l.phone)}</a></td>
+      <td>${l.instagram ? `<a href="https://instagram.com/${l.instagram.replace('@','')}" target="_blank">${esc(l.instagram)}</a>` : '—'}</td>
+      <td><span class="lead-tag">${esc(l.service || '—')}</span></td>
+      <td class="lead-msg">${esc(l.message || '—')}</td>
+      <td><span class="lead-page lead-page-${l.page}">${l.page || '—'}</span></td>
+      <td class="lead-date">${formatDate(l.created_at)}</td>
+      <td><button class="btn-danger-sm" onclick="deleteLead(${l.id})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+async function deleteLead(id) {
+  if (!confirm('Remover este lead?')) return;
+  const res = await authFetch(`/api/admin/leads?id=${id}`, { method: 'DELETE' });
+  if (res?.ok) { toast('Lead removido'); loadLeads(); }
+  else toast('Erro ao remover', true);
+}
+
+function formatDate(dt) {
+  if (!dt) return '—';
+  const d = new Date(dt);
+  return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }

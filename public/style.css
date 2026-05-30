@@ -76,8 +76,7 @@ body {
   padding: 120px 48px 64px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 24px;
+  gap: 16px;
 }
 
 /* Headline forte do hero */
