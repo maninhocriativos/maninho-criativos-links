@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="900" viewBox="0 0 800 900">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#0d0d1f"/>
+      <stop offset="50%"  stop-color="#1a0533"/>
+      <stop offset="100%" stop-color="#2d0b5e"/>
+    </linearGradient>
+    <!-- Grid sutil -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,212,255,0.04)" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="900" fill="url(#bg)"/>
+  <rect width="800" height="900" fill="url(#grid)"/>
+  <rect x="200" y="150" width="400" height="520" rx="20" fill="rgba(255,255,255,0.04)" stroke="rgba(83,52,131,0.5)" stroke-width="2"/>
+           <rect x="220" y="180" width="360" height="60" rx="10" fill="rgba(83,52,131,0.4)"/>
+           <rect x="240" y="196" width="160" height="14" rx="4" fill="rgba(255,255,255,0.7)"/>
+           <rect x="220" y="260" width="160" height="80" rx="10" fill="rgba(0,212,255,0.12)" stroke="rgba(0,212,255,0.25)" stroke-width="1"/>
+           <rect x="400" y="260" width="160" height="80" rx="10" fill="rgba(83,52,131,0.25)" stroke="rgba(83,52,131,0.4)" stroke-width="1"/>
+           <rect x="220" y="360" width="360" height="100" rx="10" fill="rgba(0,85,255,0.1)" stroke="rgba(0,85,255,0.3)" stroke-width="1"/>
+           <rect x="240" y="376" width="200" height="12" rx="4" fill="rgba(0,212,255,0.5)"/>
+           <rect x="240" y="398" width="280" height="8" rx="4" fill="rgba(255,255,255,0.15)"/>
+           <rect x="240" y="416" width="240" height="8" rx="4" fill="rgba(255,255,255,0.1)"/>
+           <rect x="220" y="480" width="360" height="44" rx="10" fill="rgba(0,212,255,0.2)"/>
+           <text x="400" y="509" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="rgba(0,212,255,0.9)">CONTRATAR AGORA</text>
+</svg>

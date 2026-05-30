@@ -57,11 +57,18 @@ function renderGrid(items) {
     card.className = 'pf-card';
     card.dataset.idx = i;
 
-    const img = document.createElement('img');
-    img.src      = item.image_url;
-    img.alt      = item.title;
-    img.loading  = 'lazy';
-    img.decoding = 'async';
+    /* Wrapper interno para o scale funcionar sem clip no pai */
+    const inner = document.createElement('div');
+    inner.className = 'pf-card-inner';
+
+    /* Imagem ou card de projeto (SVG/gradiente) */
+    const isSVG = item.image_url.endsWith('.svg');
+    const media = document.createElement('img');
+    media.src      = item.image_url;
+    media.alt      = item.title;
+    media.loading  = 'lazy';
+    media.decoding = 'async';
+    if (isSVG) media.style.cssText = 'width:100%;display:block;';
 
     const overlay = document.createElement('div');
     overlay.className = 'pf-card-overlay';
@@ -69,18 +76,17 @@ function renderGrid(items) {
       <div class="pf-card-info">
         <span class="pf-card-title">${esc(item.title)}</span>
         <span class="pf-card-cat">${esc(item.category)}</span>
-      </div>
-    `;
+      </div>`;
 
-    card.appendChild(img);
-    card.appendChild(overlay);
+    inner.appendChild(media);
+    inner.appendChild(overlay);
+    card.appendChild(inner);
     grid.appendChild(card);
 
     card.addEventListener('click', () => openLightbox(i));
 
-    /* Staggered appear animation */
     requestAnimationFrame(() => {
-      setTimeout(() => card.classList.add('visible'), i * 45);
+      setTimeout(() => card.classList.add('visible'), i * 40);
     });
   });
 }

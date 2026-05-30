@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#1a1a2e"/>
+      <stop offset="50%"  stop-color="#0f3460"/>
+      <stop offset="100%" stop-color="#533483"/>
+    </linearGradient>
+    <!-- Grid sutil -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,212,255,0.04)" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <rect width="800" height="1000" fill="url(#grid)"/>
+  <rect x="300" y="180" width="200" height="340" rx="24" fill="none" stroke="white" stroke-width="8"/>
+           <rect x="330" y="200" width="140" height="240" rx="8" fill="rgba(255,255,255,0.1)"/>
+           <rect x="320" y="220" width="160" height="20" rx="4" fill="rgba(0,212,255,0.6)"/>
+           <rect x="320" y="250" width="120" height="12" rx="4" fill="rgba(255,255,255,0.3)"/>
+           <rect x="320" y="270" width="140" height="12" rx="4" fill="rgba(255,255,255,0.2)"/>
+           <rect x="320" y="310" width="60" height="40" rx="8" fill="rgba(0,212,255,0.4)"/>
+           <rect x="390" y="310" width="60" height="40" rx="8" fill="rgba(83,52,131,0.8)"/>
+           <circle cx="400" cy="490" r="10" fill="rgba(255,255,255,0.6)"/>
+</svg>

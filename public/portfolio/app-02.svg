@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="640" viewBox="0 0 800 640">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#0a0e27"/>
+      <stop offset="50%"  stop-color="#1e3a5f"/>
+      <stop offset="100%" stop-color="#2d6a9f"/>
+    </linearGradient>
+    <!-- Grid sutil -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,212,255,0.04)" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="640" fill="url(#bg)"/>
+  <rect width="800" height="640" fill="url(#grid)"/>
+  <rect x="120" y="120" width="560" height="360" rx="16" fill="rgba(255,255,255,0.06)" stroke="rgba(0,212,255,0.3)" stroke-width="2"/>
+           <rect x="120" y="120" width="560" height="40" rx="16" fill="rgba(0,212,255,0.15)"/>
+           <circle cx="148" cy="140" r="8" fill="rgba(255,80,80,0.7)"/>
+           <circle cx="172" cy="140" r="8" fill="rgba(255,200,0,0.7)"/>
+           <circle cx="196" cy="140" r="8" fill="rgba(0,200,80,0.7)"/>
+           <rect x="140" y="176" width="140" height="260" rx="8" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+           <rect x="150" y="190" width="80" height="8" rx="4" fill="rgba(0,212,255,0.5)"/>
+           <rect x="150" y="208" width="100" height="6" rx="3" fill="rgba(255,255,255,0.2)"/>
+           <rect x="150" y="222" width="90" height="6" rx="3" fill="rgba(255,255,255,0.15)"/>
+           <rect x="300" y="176" width="360" height="120" rx="8" fill="rgba(0,212,255,0.08)" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
+           <rect x="316" y="192" width="140" height="24" rx="4" fill="rgba(0,212,255,0.3)"/>
+           <rect x="316" y="226" width="100" height="10" rx="3" fill="rgba(255,255,255,0.2)"/>
+           <rect x="300" y="312" width="170" height="100" rx="8" fill="rgba(83,52,131,0.4)" stroke="rgba(83,52,131,0.6)" stroke-width="1"/>
+           <rect x="486" y="312" width="170" height="100" rx="8" fill="rgba(0,85,255,0.2)" stroke="rgba(0,85,255,0.4)" stroke-width="1"/>
+</svg>
