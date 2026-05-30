@@ -92,7 +92,14 @@ em{font-style:normal;
 }
 @keyframes orbdrift{from{transform:translate(0,0)}to{transform:translate(40px,-50px)}}
 
-.pf-hero-inner{position:relative;z-index:1;max-width:480px}
+.pf-hero-inner{
+  position:relative;z-index:1;
+  max-width:1320px;
+  margin:0 auto;
+  width:100%;
+}
+/* texto fica no lado esquerdo do container */
+.pf-hero-inner > *{max-width:480px}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:8px;
