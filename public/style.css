@@ -474,18 +474,39 @@ body {
 .carousel {
   overflow: hidden;
   border-radius: 20px;
-  cursor: grab;
   -webkit-user-select: none;
   user-select: none;
+  cursor: default;
+  /* Fade nas bordas */
+  mask-image: linear-gradient(to right,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%);
+  -webkit-mask-image: linear-gradient(to right,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%);
 }
-.carousel.grabbing { cursor: grabbing; }
 
 .carousel-track {
   display: flex;
   gap: 16px;
-  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform;
   padding: 0 4px;
+  /* Modo normal: controlado por JS */
+}
+
+/* Modo marquee infinito */
+.carousel-track.carousel-marquee {
+  width: max-content;
+  animation: marquee-loop 60s linear infinite; /* duração sobrescrita pelo JS */
+}
+
+@keyframes marquee-loop {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 
 /* Cada slide */

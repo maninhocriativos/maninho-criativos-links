@@ -304,86 +304,58 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
-/* ══ CARROSSEL DE ENSAIO FOTOGRÁFICO ══ */
+/* ══ CARROSSEL INFINITO — loop contínuo suave ══ */
 function initCarousel() {
-  const TOTAL   = 22;
-  const VISIBLE = () => window.innerWidth <= 600 ? 2 : window.innerWidth <= 900 ? 3 : 4;
-  const SLIDE_W = () => window.innerWidth <= 600 ? 200 + 16 : 260 + 16; // width + gap
-
-  const track  = document.getElementById('carousel-track');
-  const dotsWrap = document.getElementById('carousel-dots');
-  if (!track) return;
-
-  /* Cria slides com lazy-loading */
-  for (let i = 1; i <= TOTAL; i++) {
-    const slide = document.createElement('div');
-    slide.className = 'carousel-slide';
-    const img = document.createElement('img');
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    img.alt = `Ensaio fotográfico com IA — foto ${i}`;
-    img.src = `ensaio/foto-${i}.webp`;
-    slide.appendChild(img);
-    track.appendChild(slide);
-  }
-
-  /* Dots */
-  const totalDots = Math.ceil(TOTAL / VISIBLE());
-  for (let i = 0; i < totalDots; i++) {
-    const btn = document.createElement('button');
-    btn.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-    btn.addEventListener('click', () => goTo(i));
-    dotsWrap.appendChild(btn);
-  }
-
-  let current = 0;
-  let autoTimer;
-
-  function goTo(index) {
-    const dots = dotsWrap.querySelectorAll('.carousel-dot');
-    const max  = Math.ceil(TOTAL / VISIBLE()) - 1;
-    current = Math.max(0, Math.min(index, max));
-    track.style.transform = `translateX(-${current * VISIBLE() * SLIDE_W()}px)`;
-    dots.forEach((d, i) => d.classList.toggle('active', i === current));
-  }
-
-  function next() { goTo(current + 1 >= Math.ceil(TOTAL / VISIBLE()) ? 0 : current + 1); }
-  function prev() { goTo(current - 1 < 0 ? Math.ceil(TOTAL / VISIBLE()) - 1 : current - 1); }
-
-  document.getElementById('carousel-next')?.addEventListener('click', () => { next(); resetAuto(); });
-  document.getElementById('carousel-prev')?.addEventListener('click', () => { prev(); resetAuto(); });
-
-  /* Auto-play a cada 5s */
-  function startAuto() { autoTimer = setInterval(next, 5000); }
-  function resetAuto()  { clearInterval(autoTimer); startAuto(); }
-  startAuto();
-
-  /* Pause on hover */
+  const TOTAL = 22;
+  const track    = document.getElementById('carousel-track');
   const carousel = document.getElementById('carousel');
-  carousel?.addEventListener('mouseenter', () => clearInterval(autoTimer));
-  carousel?.addEventListener('mouseleave', startAuto);
+  const dotsWrap = document.getElementById('carousel-dots');
+  const btnPrev  = document.getElementById('carousel-prev');
+  const btnNext  = document.getElementById('carousel-next');
+  if (!track || !carousel) return;
 
-  /* Swipe / drag */
-  let startX = 0, isDragging = false;
+  /* Oculta controles desnecessários no modo marquee */
+  if (dotsWrap) dotsWrap.style.display = 'none';
+  if (btnPrev)  btnPrev.style.display  = 'none';
+  if (btnNext)  btnNext.style.display  = 'none';
 
-  carousel?.addEventListener('pointerdown', (e) => {
-    startX = e.clientX;
-    isDragging = true;
-    carousel.classList.add('grabbing');
-    clearInterval(autoTimer);
-  });
+  /* Cria um set de slides */
+  function makeSlides() {
+    const frag = document.createDocumentFragment();
+    for (let i = 1; i <= TOTAL; i++) {
+      const slide = document.createElement('div');
+      slide.className = 'carousel-slide';
+      const img = document.createElement('img');
+      img.loading  = 'lazy';
+      img.decoding = 'async';
+      img.alt = `Ensaio com IA — foto ${i}`;
+      img.src = `ensaio/foto-${i}.webp`;
+      slide.appendChild(img);
+      frag.appendChild(slide);
+    }
+    return frag;
+  }
 
-  window.addEventListener('pointerup', (e) => {
-    if (!isDragging) return;
-    isDragging = false;
-    carousel?.classList.remove('grabbing');
-    const diff = e.clientX - startX;
-    if (Math.abs(diff) > 40) { diff < 0 ? next() : prev(); }
-    resetAuto();
-  });
+  /* Duplica slides para loop sem corte */
+  track.appendChild(makeSlides());
+  track.appendChild(makeSlides());
+  track.classList.add('carousel-marquee');
 
-  /* Recalcula no resize */
-  window.addEventListener('resize', () => goTo(current), { passive: true });
+  /* Velocidade: 75px/s desktop, 55px/s mobile */
+  const isMobile = window.innerWidth <= 768;
+  const slideW   = isMobile ? 180 + 16 : 260 + 16;
+  const speed    = isMobile ? 55 : 75;          // px/s
+  const duration = (TOTAL * slideW) / speed;    // segundos para um ciclo completo
+  track.style.animationDuration = duration + 's';
+
+  /* Pausa ao hover (desktop) e ao tocar (mobile) */
+  const pause  = () => track.style.animationPlayState = 'paused';
+  const resume = () => track.style.animationPlayState = 'running';
+
+  carousel.addEventListener('mouseenter', pause);
+  carousel.addEventListener('mouseleave', resume);
+  carousel.addEventListener('touchstart',  pause, { passive: true });
+  carousel.addEventListener('touchend',   resume, { passive: true });
 }
 
 /* ══ PARALLAX no hero background ══ */
