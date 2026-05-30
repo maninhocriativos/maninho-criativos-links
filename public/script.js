@@ -97,19 +97,30 @@ function renderBanners(links) {
   renderBioSocials(links);
 }
 
+/* Detecta se o link deve abrir o modal (só WhatsApp) */
+function isWhatsApp(url) {
+  return /wa\.me|whatsapp/i.test(url || '');
+}
+
 function buildBanner(link, i) {
   const a = document.createElement('a');
-  a.href   = '#';  /* interceptado pelo modal */
+  const usesModal = isWhatsApp(link.url);
+
+  a.href      = usesModal ? '#' : link.url;
   a.className = 'link-banner';
-  a.dataset.id  = link.id  || '';
-  a.dataset.url = link.url || '';
-  a.dataset.title = link.title || '';
+  a.dataset.id = link.id || '';
+
+  if (!usesModal) {
+    a.target = '_blank';
+    a.rel    = 'noopener noreferrer';
+  }
 
   const cf = link.color_from || '#00d4ff';
   const ct = link.color_to   || '#0055ff';
   a.style.setProperty('--card-grad', `linear-gradient(135deg,${cf},${ct})`);
 
   const svgIcon = getIcon(link.url, link.title);
+  const ctaText = usesModal ? 'Falar pelo WhatsApp →' : 'Acessar →';
 
   a.innerHTML = `
     <div class="banner-icon-block">
@@ -118,7 +129,7 @@ function buildBanner(link, i) {
     </div>
     <div class="banner-text-block">
       <span class="banner-name">${esc(link.title)}</span>
-      <span class="banner-cta">Falar sobre isso →</span>
+      <span class="banner-cta">${ctaText}</span>
     </div>
     <div class="banner-arrow">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -128,10 +139,12 @@ function buildBanner(link, i) {
   `;
 
   a.addEventListener('click', (e) => {
-    e.preventDefault();
     addRipple(e, a);
     if (link.id) fetch(`/api/links/${link.id}/click`, { method: 'POST' }).catch(() => {});
-    openModal(link);
+    if (usesModal) {
+      e.preventDefault();
+      openModal(link);
+    }
   });
 
   return a;
@@ -187,6 +200,17 @@ const DEFAULT_LINKS = [
 loadPage();
 initCarousel();
 initModal();
+
+/* Botão "Quero meu ensaio" também abre o modal */
+document.getElementById('btn-ensaio')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  openModal({
+    title: 'Ensaio Fotográfico com IA',
+    url: 'https://wa.me/5592986096874',
+    color_from: '#25D366',
+    color_to: '#128C7E',
+  });
+});
 
 /* ══ MODAL DE CONTATO ══ */
 const SERVICE_MAP = {
