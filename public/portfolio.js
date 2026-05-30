@@ -217,11 +217,26 @@ function animateManitinha() {
     '/Images/manitinha-4.webp'
   ];
 
+  // Preload all frames
+  const preloaded = [];
+  frames.forEach(frame => {
+    const el = new Image();
+    el.src = frame;
+    preloaded.push(el);
+  });
+
   let frameIdx = 0;
-  setInterval(() => {
-    frameIdx = (frameIdx + 1) % frames.length;
-    img.src = frames[frameIdx];
-  }, 600); // 600ms per frame = 2.4s full cycle
+  const animate = () => {
+    img.style.opacity = '0';
+    setTimeout(() => {
+      img.src = frames[frameIdx];
+      img.style.opacity = '1';
+      frameIdx = (frameIdx + 1) % frames.length;
+    }, 75);
+  };
+
+  animate();
+  setInterval(animate, 600); // 600ms per frame
 }
 
 document.addEventListener('DOMContentLoaded', animateManitinha);

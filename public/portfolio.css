@@ -412,11 +412,10 @@ em{font-style:normal;
 /* ══ MANITINHA TECH ══ */
 @keyframes manitinha-float{0%{transform:translateY(0)}50%{transform:translateY(-20px)}100%{transform:translateY(0)}}
 @keyframes glow-pulse{0%,100%{box-shadow:0 0 20px rgba(0,212,255,.6),0 0 40px rgba(0,85,255,.3),inset 0 0 20px rgba(0,212,255,.2)}50%{box-shadow:0 0 40px rgba(0,212,255,1),0 0 80px rgba(0,85,255,.6),inset 0 0 30px rgba(0,212,255,.4)}}
-@keyframes frame-rotate{0%{opacity:1}24%{opacity:1}25%{opacity:0}50%{opacity:0;transform:scale(1.02)}50.1%{opacity:1;transform:scale(1)}74%{opacity:1}75%{opacity:0}100%{opacity:0}}
 
 .manitinha-container{position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:2;width:280px;height:350px;perspective:1200px}
 .manitinha-frame{position:relative;width:100%;height:100%;animation:manitinha-float 3s ease-in-out infinite}
-.manitinha-img{position:absolute;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 30px rgba(0,212,255,.5));animation:frame-rotate 2.4s steps(4,end) infinite}
+.manitinha-img{position:absolute;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 30px rgba(0,212,255,.5));transition:opacity .15s ease-out;opacity:1}
 .manitinha-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(0,212,255,.2) 0%,transparent 70%);border-radius:50%;animation:glow-pulse 2.5s ease-in-out infinite;filter:blur(20px)}
 
 /* ════════════════════════════
