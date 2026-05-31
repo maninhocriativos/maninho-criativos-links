@@ -1,10 +1,8 @@
-const TOKEN = 'maninho-admin-2024';
+import { requireAuth } from './_auth.js';
 
 export async function onRequestGet({ request, env }) {
-  const auth = request.headers.get('Authorization') || '';
-  if (auth !== `Bearer ${TOKEN}`) {
-    return Response.json({ error: 'Não autorizado' }, { status: 401 });
-  }
+  const deny = requireAuth(request, env);
+  if (deny) return deny;
 
   const { results } = await env.DB.prepare(
     `SELECT * FROM leads ORDER BY created_at DESC LIMIT 500`
@@ -14,10 +12,8 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestDelete({ request, env }) {
-  const auth = request.headers.get('Authorization') || '';
-  if (auth !== `Bearer ${TOKEN}`) {
-    return Response.json({ error: 'Não autorizado' }, { status: 401 });
-  }
+  const deny = requireAuth(request, env);
+  if (deny) return deny;
 
   const url = new URL(request.url);
   const id = url.searchParams.get('id');

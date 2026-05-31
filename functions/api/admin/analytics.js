@@ -1,10 +1,8 @@
-const TOKEN = 'maninho-admin-2024';
+import { requireAuth } from './_auth.js';
 
 export async function onRequestGet({ request, env }) {
-  const auth = request.headers.get('Authorization') || '';
-  if (auth !== `Bearer ${TOKEN}`) {
-    return Response.json({ error: 'Não autorizado' }, { status: 401 });
-  }
+  const deny = requireAuth(request, env);
+  if (deny) return deny;
 
   const [views, clicks, modal, byPage, byDay, topLinks] = await Promise.all([
     env.DB.prepare(`SELECT COUNT(*) as n FROM analytics_events WHERE type='view'`).first(),

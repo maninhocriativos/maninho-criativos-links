@@ -437,7 +437,14 @@ async function loadLeads() {
   if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#666">Carregando...</td></tr>';
 
-  const data = await authFetch('/api/admin/leads');
+  const t = token();
+  if (!t) return;
+  let data;
+  try {
+    const res = await fetch('/api/admin/leads', { headers: { Authorization: `Bearer ${t}` } });
+    if (!res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#f87171">Erro ao carregar.</td></tr>'; return; }
+    data = await res.json();
+  } catch { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#f87171">Erro de conexão.</td></tr>'; return; }
   if (!data || !data.leads) {
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#f87171">Erro ao carregar leads.</td></tr>';
     return;
@@ -494,10 +501,27 @@ function esc(s) {
 
 /* ══ ANALYTICS ══ */
 async function loadAnalytics() {
-  document.getElementById('analytics-loading').style.display = 'block';
-  document.getElementById('analytics-content').style.display = 'none';
+  const loadingEl = document.getElementById('analytics-loading');
+  const contentEl = document.getElementById('analytics-content');
+  if (!loadingEl || !contentEl) return;
+  loadingEl.style.display = 'block';
+  contentEl.style.display = 'none';
 
-  const d = await authFetch('/api/admin/analytics');
+  const t = token();
+  if (!t) return;
+
+  let d;
+  try {
+    const res = await fetch('/api/admin/analytics', { headers: { Authorization: `Bearer ${t}` } });
+    if (!res.ok) {
+      loadingEl.textContent = 'Erro ao carregar analytics. Tente novamente.';
+      return;
+    }
+    d = await res.json();
+  } catch {
+    loadingEl.textContent = 'Erro de conexão.';
+    return;
+  }
   if (!d) return;
 
   document.getElementById('analytics-loading').style.display = 'none';
