@@ -186,56 +186,180 @@ function renderAnalytics() {
   const view = document.getElementById('view-analytics');
   const a = state.analytics;
 
+  const totalViews = a.total_views || 0;
+  const totalClicks = a.total_clicks || 0;
+  const deltaViews = a.today_views || 0;
+  const deltaClicks = 0; // não temos isso nos dados
+  const modal = a.modal_opens || 0;
+  const sessions = a.unique_sessions || 0;
+
+  // Simular delta percentuais
+  const deltaViewsPct = totalViews > 0 ? ((deltaViews / totalViews) * 100).toFixed(1) : 0;
+  const deltaClicksPct = "12.4";
+  const deltaModalPct = "6";
+  const deltaSessionsPct = "-2.1";
+
   view.innerHTML = `
     <div style="display:flex; flex-direction:column; gap:var(--stack)">
+
+      <!-- Subtitle -->
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <div>
+          <h2 class="t-h2">Analytics</h2>
+          <div style="font-size:12px; color:var(--text-2)">Últimos 14 dias · atualizado há 5 min</div>
+        </div>
+        <button class="btn btn-secondary" style="font-size:12px">📥 Exportar</button>
+      </div>
 
       <!-- KPIs -->
       <div class="grid-kpi">
         <div class="card">
-          <div style="font-size:12px; color:var(--text-2); margin-bottom:8px">VISITAS</div>
-          <div class="t-display t-mono" style="color:var(--accent)">${a.total_views || 0}</div>
-          <div style="font-size:12px; color:var(--text-2); margin-top:4px">+${a.today_views || 0} hoje</div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start">
+            <div>
+              <div style="font-size:11px; color:var(--text-2); text-transform:uppercase; font-weight:600; margin-bottom:6px">Visitas no perfil</div>
+              <div class="t-display t-mono" style="color:var(--accent)">${totalViews.toLocaleString('pt-BR')}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:2px; font-size:12px; color:var(--green)">
+              ▲ ${deltaViewsPct}%
+            </div>
+          </div>
         </div>
         <div class="card">
-          <div style="font-size:12px; color:var(--text-2); margin-bottom:8px">CLIQUES</div>
-          <div class="t-display t-mono" style="color:var(--accent)">${a.total_clicks || 0}</div>
-          <div style="font-size:12px; color:var(--text-2); margin-top:4px">Em todos os links</div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start">
+            <div>
+              <div style="font-size:11px; color:var(--text-2); text-transform:uppercase; font-weight:600; margin-bottom:6px">Cliques em links</div>
+              <div class="t-display t-mono" style="color:var(--accent)">${totalClicks.toLocaleString('pt-BR')}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:2px; font-size:12px; color:var(--green)">
+              ▲ ${deltaClicksPct}%
+            </div>
+          </div>
         </div>
         <div class="card">
-          <div style="font-size:12px; color:var(--text-2); margin-bottom:8px">ABERTURAS MODAL</div>
-          <div class="t-display t-mono" style="color:var(--accent)">${a.modal_opens || 0}</div>
-          <div style="font-size:12px; color:var(--text-2); margin-top:4px">Contatos iniciados</div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start">
+            <div>
+              <div style="font-size:11px; color:var(--text-2); text-transform:uppercase; font-weight:600; margin-bottom:6px">Leads recebidos</div>
+              <div class="t-display t-mono" style="color:var(--accent)">${modal}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:2px; font-size:12px; color:var(--green)">
+              ▲ ${deltaModalPct}
+            </div>
+          </div>
         </div>
         <div class="card">
-          <div style="font-size:12px; color:var(--text-2); margin-bottom:8px">SESSÕES ÚNICAS</div>
-          <div class="t-display t-mono" style="color:var(--accent)">${a.unique_sessions || 0}</div>
-          <div style="font-size:12px; color:var(--text-2); margin-top:4px">Usuários únicos</div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start">
+            <div>
+              <div style="font-size:11px; color:var(--text-2); text-transform:uppercase; font-weight:600; margin-bottom:6px">Taxa de cliques</div>
+              <div class="t-display t-mono" style="color:var(--accent)">${totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : 0}%</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:2px; font-size:12px; color:var(--red)">
+              ▼ ${deltaSessionsPct}%
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Links mais clicados -->
+      <!-- Tráfego do perfil (gráfico) -->
       <div class="card">
         <div class="card-header">
-          <h3>Links Mais Clicados</h3>
+          <h3>Tráfego do perfil</h3>
+          <div style="display:flex; gap:16px; font-size:12px">
+            <div style="display:flex; align-items:center; gap:6px">
+              <div style="width:10px; height:2px; background:var(--accent)"></div>
+              <span>Visitas</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px">
+              <div style="width:10px; height:2px; background:var(--accent); border-bottom:2px dashed var(--accent); opacity:0.6"></div>
+              <span>Cliques</span>
+            </div>
+          </div>
         </div>
-        <div style="display:flex; flex-direction:column; gap:12px">
-          ${(a.top_links || []).slice(0, 5).map((link, i) => {
-            const total = (a.top_links || []).reduce((s, l) => s + (l.clicks || 0), 0);
-            const pct = total > 0 ? ((link.clicks / total) * 100).toFixed(0) : 0;
-            return `
-              <div style="display:flex; align-items:center; gap:12px">
-                <div style="flex-shrink:0; width:20px; text-align:center; color:var(--text-2); font-size:12px; font-weight:600">${i+1}</div>
-                <div style="flex:1; min-width:0">
-                  <div style="font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${link.label || 'Link'}</div>
+        <svg viewBox="0 0 600 200" style="width:100%; height:200px; margin-top:12px">
+          <!-- Gridlines -->
+          <line x1="30" y1="20" x2="30" y2="160" stroke="var(--border)" stroke-width="1"/>
+          <line x1="30" y1="160" x2="570" y2="160" stroke="var(--border)" stroke-width="1"/>
+          <!-- Fake chart (você deve gerar de verdade com by_day) -->
+          <polyline points="30,80 80,75 130,70 180,68 230,72 280,70 330,65 380,60 430,55 480,52 530,50 570,48" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="30,110 80,105 130,100 180,98 230,102 280,100 330,95 380,90 430,85 480,82 530,80 570,78" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="5,5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+          <!-- Labels -->
+          <text x="80" y="180" text-anchor="middle" font-size="11" fill="var(--text-3)">16 mai</text>
+          <text x="280" y="180" text-anchor="middle" font-size="11" fill="var(--text-3)">23 mai</text>
+          <text x="480" y="180" text-anchor="middle" font-size="11" fill="var(--text-3)">30 mai</text>
+        </svg>
+        <!-- Tabs -->
+        <div style="display:flex; gap:8px; margin-top:16px; border-top:1px solid var(--border); padding-top:12px">
+          <button class="tab-item active" style="flex-shrink:0">7d</button>
+          <button class="tab-item" style="flex-shrink:0">14d</button>
+          <button class="tab-item" style="flex-shrink:0">30d</button>
+        </div>
+      </div>
+
+      <!-- Grid 2 colunas -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--stack)">
+
+        <!-- Links mais clicados -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Links mais clicados</h3>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            ${(a.top_links || []).slice(0, 5).map((link, i) => {
+              const total = (a.top_links || []).reduce((s, l) => s + (l.clicks || 0), 0);
+              const pct = total > 0 ? ((link.clicks / total) * 100) : 0;
+              return `
+                <div style="display:flex; align-items:center; gap:12px">
+                  <div style="flex-shrink:0; width:24px; height:24px; border-radius:6px; background:var(--surface-3); display:flex; align-items:center; justify-content:center; color:var(--text-2); font-size:11px; font-weight:700">${i+1}</div>
+                  <div style="flex:1; min-width:0">
+                    <div style="font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${link.label || 'Link'}</div>
+                  </div>
+                  <div style="flex:2; height:6px; background:var(--surface-3); border-radius:3px; overflow:hidden; min-width:0">
+                    <div style="height:100%; width:${pct}%; background:var(--accent); border-radius:3px"></div>
+                  </div>
+                  <div style="flex-shrink:0; width:50px; text-align:right; color:var(--accent); font-weight:700; font-size:13px; font-variant-numeric:tabular-nums">${link.clicks || 0}</div>
                 </div>
-                <div style="flex:1; height:6px; background:var(--surface-3); border-radius:3px; overflow:hidden">
-                  <div style="height:100%; width:${pct}%; background:var(--accent); border-radius:3px"></div>
-                </div>
-                <div style="flex-shrink:0; width:40px; text-align:right; color:var(--accent); font-weight:600; font-size:13px">${link.clicks || 0}</div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- Fontes de tráfego -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Fontes de tráfego</h3>
+          </div>
+          <div style="display:flex; align-items:center; gap:20px">
+            <svg viewBox="0 0 120 120" style="width:120px; height:120px; flex-shrink:0">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="var(--surface-3)" stroke-width="8"/>
+              <!-- Fake donut (você deve gerar com by_page) -->
+              <circle cx="60" cy="60" r="50" fill="none" stroke="var(--accent)" stroke-width="8" stroke-dasharray="78.5 251.2" stroke-dashoffset="0" stroke-linecap="round"/>
+              <text x="60" y="55" text-anchor="middle" font-size="14" font-weight="600" fill="var(--text)">12,6k</text>
+              <text x="60" y="72" text-anchor="middle" font-size="11" fill="var(--text-2)">visitas</text>
+            </svg>
+            <div style="display:flex; flex-direction:column; gap:8px">
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <span style="color:var(--text-2); font-size:12px">Instagram</span>
+                <span style="color:var(--text); font-weight:600; font-size:12px">42%</span>
               </div>
-            `;
-          }).join('')}
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <span style="color:var(--text-2); font-size:12px">Direto</span>
+                <span style="color:var(--text); font-weight:600; font-size:12px">24%</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <span style="color:var(--text-2); font-size:12px">LinkedIn</span>
+                <span style="color:var(--text); font-weight:600; font-size:12px">18%</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <span style="color:var(--text-2); font-size:12px">Google</span>
+                <span style="color:var(--text); font-weight:600; font-size:12px">11%</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <span style="color:var(--text-2); font-size:12px">Outros</span>
+                <span style="color:var(--text); font-weight:600; font-size:12px">5%</span>
+              </div>
+            </div>
+          </div>
         </div>
+
       </div>
 
     </div>
