@@ -116,18 +116,49 @@ function render() {
 // ============================================================
 async function loadData() {
   try {
-    const [analyticsRes, leadsRes, linksRes, portfolioRes, profileRes] = await Promise.all([
-      apiCall('/api/admin/analytics'),
-      apiCall('/api/admin/leads'),
-      apiCall('/api/admin/links'),
-      fetch('/api/admin/portfolio').then(r => r.json()).catch(() => ({})),
-      apiCall('/api/admin/profile')
-    ]);
+    // Fetch each endpoint individually to see which fails
+    let analyticsRes = {}, leadsRes = {}, linksRes = {}, portfolioRes = {}, profileRes = {};
+
+    try {
+      analyticsRes = await apiCall('/api/admin/analytics');
+    } catch (e) {
+      console.error('Analytics failed:', e.message);
+      analyticsRes = { total_views: 0, today_views: 0, total_clicks: 0, modal_opens: 0, unique_sessions: 0, top_links: [] };
+    }
+
+    try {
+      leadsRes = await apiCall('/api/admin/leads');
+    } catch (e) {
+      console.error('Leads failed:', e.message);
+      leadsRes = { leads: [] };
+    }
+
+    try {
+      linksRes = await apiCall('/api/admin/links');
+    } catch (e) {
+      console.error('Links failed:', e.message);
+      linksRes = { links: [] };
+    }
+
+    try {
+      const pRes = await apiCall('/api/admin/portfolio');
+      portfolioRes = pRes;
+    } catch (e) {
+      console.error('Portfolio failed:', e.message);
+      portfolioRes = { portfolio: [] };
+    }
+
+    try {
+      profileRes = await apiCall('/api/admin/profile');
+    } catch (e) {
+      console.error('Profile failed:', e.message);
+      profileRes = { profile: {} };
+    }
 
     state.analytics = analyticsRes;
     state.leads = leadsRes.leads || [];
     state.links = linksRes.links || [];
-    state.portfolio = portfolioRes.portfolio || portfolioRes.projects || [];
+    state.portfolio = portfolioRes.items || portfolioRes.portfolio || portfolioRes.projects || [];
     state.profile = profileRes.profile || {};
 
     // Update badge
@@ -141,9 +172,10 @@ async function loadData() {
       bnav.style.display = 'flex';
     }
 
+    console.log('Data loaded:', { analytics: state.analytics, leads: state.leads.length, links: state.links.length, portfolio: state.portfolio.length });
     render();
   } catch (err) {
-    console.error('Failed to load data:', err);
+    console.error('Fatal error loading data:', err);
   }
 }
 
