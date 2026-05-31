@@ -11,14 +11,16 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --cyan: #00d4ff;
-      --blue: #0055ff;
-      --dark: #030810;
-      --surface: #080f1e;
+      --bg: #0a0a0a;
+      --bg2: #111111;
       --border: rgba(255,255,255,.08);
-      --text: #fff;
-      --text2: rgba(255,255,255,.5);
-      --ease: cubic-bezier(.4,0,.2,1);
+      --border2: rgba(255,255,255,.12);
+      --text: #ededed;
+      --text2: #888;
+      --text3: #555;
+      --accent: #0070f3;
+      --red: #e5484d;
+      --ease: cubic-bezier(.16,1,.3,1);
     }
 
     html, body {
@@ -38,8 +40,8 @@
       filter: blur(120px); opacity: .12;
       animation: drift 20s ease-in-out infinite alternate;
     }
-    .bg-orb.a { width: 600px; height: 600px; background: var(--blue); top: -200px; left: -100px; }
-    .bg-orb.b { width: 500px; height: 500px; background: var(--cyan); bottom: -150px; right: -80px; animation-delay: -10s; }
+    .bg-orb.a { width: 600px; height: 600px; background: var(--accent); top: -200px; left: -100px; }
+    .bg-orb.b { width: 500px; height: 500px; background: #7c3aed; bottom: -150px; right: -80px; animation-delay: -10s; }
     .bg-grid {
       position: absolute; inset: 0;
       background-image:
@@ -59,14 +61,14 @@
 
     /* Card */
     .card {
-      width: 100%; max-width: 400px;
-      background: rgba(8,15,30,.85);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 20px;
-      padding: 40px 36px 36px;
-      box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(0,212,255,.06);
+      width: 100%; max-width: 380px;
+      background: rgba(17,17,17,.92);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.5);
       backdrop-filter: blur(24px);
-      animation: slideup .4s var(--ease);
+      animation: slideup .3s var(--ease);
     }
     @keyframes slideup { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 
@@ -104,14 +106,14 @@
     }
     .field-wrap input {
       width: 100%; background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.08); border-radius: 10px;
-      padding: 12px 14px 12px 40px;
-      color: var(--text); font-size: .9rem; font-family: inherit; outline: none;
-      transition: border-color .2s, box-shadow .2s, background .2s;
+      border: 1px solid var(--border2); border-radius: 8px;
+      padding: 0 14px 0 40px; height: 38px;
+      color: var(--text); font-size: .86rem; font-family: inherit; outline: none;
+      transition: border-color .15s, box-shadow .15s;
     }
     .field-wrap input:focus {
-      border-color: var(--cyan); background: rgba(0,212,255,.04);
-      box-shadow: 0 0 0 3px rgba(0,212,255,.1);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,112,243,.2);
     }
     .field-wrap input::placeholder { color: rgba(255,255,255,.2); }
     .toggle-pwd {
@@ -122,18 +124,17 @@
     .toggle-pwd:hover { color: rgba(255,255,255,.6); }
 
     .btn-login {
-      width: 100%; padding: 13px;
-      background: linear-gradient(135deg, var(--cyan), var(--blue));
-      color: #fff; border: none; border-radius: 10px;
-      font-size: .95rem; font-weight: 700; font-family: inherit;
+      width: 100%; height: 38px;
+      background: var(--accent);
+      color: #fff; border: none; border-radius: 8px;
+      font-size: .88rem; font-weight: 600; font-family: inherit;
       cursor: pointer; margin-top: 4px;
-      box-shadow: 0 0 28px rgba(0,212,255,.25);
-      transition: all .22s var(--ease);
+      transition: background .15s, box-shadow .15s;
       display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 0 44px rgba(0,212,255,.4); }
-    .btn-login:active { transform: none; }
-    .btn-login:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    .btn-login:hover { background: #0060df; box-shadow: 0 0 0 4px rgba(0,112,243,.25); }
+    .btn-login:active { background: #0050cc; }
+    .btn-login:disabled { opacity: .55; cursor: not-allowed; }
 
     .error-box {
       display: none; align-items: center; gap: 8px;
