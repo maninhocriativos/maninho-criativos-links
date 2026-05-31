@@ -53,7 +53,31 @@ function closeSidebar() {
 
 /* ══ Load data ══ */
 async function loadAllData() {
-  await Promise.all([loadLinks(), loadProfile()]);
+  await Promise.all([loadLinks(), loadProfile(), loadQuickStats()]);
+}
+
+/* ══ Quick stats bar ══ */
+async function loadQuickStats() {
+  const t = token();
+  if (!t) return;
+  try {
+    const [analyticsRes, leadsRes] = await Promise.all([
+      fetch('/api/admin/analytics', { headers: { Authorization: `Bearer ${t}` } }),
+      fetch('/api/admin/leads',     { headers: { Authorization: `Bearer ${t}` } })
+    ]);
+    if (analyticsRes.ok) {
+      const a = await analyticsRes.json();
+      document.getElementById('qs-views').textContent  = a.today_views  ?? '0';
+      document.getElementById('qs-clicks').textContent = a.total_clicks ?? '0';
+    }
+    if (leadsRes.ok) {
+      const l = await leadsRes.json();
+      document.getElementById('qs-leads').textContent = l.leads?.length ?? '0';
+      const badge = document.getElementById('leads-count');
+      if (badge) badge.textContent = l.leads?.length ?? '';
+    }
+    document.getElementById('quick-stats').style.display = 'flex';
+  } catch { /* silent fail — stats are non-critical */ }
 }
 
 /* ══ setTab — estendido para portfólio ══ */

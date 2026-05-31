@@ -52,6 +52,14 @@
         </button>
       </nav>
 
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar">M</div>
+        <div class="sidebar-user-info">
+          <span class="sidebar-user-name">Maninho</span>
+          <span class="sidebar-user-role">Administrador</span>
+        </div>
+      </div>
+
       <div class="sidebar-footer">
         <a href="/" class="snav-link" target="_blank">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -79,9 +87,30 @@
         </button>
         <div class="topbar-title">
           <h2 id="admin-page-title">Links</h2>
+          <span class="topbar-subtitle" id="admin-page-subtitle"></span>
         </div>
         <div class="topbar-actions" id="tab-actions"></div>
       </header>
+
+      <!-- ── QUICK STATS BAR ── -->
+      <div class="quick-stats" id="quick-stats" style="display:none">
+        <div class="quick-stat">
+          <span class="qs-value" id="qs-views">—</span>
+          <span class="qs-label">Visualizações hoje</span>
+        </div>
+        <div class="quick-stat">
+          <span class="qs-value" id="qs-leads">—</span>
+          <span class="qs-label">Leads totais</span>
+        </div>
+        <div class="quick-stat">
+          <span class="qs-value" id="qs-clicks">—</span>
+          <span class="qs-label">Cliques hoje</span>
+        </div>
+        <div class="quick-stat qs-pulse">
+          <span class="qs-dot"></span>
+          <span class="qs-label">Sistema online</span>
+        </div>
+      </div>
 
       <!-- ── TAB: LINKS ── -->
       <section id="tab-links" class="tab-content active">
