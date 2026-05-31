@@ -70,10 +70,17 @@ function setTab(name, btn) {
 
 /* ══ Mobile sidebar ══ */
 const sidebar = document.getElementById('sidebar');
-document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
-  sidebar?.classList.toggle('open');
-});
-function closeSidebar() { sidebar?.classList.remove('open'); }
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+function openSidebar() {
+  sidebar?.classList.add('open');
+  sidebarOverlay?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  sidebar?.classList.remove('open');
+  sidebarOverlay?.classList.remove('open');
+  document.body.style.overflow = '';
+}
 
 /* ══ Load data ══ */
 async function loadAllData() {
