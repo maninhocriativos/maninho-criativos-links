@@ -60,10 +60,11 @@ function setTab(name, btn) {
   document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'));
   document.getElementById(`tab-${name}`)?.classList.add('active');
   btn.classList.add('active');
-  const titles = { links: 'Gerenciar Links', portfolio: 'Portfólio', profile: 'Editar Perfil', leads: 'Leads Captados' };
+  const titles = { links: 'Gerenciar Links', portfolio: 'Portfólio', profile: 'Editar Perfil', leads: 'Leads Captados', analytics: 'Analytics' };
   document.getElementById('admin-page-title').textContent = titles[name] || name;
   if (name === 'portfolio') loadPortfolioAdmin();
   if (name === 'leads') loadLeads();
+  if (name === 'analytics') loadAnalytics();
   closeSidebar();
 }
 
@@ -489,4 +490,53 @@ function formatDate(dt) {
 
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ══ ANALYTICS ══ */
+async function loadAnalytics() {
+  document.getElementById('analytics-loading').style.display = 'block';
+  document.getElementById('analytics-content').style.display = 'none';
+
+  const d = await authFetch('/api/admin/analytics');
+  if (!d) return;
+
+  document.getElementById('analytics-loading').style.display = 'none';
+  document.getElementById('analytics-content').style.display = 'block';
+
+  // Stats cards
+  document.getElementById('analytics-cards').innerHTML = [
+    { icon: '👁', label: 'Visualizações totais', value: d.total_views, color: '#00d4ff' },
+    { icon: '📅', label: 'Hoje', value: d.today_views, color: '#7b2ff7' },
+    { icon: '🔗', label: 'Cliques em links', value: d.total_clicks, color: '#25D366' },
+    { icon: '💬', label: 'Abriram o modal', value: d.modal_opens, color: '#f59e0b' },
+    { icon: '🧑', label: 'Sessões únicas', value: d.unique_sessions, color: '#0055ff' },
+  ].map(c => `
+    <div class="acard" style="--ac:${c.color}">
+      <span class="acard-icon">${c.icon}</span>
+      <span class="acard-val">${c.value}</span>
+      <span class="acard-label">${c.label}</span>
+    </div>
+  `).join('');
+
+  // Gráfico de barras por dia
+  const days = d.by_day.slice(0, 30).reverse();
+  const maxN = Math.max(...days.map(d => d.n), 1);
+  document.getElementById('chart-days').innerHTML = days.length === 0
+    ? '<p style="color:#666;text-align:center;padding:32px">Sem dados ainda</p>'
+    : `<div class="bar-chart">${days.map(r => `
+        <div class="bar-col">
+          <div class="bar-fill" style="height:${Math.round((r.n/maxN)*100)}%" title="${r.n} visitas"></div>
+          <span class="bar-label">${r.day?.slice(5)}</span>
+        </div>`).join('')}</div>`;
+
+  // Top links
+  document.getElementById('top-links-list').innerHTML = d.top_links.length === 0
+    ? '<p style="color:#666;text-align:center;padding:32px">Sem cliques registrados ainda</p>'
+    : d.top_links.map((l, i) => `
+      <div class="top-link-row">
+        <span class="tl-rank">${i+1}</span>
+        <span class="tl-name">${esc(l.label || l.href || '—')}</span>
+        <span class="tl-bar"><span style="width:${Math.round((l.clicks/d.top_links[0].clicks)*100)}%"></span></span>
+        <span class="tl-count">${l.clicks}</span>
+      </div>`).join('');
 }
