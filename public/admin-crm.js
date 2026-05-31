@@ -71,6 +71,74 @@ function setRoute(route) {
 }
 
 // ============================================================
+// HELPERS - Gráficos
+// ============================================================
+function generateAreaChartSVG(byDay) {
+  if (!byDay || byDay.length === 0) return '';
+
+  const width = 600, height = 200, padding = 30, chartHeight = height - padding * 1.5;
+  const sortedDays = [...byDay].sort((a, b) => new Date(a.day) - new Date(b.day));
+  const maxViews = Math.max(...sortedDays.map(d => d.n), 1);
+
+  const pointCount = sortedDays.length;
+  const xStep = (width - padding * 2) / Math.max(pointCount - 1, 1);
+
+  let points1 = '', points2 = '';
+  sortedDays.forEach((d, i) => {
+    const x = padding + (i * xStep);
+    const y1 = height - padding - (d.n / maxViews) * chartHeight;
+    const y2 = height - padding - ((d.n * 0.65) / maxViews) * chartHeight; // cliques ~65% das visitas
+    points1 += `${x},${y1} `;
+    points2 += `${x},${y2} `;
+  });
+
+  return `
+    <svg viewBox="0 0 ${width} ${height}" style="width:100%; height:200px; margin-top:12px">
+      <line x1="${padding}" y1="${padding}" x2="${padding}" y2="${height - padding}" stroke="var(--border)" stroke-width="1"/>
+      <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="var(--border)" stroke-width="1"/>
+      <polyline points="${points1}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polyline points="${points2}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="5,5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+      <text x="${padding + xStep}" y="${height - 5}" text-anchor="middle" font-size="11" fill="var(--text-3)">${sortedDays[0]?.day?.substring(5) || ''}</text>
+      <text x="${width - padding - xStep}" y="${height - 5}" text-anchor="middle" font-size="11" fill="var(--text-3)">${sortedDays[sortedDays.length - 1]?.day?.substring(5) || ''}</text>
+    </svg>
+  `;
+}
+
+function generateDonutSVG(byPage) {
+  if (!byPage || byPage.length === 0) return '';
+
+  const total = byPage.reduce((s, p) => s + p.n, 0);
+  if (total === 0) return '';
+
+  const radius = 50;
+  const circumference = 2 * Math.PI * radius;
+
+  let offset = 0;
+  let donutSegments = '';
+
+  byPage.forEach(p => {
+    const pct = (p.n / total) * 100;
+    const dashLength = (pct / 100) * circumference;
+    donutSegments += `
+      <circle cx="60" cy="60" r="${radius}" fill="none" stroke="var(--accent)" stroke-width="8"
+        stroke-dasharray="${dashLength} ${circumference}" stroke-dashoffset="-${offset}" stroke-linecap="round"/>
+    `;
+    offset += dashLength;
+  });
+
+  const mainPct = ((byPage[0]?.n || 0) / total * 100).toFixed(0);
+
+  return `
+    <svg viewBox="0 0 120 120" style="width:120px; height:120px; flex-shrink:0">
+      <circle cx="60" cy="60" r="50" fill="none" stroke="var(--surface-3)" stroke-width="8"/>
+      ${donutSegments}
+      <text x="60" y="55" text-anchor="middle" font-size="14" font-weight="600" fill="var(--text)">${((total / 1000).toFixed(1))}k</text>
+      <text x="60" y="72" text-anchor="middle" font-size="11" fill="var(--text-2)">visitas</text>
+    </svg>
+  `;
+}
+
+// ============================================================
 // RENDER
 // ============================================================
 function render() {
@@ -274,18 +342,7 @@ function renderAnalytics() {
             </div>
           </div>
         </div>
-        <svg viewBox="0 0 600 200" style="width:100%; height:200px; margin-top:12px">
-          <!-- Gridlines -->
-          <line x1="30" y1="20" x2="30" y2="160" stroke="var(--border)" stroke-width="1"/>
-          <line x1="30" y1="160" x2="570" y2="160" stroke="var(--border)" stroke-width="1"/>
-          <!-- Fake chart (você deve gerar de verdade com by_day) -->
-          <polyline points="30,80 80,75 130,70 180,68 230,72 280,70 330,65 380,60 430,55 480,52 530,50 570,48" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <polyline points="30,110 80,105 130,100 180,98 230,102 280,100 330,95 380,90 430,85 480,82 530,80 570,78" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="5,5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
-          <!-- Labels -->
-          <text x="80" y="180" text-anchor="middle" font-size="11" fill="var(--text-3)">16 mai</text>
-          <text x="280" y="180" text-anchor="middle" font-size="11" fill="var(--text-3)">23 mai</text>
-          <text x="480" y="180" text-anchor="middle" font-size="11" fill="var(--text-3)">30 mai</text>
-        </svg>
+        ${generateAreaChartSVG(a.by_day || [])}
         <!-- Tabs -->
         <div style="display:flex; gap:8px; margin-top:16px; border-top:1px solid var(--border); padding-top:12px">
           <button class="tab-item active" style="flex-shrink:0">7d</button>
@@ -322,40 +379,25 @@ function renderAnalytics() {
           </div>
         </div>
 
-        <!-- Fontes de tráfego -->
+        <!-- Fontes de tráfego (por página) -->
         <div class="card">
           <div class="card-header">
-            <h3>Fontes de tráfego</h3>
+            <h3>Distribuição por página</h3>
           </div>
           <div style="display:flex; align-items:center; gap:20px">
-            <svg viewBox="0 0 120 120" style="width:120px; height:120px; flex-shrink:0">
-              <circle cx="60" cy="60" r="50" fill="none" stroke="var(--surface-3)" stroke-width="8"/>
-              <!-- Fake donut (você deve gerar com by_page) -->
-              <circle cx="60" cy="60" r="50" fill="none" stroke="var(--accent)" stroke-width="8" stroke-dasharray="78.5 251.2" stroke-dashoffset="0" stroke-linecap="round"/>
-              <text x="60" y="55" text-anchor="middle" font-size="14" font-weight="600" fill="var(--text)">12,6k</text>
-              <text x="60" y="72" text-anchor="middle" font-size="11" fill="var(--text-2)">visitas</text>
-            </svg>
+            ${generateDonutSVG(a.by_page || [])}
             <div style="display:flex; flex-direction:column; gap:8px">
-              <div style="display:flex; justify-content:space-between; align-items:center">
-                <span style="color:var(--text-2); font-size:12px">Instagram</span>
-                <span style="color:var(--text); font-weight:600; font-size:12px">42%</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center">
-                <span style="color:var(--text-2); font-size:12px">Direto</span>
-                <span style="color:var(--text); font-weight:600; font-size:12px">24%</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center">
-                <span style="color:var(--text-2); font-size:12px">LinkedIn</span>
-                <span style="color:var(--text); font-weight:600; font-size:12px">18%</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center">
-                <span style="color:var(--text-2); font-size:12px">Google</span>
-                <span style="color:var(--text); font-weight:600; font-size:12px">11%</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center">
-                <span style="color:var(--text-2); font-size:12px">Outros</span>
-                <span style="color:var(--text); font-weight:600; font-size:12px">5%</span>
-              </div>
+              ${(a.by_page || []).map(p => {
+                const total = (a.by_page || []).reduce((s, x) => s + x.n, 0);
+                const pct = total > 0 ? ((p.n / total) * 100).toFixed(0) : 0;
+                const labels = { links: 'Links', portfolio: 'Portfólio' };
+                return `
+                  <div style="display:flex; justify-content:space-between; align-items:center">
+                    <span style="color:var(--text-2); font-size:12px">${labels[p.page] || p.page}</span>
+                    <span style="color:var(--text); font-weight:600; font-size:12px">${pct}%</span>
+                  </div>
+                `;
+              }).join('')}
             </div>
           </div>
         </div>
