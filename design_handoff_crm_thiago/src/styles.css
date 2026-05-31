@@ -1,0 +1,236 @@
+/* ============================================================
+   CRM — Design tokens
+   Dark SaaS · inspirado em Linear / Vercel / Railway
+   1 cor de acento · grid de 8px · bordas neutras
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ---- Acento (único) ---- */
+  --accent:        #0070f3;
+  --accent-hover:  #1a85ff;
+  --accent-press:  #0061d6;
+  --accent-soft:   rgba(0, 112, 243, 0.14);
+  --accent-ring:   rgba(0, 112, 243, 0.40);
+
+  /* ---- Superfícies (near-black, escalonadas) ---- */
+  --bg:            #0a0a0a;   /* página */
+  --surface-1:     #0f0f10;   /* sidebar / barras */
+  --surface-2:     #141415;   /* cards */
+  --surface-3:     #1a1a1c;   /* elevado / hover */
+  --surface-4:     #202022;   /* inputs / chips */
+
+  /* ---- Bordas neutras ---- */
+  --border:        rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --border-faint:  rgba(255, 255, 255, 0.05);
+
+  /* ---- Texto ---- */
+  --text:          #ededed;
+  --text-2:        #a0a0a8;
+  --text-3:        #6c6c74;
+  --text-on-accent:#ffffff;
+
+  /* ---- Semânticas (baixa saturação, uso restrito a status) ---- */
+  --green:   #30a46c;
+  --green-soft: rgba(48, 164, 108, 0.14);
+  --amber:   #e0a30a;
+  --amber-soft: rgba(224, 163, 10, 0.14);
+  --red:     #e5484d;
+  --red-soft: rgba(229, 72, 77, 0.14);
+  --violet:  #8e6cf0;
+  --violet-soft: rgba(142, 108, 240, 0.14);
+
+  /* ---- Espaçamento: grid de 8px (com meio-passo) ---- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* ---- Raio ---- */
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-full: 999px;
+
+  /* ---- Alturas de controle (sistema fixo) ---- */
+  --h-sm: 28px;
+  --h-md: 34px;   /* padrão */
+  --h-lg: 38px;
+
+  /* ---- Sombras (sutis, sem brilho colorido) ---- */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.45);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.55);
+
+  /* ---- Densidade: confortável (padrão). Tweak troca p/ compacta ---- */
+  --gutter:     24px;   /* respiro do conteúdo */
+  --card-pad:   20px;
+  --row-h:      52px;   /* linha de tabela */
+  --stack:      16px;   /* gap vertical entre blocos */
+  --sidebar-w:  248px;
+
+  --font: 'Poppins', system-ui, -apple-system, sans-serif;
+}
+
+[data-density="compact"] {
+  --gutter:    16px;
+  --card-pad:  14px;
+  --row-h:     40px;
+  --stack:     10px;
+  --sidebar-w: 224px;
+}
+
+/* ============================================================
+   Reset + base
+   ============================================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#root { height: 100%; }
+
+::selection { background: var(--accent-soft); color: #fff; }
+
+/* Scrollbars discretas */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.10);
+  border-radius: var(--r-full);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); background-clip: padding-box; }
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea { font-family: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* ============================================================
+   Tipografia utilitária
+   ============================================================ */
+.t-display { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+.t-h1      { font-size: 20px; font-weight: 600; letter-spacing: -0.015em; }
+.t-h2      { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.t-body    { font-size: 14px; font-weight: 400; }
+.t-sm      { font-size: 13px; font-weight: 400; }
+.t-xs      { font-size: 12px; font-weight: 400; }
+.t-mono    { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.t-muted   { color: var(--text-2); }
+.t-faint   { color: var(--text-3); }
+.t-label   { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+
+/* ============================================================
+   Foco acessível (ring de acento)
+   ============================================================ */
+:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+  border-radius: var(--r-sm);
+}
+
+/* ============================================================
+   LAYOUT RESPONSIVO
+   Breakpoints: 1100 (KPIs), 1000 (portfólio), 860 (tablet→mobile
+   shell), 680 (tabela leads), 560 (mobile estreito)
+   ============================================================ */
+
+/* Shell: sidebar (desktop) + bottom nav (mobile) */
+.app-shell { display: flex; height: 100%; overflow: hidden; }
+.app-main  { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.app-bottomnav { display: none; }
+
+.bnav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; height: 100%; background: transparent; transition: color .12s;
+}
+.bnav-badge {
+  position: absolute; top: -5px; right: -10px; min-width: 15px; height: 15px; padding: 0 4px;
+  border-radius: var(--r-full); background: var(--accent); color: #fff; font-size: 9.5px;
+  font-weight: 600; display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--surface-1);
+}
+
+/* Grids de conteúdo */
+.grid-kpi        { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--stack); }
+.grid-analytics-2{ display: grid; grid-template-columns: 1.3fr 1fr; gap: var(--stack); }
+.grid-links      { display: grid; grid-template-columns: 1fr 300px; gap: var(--stack); align-items: start; }
+.grid-portfolio  { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--stack); }
+.grid-lead-detail{ display: grid; grid-template-columns: 320px 1fr; gap: var(--stack); align-items: start; }
+.grid-form-2     { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+/* Tabela de leads (grid) */
+.leads-head { display: grid; grid-template-columns: 2.4fr 1.3fr 1fr 1fr 0.9fr 40px; }
+.lead-row   { display: grid; grid-template-columns: 2.4fr 1.3fr 1fr 1fr 0.9fr 40px; align-items: center; }
+
+/* Tabs roláveis horizontalmente quando estreito */
+.tabs-pill { -ms-overflow-style: none; scrollbar-width: none; }
+.tabs-pill::-webkit-scrollbar { display: none; }
+
+/* ---- ≤1100px: KPIs em 2 colunas ---- */
+@media (max-width: 1100px) {
+  .grid-kpi { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---- ≤1000px: portfólio em 2 colunas ---- */
+@media (max-width: 1000px) {
+  .grid-portfolio { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---- ≤860px: tablet → mobile (shell vira bottom nav) ---- */
+@media (max-width: 860px) {
+  .app-sidebar { display: none !important; }
+  .app-bottomnav {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; height: 58px;
+    background: color-mix(in srgb, var(--surface-1) 94%, transparent);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom);
+  }
+  .app-scroll { padding-bottom: 64px; overflow-x: hidden; }
+
+  .grid-analytics-2 { grid-template-columns: minmax(0, 1fr); }
+  .grid-links       { grid-template-columns: minmax(0, 1fr); }
+  .grid-lead-detail { grid-template-columns: minmax(0, 1fr); }
+
+  .sticky-side { position: static !important; top: auto !important; }
+}
+
+/* ---- ≤680px: tabela de leads vira cards ---- */
+@media (max-width: 680px) {
+  .leads-head { display: none !important; }
+  .lead-row {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas: "lead status" "lead value" "lead date" !important;
+    align-items: start !important; padding: 14px 16px !important;
+    row-gap: 3px; column-gap: 12px;
+  }
+  .lc-lead   { grid-area: lead; align-self: center; }
+  .lc-source { display: none !important; }
+  .lc-status { grid-area: status; justify-self: end; }
+  .lc-value  { grid-area: value; justify-self: end; padding-left: 0 !important; }
+  .lc-date   { grid-area: date; justify-self: end; padding-left: 0 !important; }
+  .lc-chev   { display: none !important; }
+}
+
+/* ---- ≤560px: mobile estreito ---- */
+@media (max-width: 560px) {
+  .grid-kpi       { grid-template-columns: minmax(0, 1fr); }
+  .grid-portfolio { grid-template-columns: minmax(0, 1fr); }
+  .grid-form-2    { grid-template-columns: minmax(0, 1fr); }
+  .app-topbar     { height: auto !important; min-height: 58px; padding-top: 10px !important; padding-bottom: 10px !important; }
+}

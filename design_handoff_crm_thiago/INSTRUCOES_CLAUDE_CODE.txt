@@ -1,0 +1,234 @@
+================================================================================
+CRM THIAGO — INSTRUÇÕES PARA O CLAUDE CODE
+Painel admin (dark SaaS) de um portfólio freelancer
+================================================================================
+
+COMO LER ESTE DOCUMENTO
+-----------------------
+Este arquivo é o briefing para você (Claude Code) continuar/editar a estrutura
+que JÁ EXISTE. Os arquivos-fonte estão na pasta `src/` deste pacote. Eles são
+um PROTÓTIPO funcional em React (carregado via Babel no browser, sem build).
+
+Seu trabalho NÃO é começar do zero: é EVOLUIR esta estrutura — seja portando
+para um codebase real (Next.js / Vite+React) mantendo os padrões abaixo, seja
+editando os próprios arquivos do protótipo. Em ambos os casos, RESPEITE o
+design system (tokens, alturas, grid de 8px) descrito aqui.
+
+Direção visual: Linear / Vercel / Railway. Dark, profissional, UMA cor de
+acento (#0070f3), SEM gradientes neon, SEM emojis, grid de 8px, fonte Poppins.
+
+
+================================================================================
+1. ESTRUTURA DE ARQUIVOS (pasta src/)
+================================================================================
+index.html .............. Entrada. Carrega React 18 (UMD) + Babel standalone via
+                          CDN e, em ordem, todos os scripts .jsx abaixo.
+styles.css .............. FONTE DA VERDADE do design system: tokens (:root),
+                          reset, utilitários de tipografia e TODA a camada
+                          responsiva (media queries).
+icons.jsx ............... ~60 ícones SVG (stroke 1.6, viewBox 24, currentColor)
+                          + componente <Icon name size strokeWidth/>.
+ui.jsx .................. Componentes base: Button, Input, Textarea, Badge,
+                          Avatar, Toggle, Card, Tabs, SectionTitle, Menu, Divider.
+data.jsx ................ Dados mock (OWNER, LINKS, SOCIALS, PROJECTS, LEADS,
+                          LEAD_STATUS, ANALYTICS) + helper fmtMoney.
+shell.jsx ............... Sidebar (desktop), Topbar, KpiCard, BottomNav (mobile),
+                          definição da NAV (5 abas).
+view-analytics.jsx ...... Aba Analytics (gráficos em SVG/CSS).
+view-links.jsx .......... Aba Links (linktree) + preview mobile ao vivo.
+view-portfolio.jsx ...... Aba Portfólio (grid de cards de projetos).
+view-leads.jsx .......... Aba Leads = o "CRM": tabela (LeadsTable) + detalhe
+                          do contato (LeadDetail).
+view-profile.jsx ........ Aba Perfil (forms + configurações).
+app.jsx ................. Monta tudo: roteamento entre abas (estado `route`),
+                          topbars por aba, aplicação dos tweaks ao :root, e
+                          renderização de Sidebar + BottomNav + TweaksPanel.
+tweaks-panel.jsx ........ Painel de "tweaks" ao vivo (densidade/raio/acento).
+                          OPCIONAL no codebase real — pode virar theme switcher
+                          ou ser removido.
+
+COMO RODAR O PROTÓTIPO: sirva a pasta src/ estaticamente (ex.: `npx serve src`
+ou Live Server). Não há build — os .jsx são transpilados no browser. ISSO É SÓ
+PARA O PROTÓTIPO; em produção use JSX compilado normalmente.
+
+CONVENÇÃO IMPORTANTE (Babel multi-arquivo): cada <script type="text/babel"> tem
+escopo próprio. Por isso cada arquivo exporta seus símbolos com
+`Object.assign(window, { ... })` no final, e os demais os consomem via window.
+Ao portar para um bundler real, troque isso por imports/exports ES normais.
+
+
+================================================================================
+2. DESIGN TOKENS (em styles.css :root) — NÃO INVENTAR VALORES
+================================================================================
+ACENTO (único):
+  --accent #0070f3 | --accent-hover #1a85ff | --accent-press #0061d6
+  --accent-soft rgba(0,112,243,.14) | --accent-ring rgba(0,112,243,.40)
+
+SUPERFÍCIES (near-black, escalonadas):
+  --bg #0a0a0a | --surface-1 #0f0f10 | --surface-2 #141415
+  --surface-3 #1a1a1c | --surface-4 #202022
+
+BORDAS (neutras, NUNCA coloridas):
+  --border rgba(255,255,255,.08) | --border-strong rgba(255,255,255,.14)
+  --border-faint rgba(255,255,255,.05)
+
+TEXTO:
+  --text #ededed | --text-2 #a0a0a8 | --text-3 #6c6c74 | --text-on-accent #fff
+
+SEMÂNTICAS (baixa saturação, SÓ para status; cada uma tem variante -soft):
+  --green #30a46c | --amber #e0a30a | --red #e5484d | --violet #8e6cf0
+
+ESPAÇAMENTO (grid de 8px): --s-1:4 --s-2:8 --s-3:12 --s-4:16 --s-5:24
+  --s-6:32 --s-7:48 --s-8:64 (px)
+
+RAIO: --r-sm:6 --r-md:8 (padrão) --r-lg:12 --r-full:999 (px)
+
+ALTURAS DE CONTROLE (SISTEMA FIXO — respeitar sempre):
+  --h-sm 28px (botão small / tabs)
+  --h-md 34px (botão PADRÃO + TODOS os inputs)
+  --h-lg 38px (botão large / itens de nav)
+
+SOMBRAS (sutis, sem brilho colorido):
+  --shadow-sm 0 1px 2px rgba(0,0,0,.4)
+  --shadow-md 0 4px 16px rgba(0,0,0,.45)
+  --shadow-lg 0 12px 40px rgba(0,0,0,.55)
+
+TIPOGRAFIA: família Poppins (400/500/600/700), base 14px / line-height 1.5.
+  Classes utilitárias: .t-display(28/600) .t-h1(20/600) .t-h2(15/600)
+  .t-body(14) .t-sm(13) .t-xs(12) .t-label(11/600 uppercase) .t-mono(tabular)
+  .t-muted(text-2) .t-faint(text-3)
+
+DENSIDADE: atributo [data-density="compact"] no <html> reduz --gutter (24->16),
+  --card-pad (20->14), --row-h (52->40), --stack (16->10), --sidebar-w (248->224).
+  Padrão = "comfortable".
+
+
+================================================================================
+3. LAYOUT GLOBAL (shell.jsx + app.jsx)
+================================================================================
+- Container raiz `.app-shell`: flex row. Sidebar fixa (--sidebar-w) + <main> flex.
+- SIDEBAR (.app-sidebar, desktop): fundo --surface-1, borda direita. De cima p/
+  baixo: brand (quadrado acento c/ "t" + nome/site) -> nav "Painel" (5 itens 38px,
+  ativo = fundo surface-3, ícone acento, barra 3px acento à esquerda; item Leads
+  tem badge de leads NOVOS) -> spacer -> "Ver site público" -> conta (avatar +
+  menu dropdown).
+- TOPBAR (.app-topbar): sticky, altura 64, borda inferior, backdrop-blur. Título
+  (.t-h1) + subtítulo à esquerda, ações à direita. SOME no detalhe de um lead
+  (que tem header próprio).
+- BOTTOM NAV (.app-bottomnav, mobile): espelha os 5 itens; fixo no rodapé.
+
+Estado em app.jsx: `route` (aba atual), `openLead` (id ou null), `leads`,
+`filter`, `query`. Navegar zera openLead. Status de lead é mutável (won/lost).
+
+
+================================================================================
+4. AS 5 TELAS (resumo do que cada uma faz)
+================================================================================
+ANALYTICS (view-analytics.jsx): 4 KPIs (KpiCard) -> card "Tráfego do perfil"
+  com AreaChart SVG (2 séries: visitas área+linha sólida acento; cliques linha
+  tracejada) + Tabs 7d/14d/30d -> grid 2col: "Links mais clicados" (barras) +
+  [Donut de fontes (conic-gradient) / barras de dispositivos].
+
+LINKS (view-links.jsx): grid 2col [lista | preview]. Lista de LinkRow com handle
+  de DRAG (reordena via drag&drop nativo), ícone, título+URL, cliques, divisor,
+  Toggle ativo/inativo (inativo cai p/ opacity .62) e menu "...". Botão tracejado
+  "Adicionar link". Coluna direita = PREVIEW de telefone ao vivo refletindo só
+  os links ativos. Card "Total de cliques".
+
+PORTFÓLIO (view-portfolio.jsx): Tabs (Todos/Publicados/Rascunhos) + grid 3col de
+  ProjectCard. Thumb = PLACEHOLDER (gradiente por hue + ícone image) -> trocar por
+  imagem real. Badges Destaque/Status. Hover mostra ações. Último item = card
+  tracejado "Novo projeto".
+
+LEADS = o "CRM" (view-leads.jsx):
+  • LeadsTable: Tabs de status + busca + "Filtros". Tabela em CSS grid (colunas
+    Lead/Origem/Status/Valor/Recebido/chevron). Linha clicável abre o detalhe.
+  • LeadDetail: header próprio (voltar + Responder + Agendar call + menu). Grid
+    2col: ESQUERDA (sticky) = card de perfil (avatar, status, rating em estrelas,
+    InfoRows copiáveis, valor potencial, tags); DIREITA = "Mensagem recebida" +
+    "Adicionar nota/resposta" (Textarea) + "Histórico" (timeline vertical com
+    marcadores coloridos por tipo: won=verde, lost=vermelho, demais=neutro).
+
+PERFIL (view-profile.jsx): card cabeçalho (avatar + dados + "Trocar foto") ->
+  form 2col (Field) -> "Redes sociais" -> "Visibilidade & privacidade" (Toggles)
+  -> "Notificações" (Toggles) -> "Zona de perigo" (excluir conta, botão danger).
+
+
+================================================================================
+5. COMPORTAMENTO RESPONSIVO (tudo via media queries em styles.css)
+================================================================================
+REGRA DE OURO que já está aplicada e DEVE ser mantida ao editar: colunas de grid
+flexíveis usam minmax(0, 1fr) — NUNCA 1fr puro — para poderem encolher abaixo do
+conteúdo. Textos longos (títulos, URLs, @handle) usam
+whiteSpace:nowrap; overflow:hidden; textOverflow:ellipsis + minWidth:0 no pai
+flex. Esquecer isso causa overflow horizontal (cards "cortados").
+
+Breakpoints:
+  <=1100px  KPIs 4 -> 2 colunas
+  <=1000px  Portfólio 3 -> 2 colunas
+  <=860px   Sidebar some -> BOTTOM NAV fixo; grids de 2col (Analytics/Links/
+            Detalhe do lead) -> 1col; colunas sticky deixam de grudar;
+            .app-scroll ganha padding-bottom 64 + overflow-x:hidden
+  <=680px   Tabela de Leads -> CARDS empilhados (header some; .lead-row usa
+            grid-template-areas; células .lc-* reposicionadas/ocultadas)
+  <=560px   KPIs/Portfólio/form do Perfil em 1col; topbar com altura automática
+
+Padrões de implementação:
+  - BottomNav (shell.jsx) renderiza sempre; CSS esconde no desktop e mostra
+    <=860px; .app-sidebar faz o inverso.
+  - Tabs (ui.jsx) têm overflow-x:auto + scrollbar oculta p/ rolar na horizontal.
+  - Tabela->cards é 100% CSS (grid-template-areas + classes lc-lead/lc-status/
+    lc-value/lc-date/lc-source/lc-chev).
+  - env(safe-area-inset-bottom) no bottom nav (notch iOS).
+
+
+================================================================================
+6. MODELOS DE DADOS (ver src/data.jsx para exemplos completos)
+================================================================================
+Lead   = { id, name, company, role, status, email, phone, location, source,
+           value, createdAt, lastActivity, rating(1-5), tags[], message,
+           timeline[] }
+         timeline[i] = { type: message|view|call|note|won|lost, title, detail,
+                         date }
+         status -> label/tom de badge: new->Novo/blue, qualified->Qualificado/
+         violet, negotiation->Negociação/amber, won->Ganho/green, lost->Perdido/red
+Link    = { id, title, url, icon, active, clicks, ctr }
+Project = { id, title, category, year, status: published|draft, featured, hue,
+           views, desc }
+
+State no protótipo é client-side (useState). No codebase real: trocar por API/DB.
+- route -> router real (Next.js routes / React Router)
+- leads[], links[] (ordem+active), forms do perfil -> persistir no backend
+- tweaks (density/accent/radius) -> opcional, localStorage/preferências
+
+
+================================================================================
+7. ASSETS
+================================================================================
+- Fonte Poppins via Google Fonts (@import em styles.css). No codebase: next/font
+  ou self-host.
+- Ícones SVG próprios (icons.jsx). SUGESTÃO: trocar por lucide-react (foram
+  desenhados no estilo Lucide/Feather; nomes equivalem quase 1:1).
+- Imagens de projeto: hoje PLACEHOLDERS (gradiente + ícone). Substituir por
+  thumbnails reais.
+- Avatares: gerados (iniciais + gradiente por hash do nome). Manter como fallback
+  ou usar fotos reais.
+- Nenhum asset de marca de terceiros é usado.
+
+
+================================================================================
+8. CHECKLIST AO EDITAR / PORTAR
+================================================================================
+[ ] Usar SEMPRE os tokens de styles.css; não introduzir cores/raios/alturas novos.
+[ ] Manter a cor de acento ÚNICA (#0070f3). Semânticas só para status.
+[ ] Botões 28/34/38px; inputs 34px; espaçamentos múltiplos de 8 (ou 4).
+[ ] Grids responsivos com minmax(0,1fr); truncar textos longos (minWidth:0).
+[ ] Sem gradientes neon, sem emojis, bordas neutras.
+[ ] Testar em 393px (telefone), 680px e 834px: nenhuma tela pode ter overflow
+    horizontal (scrollWidth ≈ clientWidth).
+[ ] Ao trocar Babel/window por bundler real: converter os Object.assign(window,…)
+    em exports ES e os <script> de index.html em imports.
+
+================================================================================
+FIM
+================================================================================

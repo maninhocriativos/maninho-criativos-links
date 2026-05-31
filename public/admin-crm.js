@@ -120,14 +120,14 @@ async function loadData() {
       apiCall('/api/admin/analytics'),
       apiCall('/api/admin/leads'),
       apiCall('/api/admin/links'),
-      apiCall('/api/admin/portfolio'),
+      fetch('/api/admin/portfolio').then(r => r.json()).catch(() => ({})),
       apiCall('/api/admin/profile')
     ]);
 
     state.analytics = analyticsRes;
     state.leads = leadsRes.leads || [];
     state.links = linksRes.links || [];
-    state.portfolio = portfolioRes.projects || [];
+    state.portfolio = portfolioRes.portfolio || portfolioRes.projects || [];
     state.profile = profileRes.profile || {};
 
     // Update badge
@@ -268,25 +268,30 @@ function renderPortfolio() {
     <div style="display:flex; flex-direction:column; gap:var(--stack)">
 
       <div style="display:flex; justify-content:space-between; align-items:center">
-        <h2 class="t-h2">${projects.length} projetos</h2>
+        <h2 class="t-h2">${projects.length} projeto${projects.length !== 1 ? 's' : ''}</h2>
         <button class="btn btn-primary" onclick="console.log('Novo projeto')">+ Novo Projeto</button>
       </div>
 
       <div class="grid-portfolio">
-        ${projects.map(p => `
-          <div class="card" style="padding:0; overflow:hidden">
-            <div style="height:140px; background:linear-gradient(135deg, hsl(${Math.random() * 360}, 70%, 40%), hsl(${Math.random() * 360}, 70%, 50%)); display:flex; align-items:center; justify-content:center; color:#fff; opacity:0.8">
-              📷
-            </div>
-            <div style="padding:var(--s-3)">
-              <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${p.title}</div>
-              <div style="font-size:12px; color:var(--text-2); margin-top:2px">${p.category}</div>
-              <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap">
-                ${p.is_active ? '<span class="badge green"><span class="badge-dot"></span>Publicado</span>' : '<span class="badge violet"><span class="badge-dot"></span>Rascunho</span>'}
+        ${projects.map(p => {
+          const hue = p.id ? (parseInt(p.id) * 47) % 360 : Math.random() * 360;
+          return `
+            <div class="card" style="padding:0; overflow:hidden; cursor:pointer; transition:border-color 0.12s">
+              <div style="height:160px; background:${p.image_url ? `url('${p.image_url}')` : `linear-gradient(135deg, hsl(${hue}, 70%, 35%), hsl(${hue + 30}, 70%, 45%))`}; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; color:#fff; opacity:${p.image_url ? '1' : '0.85'}">
+                ${!p.image_url ? '<div style="font-size:36px; opacity:0.6">📷</div>' : ''}
+              </div>
+              <div style="padding:var(--s-3)">
+                <div style="font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${p.title}</div>
+                <div style="font-size:12px; color:var(--text-2); margin-top:2px">${p.category}</div>
+                <div style="font-size:12px; color:var(--text-3); margin-top:4px; line-height:1.4">${(p.description || '').substring(0, 80)}${(p.description || '').length > 80 ? '...' : ''}</div>
+                <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap">
+                  ${p.featured ? '<span class="badge blue"><span class="badge-dot"></span>Destaque</span>' : ''}
+                  ${p.is_active ? '<span class="badge green"><span class="badge-dot"></span>Publicado</span>' : '<span class="badge violet"><span class="badge-dot"></span>Rascunho</span>'}
+                </div>
               </div>
             </div>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
 
     </div>
@@ -400,9 +405,9 @@ function renderLeadDetail() {
                 <span class="t-faint">E-mail</span>
                 <span>${lead.email || '—'}</span>
               </div>
-              <div style="display:flex; justify-content:space-between; font-size:12px">
+              <div style="display:flex; justify-content:space-between; font-size:12px; align-items:center">
                 <span class="t-faint">Instagram</span>
-                <span>${lead.instagram || '—'}</span>
+                ${lead.instagram ? `<a href="https://instagram.com/${lead.instagram.replace('@', '')}" target="_blank" style="color:var(--accent); font-weight:500; text-decoration:none">@${lead.instagram.replace('@', '')}</a>` : '<span>—</span>'}
               </div>
               <div style="display:flex; justify-content:space-between; font-size:12px">
                 <span class="t-faint">Origem</span>
