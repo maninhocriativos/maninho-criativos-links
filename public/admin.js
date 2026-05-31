@@ -2,57 +2,26 @@
 const TOKEN_KEY = 'mc_admin_token';
 const token = () => sessionStorage.getItem(TOKEN_KEY);
 
-async function doLogin() {
-  const pwd = document.getElementById('pwd-input').value.trim();
-  const errEl = document.getElementById('login-error');
-  errEl.textContent = '';
-  if (!pwd) { errEl.textContent = 'Digite a senha.'; return; }
-
-  const res = await fetch('/api/admin/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: pwd })
-  });
-
-  if (res.ok) {
-    const { token: t } = await res.json();
-    sessionStorage.setItem(TOKEN_KEY, t);
-    showPanel();
-  } else {
-    errEl.textContent = 'Senha incorreta.';
-    document.getElementById('pwd-input').value = '';
-  }
-}
-
 async function checkAuth() {
   const t = token();
-  if (!t) return showLogin();
+  if (!t) return window.location.replace('/login.html');
   const res = await fetch('/api/admin/verify', { headers: { Authorization: `Bearer ${t}` } });
-  res.ok ? showPanel() : showLogin();
-}
-
-function showLogin() {
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('admin-panel').style.display = 'none';
+  if (!res.ok) {
+    sessionStorage.removeItem(TOKEN_KEY);
+    return window.location.replace('/login.html');
+  }
+  showPanel();
 }
 
 function showPanel() {
-  document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-panel').style.display = 'grid';
   loadAllData();
 }
 
 function logout() {
   sessionStorage.removeItem(TOKEN_KEY);
-  showLogin();
+  window.location.replace('/login.html');
 }
-
-function togglePwd() {
-  const inp = document.getElementById('pwd-input');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-}
-
-document.getElementById('pwd-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
 /* ══ Tabs ══ */
 function setTab(name, btn) {

@@ -1,15 +1,22 @@
 // POST /api/admin/login
 export async function onRequestPost({ request, env }) {
   try {
-    const { password } = await request.json();
-    if (!password) return Response.json({ error: 'Missing password' }, { status: 400 });
+    const { username, password } = await request.json();
+    if (!password) return Response.json({ error: 'Credenciais obrigatórias' }, { status: 400 });
 
-    if (password !== env.ADMIN_PASSWORD) {
-      return Response.json({ error: 'Invalid credentials' }, { status: 401 });
+    const validUser = env.ADMIN_USER || 'admin';
+    const validPass = env.ADMIN_PASSWORD;
+
+    if (!validPass || password !== validPass) {
+      return Response.json({ error: 'Usuário ou senha incorretos' }, { status: 401 });
+    }
+
+    if (username && username !== validUser) {
+      return Response.json({ error: 'Usuário ou senha incorretos' }, { status: 401 });
     }
 
     return Response.json({ token: env.ADMIN_TOKEN });
-  } catch (e) {
-    return Response.json({ error: 'Bad request' }, { status: 400 });
+  } catch {
+    return Response.json({ error: 'Requisição inválida' }, { status: 400 });
   }
 }
