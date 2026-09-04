@@ -23,11 +23,12 @@ function setTab(name, btn) {
   document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'));
   document.getElementById(`tab-${name}`)?.classList.add('active');
   btn.classList.add('active');
-  const titles = { links: 'Gerenciar Links', portfolio: 'Portfólio', profile: 'Editar Perfil', leads: 'Leads Captados', receipts: 'Recibos por e-mail', analytics: 'Analytics' };
+  const titles = { links: 'Gerenciar Links', portfolio: 'Portfólio', profile: 'Editar Perfil', leads: 'Leads Captados', clients: 'Clientes', receipts: 'Recibos por e-mail', analytics: 'Analytics' };
   document.getElementById('admin-page-title').textContent = titles[name] || name;
   if (name === 'portfolio') loadPortfolioAdmin();
   if (name === 'leads') loadLeads();
-  if (name === 'receipts') loadReceipts();
+  if (name === 'clients') loadClients();
+  if (name === 'receipts') { loadClientOptions(); loadReceipts(); }
   if (name === 'analytics') loadAnalytics();
   closeSidebar();
 }
@@ -495,6 +496,65 @@ function formatDate(dt) {
   return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
 
+/* ══ CLIENTES ══ */
+let clientsCache = [];
+
+async function fetchClients() {
+  const res = await authFetch('/api/admin/clients');
+  if (!res?.ok) return [];
+  clientsCache = (await res.json()).clients || [];
+  return clientsCache;
+}
+
+async function loadClients() {
+  const tbody = document.getElementById('clients-tbody'); if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:28px">Carregando...</td></tr>';
+  const clients = await fetchClients();
+  document.getElementById('clients-count').textContent = `${clients.length} cliente${clients.length === 1 ? '' : 's'}`;
+  tbody.innerHTML = clients.length ? clients.map(client => `<tr>
+    <td><strong>${esc(client.name)}</strong><br><small>${esc(client.email)}</small></td><td>${esc(client.phone || '—')}</td>
+    <td>${esc(client.document || '—')}</td><td>${esc([client.city, client.state].filter(Boolean).join(' / ') || '—')}</td>
+    <td><button class="btn-secondary small" onclick="editClient(${client.id})">Editar</button> <button class="btn-danger-sm" onclick="archiveClient(${client.id})">Arquivar</button></td></tr>`).join('')
+    : '<tr><td colspan="5" style="text-align:center;padding:28px">Nenhum cliente cadastrado.</td></tr>';
+}
+
+async function submitClient(event) {
+  event.preventDefault(); const id = Number(getVal('c-id')) || null;
+  const body = { id, name:getVal('c-name'), email:getVal('c-email'), phone:getVal('c-phone'), document:getVal('c-document'), address:getVal('c-address'), city:getVal('c-city'), state:getVal('c-state'), postal_code:getVal('c-postal'), notes:getVal('c-notes') };
+  const res = await authFetch('/api/admin/clients', { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) });
+  if (res?.ok) { toast(id ? 'Cliente atualizado ✓' : 'Cliente cadastrado ✓'); resetClientForm(); loadClients(); }
+  else if (res) { const data = await res.json().catch(() => ({})); toast(data.error || 'Erro ao salvar cliente', true); }
+}
+
+function editClient(id) {
+  const client = clientsCache.find(item => item.id === id); if (!client) return;
+  for (const [field,key] of [['c-id','id'],['c-name','name'],['c-email','email'],['c-phone','phone'],['c-document','document'],['c-address','address'],['c-city','city'],['c-state','state'],['c-postal','postal_code'],['c-notes','notes']]) setVal(field, client[key] || '');
+  document.getElementById('client-submit').textContent = 'Salvar alterações'; document.getElementById('client-cancel').hidden = false;
+  document.getElementById('client-form').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function resetClientForm() {
+  document.getElementById('client-form').reset(); setVal('c-id','');
+  document.getElementById('client-submit').textContent = 'Cadastrar cliente'; document.getElementById('client-cancel').hidden = true;
+}
+
+async function archiveClient(id) {
+  if (!confirm('Arquivar este cliente? O histórico de recibos será preservado.')) return;
+  const res = await authFetch(`/api/admin/clients?id=${id}`, { method:'DELETE' });
+  if (res?.ok) { toast('Cliente arquivado'); loadClients(); } else toast('Erro ao arquivar', true);
+}
+
+async function loadClientOptions() {
+  const clients = await fetchClients(); const select = document.getElementById('r-client'); if (!select) return;
+  select.innerHTML = '<option value="">Selecione um cliente</option>' + clients.map(client => `<option value="${client.id}">${esc(client.name)} — ${esc(client.email)}</option>`).join('');
+  selectReceiptClient();
+}
+
+function selectReceiptClient() {
+  const client = clientsCache.find(item => item.id === Number(getVal('r-client')));
+  setVal('r-email-preview', client?.email || '');
+}
+
 /* ══ RECIBOS POR E-MAIL ══ */
 function toggleReceiptSchedule() {
   const scheduled = getVal('r-mode') === 'scheduled';
@@ -512,7 +572,7 @@ async function submitReceipt(event) {
   if (!Number.isFinite(amount) || amount <= 0) { toast('Informe um valor válido', true); return; }
   if (scheduled && !scheduledValue) { toast('Informe a data e hora do envio', true); return; }
   const body = {
-    recipient_name: getVal('r-name'), recipient_email: getVal('r-email'),
+    client_id: Number(getVal('r-client')),
     description: getVal('r-description'), amount_cents: Math.round(amount * 100),
     payment_method: getVal('r-payment'), receipt_date: getVal('r-date'),
     scheduled_at: scheduled ? new Date(scheduledValue).toISOString() : null,

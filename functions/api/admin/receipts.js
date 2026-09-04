@@ -26,6 +26,7 @@ function receiptHtml(receipt) {
           <p style="margin:0 0 12px"><strong>Data:</strong> ${escapeHtml(date)}</p>
           ${receipt.payment_method ? `<p style="margin:0"><strong>Forma de pagamento:</strong> ${escapeHtml(receipt.payment_method)}</p>` : ''}
         </div>
+        <div style="margin-top:52px;text-align:center"><div style="border-top:1px solid #334155;width:280px;margin:0 auto 8px"></div><strong>Maninho Criativos</strong><br><span style="font-size:12px;color:#64748b">Assinatura do responsável</span></div>
         <p style="font-size:13px;color:#64748b">Este recibo foi emitido eletronicamente por Maninho Criativos.</p>
       </div>
     </div></body></html>`;
@@ -43,9 +44,13 @@ export async function onRequestPost({ request, env }) {
     await rateLimit(env, request, 'admin-receipts', 30, 60 * 60);
     if (!env.RESEND_API_KEY || !env.RESEND_FROM_EMAIL) throw new HttpError(503, 'Resend não configurado');
     const body = await readJson(request, 16_384);
+    const clientId = integer(body.client_id, { min: 1 });
+    const client = await env.DB.prepare(`SELECT id,name,email FROM clients WHERE id=? AND is_active=1`).bind(clientId).first();
+    if (!client) throw new HttpError(404, 'Cliente não encontrado ou arquivado');
     const receipt = {
-      recipient_name: text(body.recipient_name, { required: true, max: 120 }),
-      recipient_email: validEmail(body.recipient_email),
+      client_id: client.id,
+      recipient_name: text(client.name, { required: true, max: 120 }),
+      recipient_email: validEmail(client.email),
       description: text(body.description, { required: true, max: 500 }),
       amount_cents: integer(body.amount_cents, { min: 1, max: 100_000_000 }),
       payment_method: text(body.payment_method, { max: 80 }),
@@ -62,9 +67,9 @@ export async function onRequestPost({ request, env }) {
     }
 
     const created = await env.DB.prepare(`INSERT INTO receipt_emails
-      (recipient_name, recipient_email, description, amount_cents, payment_method, receipt_date, scheduled_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`)
-      .bind(receipt.recipient_name, receipt.recipient_email, receipt.description, receipt.amount_cents,
+      (client_id, recipient_name, recipient_email, description, amount_cents, payment_method, receipt_date, scheduled_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`)
+      .bind(receipt.client_id, receipt.recipient_name, receipt.recipient_email, receipt.description, receipt.amount_cents,
         receipt.payment_method, receipt.receipt_date, receipt.scheduled_at).first();
 
     const payload = {

@@ -42,6 +42,10 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>
           <span>Recibos</span>
         </button>
+        <button class="snav-item" data-tab="clients" onclick="setTab('clients',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+          <span>Clientes</span>
+        </button>
         <button class="snav-item" data-tab="analytics" onclick="setTab('analytics',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           <span>Analytics</span>
@@ -336,19 +340,36 @@
         </div>
       </section>
 
+      <!-- ── TAB: CLIENTES ── -->
+      <section id="tab-clients" class="tab-content">
+        <div class="panel-card">
+          <div class="panel-card-header"><h3>👤 Cadastro de clientes</h3></div>
+          <form class="link-form" id="client-form" onsubmit="submitClient(event)">
+            <input id="c-id" type="hidden" />
+            <div class="form-row"><div class="form-field"><label>Nome *</label><input class="admin-input" id="c-name" maxlength="120" required /></div><div class="form-field"><label>E-mail *</label><input class="admin-input" id="c-email" type="email" required /></div></div>
+            <div class="form-row three"><div class="form-field"><label>Telefone</label><input class="admin-input" id="c-phone" maxlength="30" /></div><div class="form-field"><label>CPF/CNPJ</label><input class="admin-input" id="c-document" maxlength="30" /></div><div class="form-field"><label>CEP</label><input class="admin-input" id="c-postal" maxlength="12" /></div></div>
+            <div class="form-field"><label>Endereço</label><input class="admin-input" id="c-address" maxlength="240" /></div>
+            <div class="form-row"><div class="form-field"><label>Cidade</label><input class="admin-input" id="c-city" maxlength="100" /></div><div class="form-field"><label>UF</label><select class="admin-input" id="c-state"><option value="">Selecione</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div></div>
+            <div class="form-field"><label>Observações</label><textarea class="admin-input" id="c-notes" maxlength="500" rows="3"></textarea></div>
+            <div class="form-actions"><button type="button" class="btn-secondary" id="client-cancel" onclick="resetClientForm()" hidden>Cancelar edição</button><button type="submit" class="btn-primary" id="client-submit">Cadastrar cliente</button></div>
+          </form>
+        </div>
+        <div class="links-table-wrap"><div class="table-header-row"><span class="table-count" id="clients-count">0 clientes</span><button class="btn-secondary small" onclick="loadClients()">↻ Atualizar</button></div><div class="table-wrap"><table class="leads-table"><thead><tr><th>Cliente</th><th>Contato</th><th>Documento</th><th>Cidade</th><th>Ações</th></tr></thead><tbody id="clients-tbody"></tbody></table></div></div>
+      </section>
+
       <!-- ── TAB: RECIBOS ── -->
       <section id="tab-receipts" class="tab-content">
         <div class="panel-card">
           <div class="panel-card-header"><h3>✉️ Enviar recibo por e-mail</h3></div>
           <form class="link-form" id="receipt-form" onsubmit="submitReceipt(event)">
-            <div class="form-row">
-              <div class="form-field"><label>Nome do cliente *</label><input class="admin-input" id="r-name" maxlength="120" required /></div>
-              <div class="form-field"><label>E-mail do cliente *</label><input class="admin-input" id="r-email" type="email" required /></div>
+            <div class="form-row receipt-client-row">
+              <div class="form-field"><label>Cliente cadastrado *</label><select class="admin-input" id="r-client" onchange="selectReceiptClient()" required><option value="">Selecione um cliente</option></select></div>
+              <div class="form-field"><label>E-mail de destino</label><input class="admin-input" id="r-email-preview" readonly placeholder="Preenchido pelo cliente" /></div>
             </div>
-            <div class="form-field"><label>Descrição do pagamento *</label><input class="admin-input" id="r-description" maxlength="500" placeholder="Ex.: Criação de identidade visual" required /></div>
-            <div class="form-row">
+            <div class="form-field"><label>Descrição do pagamento *</label><input class="admin-input" id="r-description" list="receipt-services" maxlength="500" placeholder="Escolha ou digite o serviço" required /><datalist id="receipt-services"><option value="Criação de identidade visual"><option value="Desenvolvimento de site"><option value="Gestão de redes sociais"><option value="Ensaio fotográfico com IA"><option value="Design gráfico"><option value="Consultoria criativa"></datalist></div>
+            <div class="form-row three">
               <div class="form-field"><label>Valor (R$) *</label><input class="admin-input" id="r-amount" type="number" min="0.01" max="1000000" step="0.01" required /></div>
-              <div class="form-field"><label>Forma de pagamento</label><input class="admin-input" id="r-payment" maxlength="80" placeholder="PIX, transferência..." /></div>
+              <div class="form-field"><label>Forma de pagamento</label><select class="admin-input" id="r-payment"><option value="">Selecione</option><option>PIX</option><option>Transferência bancária</option><option>Cartão de crédito</option><option>Cartão de débito</option><option>Dinheiro</option><option>Boleto</option><option>Outro</option></select></div>
               <div class="form-field"><label>Data do recibo *</label><input class="admin-input" id="r-date" type="date" required /></div>
             </div>
             <div class="form-row">
