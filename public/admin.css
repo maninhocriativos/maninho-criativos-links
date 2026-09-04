@@ -333,6 +333,14 @@ html, body {
   padding: 14px 16px; border-bottom: 1px solid var(--border);
 }
 .panel-card-header h3 { font-size: .84rem; font-weight: 600; color: var(--text); }
+.panel-description { color: var(--text3); font-size: .75rem; margin-top: 5px; }
+
+.clients-page { max-width: 1280px; margin: 0 auto; }
+.client-card { box-shadow: 0 16px 44px rgba(0,0,0,.18); }
+.client-form { gap: 16px; padding: 22px; }
+.client-form .admin-input { min-height: 40px; }
+.client-form textarea.admin-input { min-height: 78px; padding-top: 10px; resize: vertical; }
+.client-form .form-actions { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 16px; }
 
 /* Link form */
 .link-form { padding: 16px; display: flex; flex-direction: column; gap: 12px; }

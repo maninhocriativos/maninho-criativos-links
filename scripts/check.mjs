@@ -28,7 +28,7 @@ for (const file of walk('public').filter(f => extname(f) === '.html')) {
   for (const match of source.matchAll(/(?:src|href)="([^"#]+)"/g)) {
     const ref = match[1];
     if (/^(?:https?:|mailto:|tel:|\/api\/|\/uploads\/|\/$)/.test(ref)) continue;
-    const local = join('public', ref.replace(/^\//, ''));
+    const local = join('public', ref.split('?')[0].replace(/^\//, ''));
     if (!existsSync(local)) { console.error(`Missing static reference ${ref} in ${file}`); failed = true; }
   }
 }
