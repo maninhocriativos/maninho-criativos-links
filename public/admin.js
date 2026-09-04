@@ -10,6 +10,7 @@ async function checkAuth() {
 function showPanel() {
   document.getElementById('admin-panel').style.display = 'grid';
   loadAllData();
+  restoreTab();
 }
 
 async function logout() {
@@ -18,19 +19,41 @@ async function logout() {
 }
 
 /* ══ Tabs ══ */
-function setTab(name, btn) {
+const tabTitles = { links: ['Gerenciar Links','Organize os destinos da sua página'], portfolio: ['Portfólio','Gerencie seus projetos publicados'], profile: ['Editar Perfil','Identidade e aparência da página'], leads: ['Leads Captados','Contatos recebidos pelo site'], clients: ['Clientes','Cadastro central para propostas e recibos'], receipts: ['Recibos por e-mail','Envie agora ou programe o disparo'], analytics: ['Analytics','Acompanhe o desempenho do site'] };
+
+function setTab(name, btn, persist = true) {
+  if (!document.getElementById(`tab-${name}`)) name = 'links';
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'));
   document.getElementById(`tab-${name}`)?.classList.add('active');
-  btn.classList.add('active');
-  const titles = { links: 'Gerenciar Links', portfolio: 'Portfólio', profile: 'Editar Perfil', leads: 'Leads Captados', clients: 'Clientes', receipts: 'Recibos por e-mail', analytics: 'Analytics' };
-  document.getElementById('admin-page-title').textContent = titles[name] || name;
+  (btn || document.querySelector(`.snav-item[data-tab="${name}"]`))?.classList.add('active');
+  document.getElementById('admin-page-title').textContent = tabTitles[name][0];
+  document.getElementById('admin-page-subtitle').textContent = tabTitles[name][1];
+  if (persist) {
+    localStorage.setItem('mc_admin_tab', name);
+    history.replaceState(null, '', `${location.pathname}${location.search}#${name}`);
+  }
   if (name === 'portfolio') loadPortfolioAdmin();
   if (name === 'leads') loadLeads();
   if (name === 'clients') loadClients();
   if (name === 'receipts') { loadClientOptions(); loadReceipts(); }
   if (name === 'analytics') loadAnalytics();
   closeSidebar();
+}
+
+function restoreTab() {
+  const hashTab = location.hash.replace('#', '');
+  const savedTab = localStorage.getItem('mc_admin_tab');
+  setTab(hashTab || savedTab || 'links', null, false);
+}
+
+window.addEventListener('hashchange', () => restoreTab());
+
+function openDatePicker(id) {
+  const input = document.getElementById(id);
+  if (!input) return;
+  if (typeof input.showPicker === 'function') input.showPicker();
+  else { input.focus(); input.click(); }
 }
 
 /* ══ Mobile sidebar ══ */

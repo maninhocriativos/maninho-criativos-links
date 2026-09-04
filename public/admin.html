@@ -370,11 +370,11 @@
             <div class="form-row three">
               <div class="form-field"><label>Valor (R$) *</label><input class="admin-input" id="r-amount" type="number" min="0.01" max="1000000" step="0.01" required /></div>
               <div class="form-field"><label>Forma de pagamento</label><select class="admin-input" id="r-payment"><option value="">Selecione</option><option>PIX</option><option>Transferência bancária</option><option>Cartão de crédito</option><option>Cartão de débito</option><option>Dinheiro</option><option>Boleto</option><option>Outro</option></select></div>
-              <div class="form-field"><label>Data do recibo *</label><input class="admin-input" id="r-date" type="date" required /></div>
+              <div class="form-field"><label>Data do recibo *</label><div class="date-control"><input class="admin-input" id="r-date" type="date" required /><button type="button" class="date-button" onclick="openDatePicker('r-date')" aria-label="Abrir calendário">📅</button></div></div>
             </div>
             <div class="form-row">
               <div class="form-field"><label>Quando enviar?</label><select class="admin-input" id="r-mode" onchange="toggleReceiptSchedule()"><option value="now">Enviar agora</option><option value="scheduled">Agendar envio</option></select></div>
-              <div class="form-field" id="r-schedule-field" hidden><label>Data e hora do envio *</label><input class="admin-input" id="r-scheduled" type="datetime-local" /></div>
+              <div class="form-field" id="r-schedule-field" hidden><label>Data e hora do envio *</label><div class="date-control"><input class="admin-input" id="r-scheduled" type="datetime-local" /><button type="button" class="date-button" onclick="openDatePicker('r-scheduled')" aria-label="Abrir calendário">📅</button></div></div>
             </div>
             <div class="form-actions"><button type="submit" class="btn-primary" id="receipt-submit">Enviar recibo</button></div>
           </form>
@@ -467,6 +467,6 @@
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <script src="admin.js?v=20260904-2"></script>
+  <script src="admin.js?v=20260904-3"></script>
 </body>
 </html>
