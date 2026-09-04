@@ -377,20 +377,21 @@
               <div class="form-field"><label>Quando enviar?</label><select class="admin-input" id="r-mode" onchange="toggleReceiptSchedule()"><option value="now">Enviar agora</option><option value="scheduled">Agendar envio</option></select></div>
               <div class="form-field" id="r-schedule-field" hidden><label>Data e hora do envio *</label><div class="date-control"><input class="admin-input" id="r-scheduled" type="datetime-local" /><button type="button" class="date-button" onclick="openDatePicker('r-scheduled')" aria-label="Abrir calendário">📅</button></div></div>
             </div>
-            <div class="form-actions"><button type="submit" class="btn-primary" id="receipt-submit">Enviar recibo</button></div>
+            <div class="signature-field"><div class="signature-heading"><div><strong>Assinatura eletrônica</strong><small>Assine com o mouse, caneta ou dedo</small></div><button type="button" class="btn-secondary small" onclick="clearSignature()">Limpar</button></div><canvas id="signature-pad" width="900" height="220" aria-label="Área para assinatura"></canvas></div>
+            <div class="form-actions"><button type="button" class="btn-secondary" onclick="printReceipt()">Salvar cópia em PDF</button><button type="submit" class="btn-primary" id="receipt-submit">Enviar recibo</button></div>
           </form>
         </div>
         <aside class="receipt-preview-panel">
           <div class="receipt-preview-toolbar"><div><strong>Pré-visualização</strong><small>Atualização em tempo real</small></div><button type="button" class="btn-secondary small" onclick="printReceipt()">Imprimir / PDF</button></div>
           <article class="receipt-paper" id="receipt-preview">
-            <header class="receipt-paper-header"><div><span class="receipt-brand">MANINHO CRIATIVOS</span><h2>RECIBO</h2></div><span class="receipt-number">Nº —</span></header>
+            <header class="receipt-paper-header"><div><span class="receipt-brand">MANINHO CRIATIVOS</span><h2>RECIBO DE SERVIÇOS</h2><small>DOCUMENTO NÃO FISCAL</small></div><span class="receipt-number">Nº PRÉVIA</span></header>
+            <section class="receipt-issuer"><strong>PRESTADOR DO SERVIÇO</strong><span>Maninho Criativos</span><small>Documento eletrônico de comprovação de pagamento</small></section>
             <div class="receipt-total"><small>VALOR RECEBIDO</small><strong id="preview-amount">R$ 0,00</strong></div>
-            <p>Recebemos de <strong id="preview-client">Selecione um cliente</strong><span id="preview-document"></span>, a importância acima referente a:</p>
-            <div class="receipt-description" id="preview-description">Descrição do pagamento</div>
+            <section class="receipt-customer"><small>TOMADOR DO SERVIÇO</small><strong id="preview-client">Selecione um cliente</strong><span id="preview-document"></span><em id="preview-address"></em></section>
+            <div class="receipt-service-table"><div class="receipt-service-head"><span>DESCRIÇÃO DO SERVIÇO</span><span>VALOR</span></div><div class="receipt-service-row"><span id="preview-description">Descrição do pagamento</span><strong id="preview-service-amount">R$ 0,00</strong></div></div>
             <dl class="receipt-meta"><div><dt>Forma de pagamento</dt><dd id="preview-payment">Não informada</dd></div><div><dt>Data</dt><dd id="preview-date">—</dd></div></dl>
-            <div class="receipt-client-details" id="preview-address"></div>
-            <div class="receipt-signature"><span></span><strong>Maninho Criativos</strong><small>Assinatura do responsável</small></div>
-            <footer>Recibo emitido eletronicamente por Maninho Criativos.</footer>
+            <div class="receipt-signature"><img id="preview-signature" alt="Assinatura eletrônica" hidden /><span></span><strong>Maninho Criativos</strong><small>Assinatura eletrônica do responsável</small></div>
+            <footer>Recibo emitido eletronicamente • Documento não fiscal • Código definitivo gerado ao salvar</footer>
           </article>
         </aside>
         </div>
@@ -482,6 +483,6 @@
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <script src="admin.js?v=20260904-4"></script>
+  <script src="admin.js?v=20260904-5"></script>
 </body>
 </html>

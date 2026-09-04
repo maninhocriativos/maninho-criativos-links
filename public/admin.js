@@ -617,6 +617,7 @@ function updateReceiptPreview() {
   document.getElementById('preview-client').textContent = client?.name || 'Selecione um cliente';
   document.getElementById('preview-document').textContent = client?.document ? `CPF/CNPJ ${client.document}` : '';
   document.getElementById('preview-amount').textContent = amount.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+  document.getElementById('preview-service-amount').textContent = amount.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
   document.getElementById('preview-description').textContent = getVal('r-description') || 'Descrição do pagamento';
   document.getElementById('preview-payment').textContent = getVal('r-payment') || 'Não informada';
   document.getElementById('preview-date').textContent = receiptDateLabel(getVal('r-date'));
@@ -627,6 +628,39 @@ function updateReceiptPreview() {
 function printReceipt() {
   updateReceiptPreview();
   window.print();
+}
+
+let signatureDirty = false;
+function setupSignaturePad() {
+  const canvas = document.getElementById('signature-pad'); if (!canvas) return;
+  const context = canvas.getContext('2d');
+  context.lineWidth = 4; context.lineCap = 'round'; context.lineJoin = 'round'; context.strokeStyle = '#111827';
+  let drawing = false;
+  const point = event => { const rect = canvas.getBoundingClientRect(); return { x:(event.clientX-rect.left)*(canvas.width/rect.width), y:(event.clientY-rect.top)*(canvas.height/rect.height) }; };
+  canvas.addEventListener('pointerdown', event => { drawing=true; signatureDirty=true; canvas.setPointerCapture(event.pointerId); const p=point(event); context.beginPath(); context.moveTo(p.x,p.y); });
+  canvas.addEventListener('pointermove', event => { if(!drawing)return; const p=point(event); context.lineTo(p.x,p.y); context.stroke(); updateSignaturePreview(); });
+  const stop = () => { if(!drawing)return; drawing=false; updateSignaturePreview(); };
+  canvas.addEventListener('pointerup', stop); canvas.addEventListener('pointercancel', stop);
+}
+
+function updateSignaturePreview() {
+  const image=document.getElementById('preview-signature'); const canvas=document.getElementById('signature-pad');
+  image.hidden=!signatureDirty;
+  if(signatureDirty) image.src=canvas.toDataURL('image/png'); else image.removeAttribute('src');
+}
+
+function clearSignature() {
+  const canvas=document.getElementById('signature-pad'); canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  signatureDirty=false; updateSignaturePreview();
+}
+
+async function uploadSignature() {
+  if(!signatureDirty) return '';
+  const blob=await new Promise(resolve => document.getElementById('signature-pad').toBlob(resolve,'image/png'));
+  if(!blob) throw new Error('Não foi possível processar a assinatura');
+  const response=await authFetch('/api/admin/upload',{method:'POST',headers:{'Content-Type':'image/png','X-Upload-Purpose':'signature'},body:blob});
+  if(!response?.ok) throw new Error('Não foi possível salvar a assinatura');
+  return (await response.json()).url;
 }
 
 /* ══ RECIBOS POR E-MAIL ══ */
@@ -653,14 +687,17 @@ async function submitReceipt(event) {
   };
   button.disabled = true;
   try {
+    body.signature_url = await uploadSignature();
     const res = await authFetch('/api/admin/receipts', { method: 'POST', body: JSON.stringify(body) });
     if (res?.ok) {
+      const created = await res.json();
       event.target.reset();
       const now = new Date();
       document.getElementById('r-date').value = new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
       toggleReceiptSchedule();
+      clearSignature();
       updateReceiptPreview();
-      toast(scheduled ? 'Recibo agendado ✓' : 'Recibo enviado ✓');
+      toast(`${scheduled ? 'Recibo agendado' : 'Recibo enviado'} • ${created.document_code} ✓`);
       loadReceipts();
     } else if (res) {
       const data = await res.json().catch(() => ({}));
@@ -683,7 +720,7 @@ async function loadReceipts() {
     <tr><td>#${receipt.id}</td><td><strong>${esc(receipt.recipient_name)}</strong><br><small>${esc(receipt.recipient_email)}</small></td>
     <td>${esc(receipt.description)}</td><td>${(receipt.amount_cents / 100).toLocaleString('pt-BR', { style:'currency', currency:'BRL' })}</td>
     <td>${formatDate(receipt.scheduled_at || receipt.created_at)}</td><td><span class="lead-tag">${labels[receipt.status] || esc(receipt.status)}</span></td>
-    <td>${receipt.status === 'scheduled' ? `<button class="btn-danger-sm" onclick="cancelReceipt(${receipt.id})">Cancelar</button>` : '—'}</td></tr>`).join('');
+    <td><div style="display:flex;gap:6px">${receipt.pdf_url ? `<a class="btn-secondary small" href="/api/admin/receipts/${receipt.id}/pdf">PDF</a>` : ''}${receipt.status === 'scheduled' ? `<button class="btn-danger-sm" onclick="cancelReceipt(${receipt.id})">Cancelar</button>` : ''}</div></td></tr>`).join('');
 }
 
 async function cancelReceipt(id) {
@@ -700,6 +737,7 @@ if (receiptDate) {
 }
 ['r-description','r-amount','r-payment','r-date'].forEach(id => document.getElementById(id)?.addEventListener('input', updateReceiptPreview));
 updateReceiptPreview();
+setupSignaturePad();
 
 /* ══ ANALYTICS ══ */
 async function loadAnalytics() {
