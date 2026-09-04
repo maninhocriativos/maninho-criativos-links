@@ -102,11 +102,18 @@ function isWhatsApp(url) {
   return /wa\.me|whatsapp/i.test(url || '');
 }
 
+function safeUrl(value) {
+  try {
+    const url = new URL(value, location.origin);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '#';
+  } catch { return '#'; }
+}
+
 function buildBanner(link, i) {
   const a = document.createElement('a');
   const usesModal = isWhatsApp(link.url);
 
-  a.href      = usesModal ? '#' : link.url;
+  a.href      = usesModal ? '#' : safeUrl(link.url);
   a.className = 'link-banner';
   a.dataset.id = link.id || '';
 
@@ -162,7 +169,7 @@ function renderBioSocials(links) {
     if (seen.has(key)) return;
     seen.add(key);
     const a = document.createElement('a');
-    a.href   = link.url;
+    a.href   = safeUrl(link.url);
     a.target = '_blank';
     a.rel    = 'noopener noreferrer';
     a.className = 'bio-social-btn';
@@ -232,7 +239,10 @@ function initModal() {
   /* Fechar */
   closeBtn?.addEventListener('click', closeModal);
   overlay?.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Tab' && overlay?.classList.contains('open')) trapFocus(e, overlay);
+  });
 
   /* Submit */
   form?.addEventListener('submit', (e) => {
@@ -302,14 +312,29 @@ function openModal(link) {
   }
 
   document.getElementById('modal-error').textContent = '';
+  modalReturnFocus = document.activeElement;
   overlay?.classList.add('open');
+  overlay?.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
   setTimeout(() => document.getElementById('f-name')?.focus(), 320);
 }
 
 function closeModal() {
-  document.getElementById('contact-modal')?.classList.remove('open');
+  const modal = document.getElementById('contact-modal');
+  modal?.classList.remove('open');
+  modal?.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
+  modalReturnFocus?.focus?.();
+}
+
+let modalReturnFocus = null;
+function trapFocus(event, container) {
+  const nodes = [...container.querySelectorAll('button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+    .filter(el => !el.disabled && el.offsetParent !== null);
+  if (!nodes.length) return;
+  const first = nodes[0], last = nodes[nodes.length - 1];
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 }
 
 /* ══ CARROSSEL INFINITO — loop contínuo suave ══ */

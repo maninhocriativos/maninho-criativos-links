@@ -22,10 +22,15 @@ async function init() {
   setupNav();
 
   document.querySelectorAll('.srv-big-card').forEach(card => {
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
     card.addEventListener('click', () => {
       const cat = card.dataset.goto;
       const btn = document.querySelector(`.cat-btn[data-cat="${CSS.escape(cat)}"]`);
       if (btn) btn.click();
+    });
+    card.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); card.click(); }
     });
   });
 }
@@ -125,7 +130,7 @@ function renderGrid(items) {
         <span class="pf-overlay-cat">${esc(item.category)}</span>
       </div>
       ${item.project_url ? `
-        <a href="${esc(item.project_url)}" target="_blank" rel="noopener" class="pf-overlay-link" onclick="event.stopPropagation()">
+        <a href="${esc(safeExternalUrl(item.project_url))}" target="_blank" rel="noopener noreferrer" class="pf-overlay-link" onclick="event.stopPropagation()">
           Ver projeto →
         </a>` : ''}`;
 
@@ -143,12 +148,14 @@ function renderGrid(items) {
 function openLightbox(idx) {
   activeIdx = idx;
   document.getElementById('lightbox').classList.add('open');
+  document.getElementById('lightbox').setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
   renderLB(idx);
 }
 
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox').setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
   document.getElementById('lb-open-btn')?.remove();
 }
@@ -175,7 +182,7 @@ function renderLB(idx) {
   if (item.project_url) {
     const btn = document.createElement('a');
     btn.id = 'lb-open-btn';
-    btn.href = item.project_url;
+    btn.href = safeExternalUrl(item.project_url);
     btn.target = '_blank';
     btn.rel = 'noopener noreferrer';
     btn.className = 'lb-project-btn';
@@ -205,15 +212,26 @@ function esc(s) {
   return String(s?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function safeExternalUrl(value) {
+  try {
+    const url = new URL(value, location.origin);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '#';
+  } catch { return '#'; }
+}
+
 // ══ MODAL DE CONTATO ══
 function openModal() {
-  document.getElementById('contact-modal')?.classList.add('open');
+  const modal = document.getElementById('contact-modal');
+  modal?.classList.add('open');
+  modal?.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
   setTimeout(() => document.getElementById('f-name')?.focus(), 320);
 }
 
 function closeModal() {
-  document.getElementById('contact-modal')?.classList.remove('open');
+  const modal = document.getElementById('contact-modal');
+  modal?.classList.remove('open');
+  modal?.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
 }
 

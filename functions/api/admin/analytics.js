@@ -1,7 +1,7 @@
 import { requireAuth } from './_auth.js';
 
 export async function onRequestGet({ request, env }) {
-  const deny = requireAuth(request, env);
+  const deny = await requireAuth(request, env);
   if (deny) return deny;
 
   const [views, clicks, modal, byPage, byDay, topLinks] = await Promise.all([

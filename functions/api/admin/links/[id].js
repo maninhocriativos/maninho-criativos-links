@@ -1,44 +1,30 @@
 import { requireAuth } from '../_auth.js';
+import { color, errorResponse, httpUrl, integer, json, readJson, text } from '../../_utils.js';
 
-// PATCH /api/admin/links/:id — atualiza campos parcialmente
+const validators = {
+  title: v => text(v, { required: true, max: 120 }), url: v => httpUrl(v, { required: true }),
+  icon: v => text(v, { max: 16 }), color_from: v => color(v), color_to: v => color(v),
+  order_index: v => integer(v, { max: 100_000 }), is_active: v => integer(v, { min: 0, max: 1 }),
+};
+
 export async function onRequestPatch({ request, env, params }) {
-  const deny = requireAuth(request, env);
-  if (deny) return deny;
-
+  const deny = await requireAuth(request, env); if (deny) return deny;
   try {
-    const id = parseInt(params.id);
-    if (!id) return Response.json({ error: 'Invalid id' }, { status: 400 });
-
-    const body = await request.json();
-    const allowed = ['title', 'url', 'icon', 'color_from', 'color_to', 'order_index', 'is_active'];
-    const fields = Object.keys(body).filter(k => allowed.includes(k));
-    if (fields.length === 0) return Response.json({ error: 'No valid fields' }, { status: 400 });
-
-    const setClause = fields.map(f => `${f} = ?`).join(', ');
-    const values = fields.map(f => body[f]);
-
-    await env.DB.prepare(
-      `UPDATE links SET ${setClause} WHERE id = ?`
-    ).bind(...values, id).run();
-
-    return Response.json({ ok: true });
-  } catch (e) {
-    return Response.json({ error: 'DB error' }, { status: 500 });
-  }
+    const id = integer(params.id, { min: 1 });
+    const body = await readJson(request);
+    const fields = Object.keys(body).filter(key => validators[key]);
+    if (!fields.length) return json({ error: 'Nenhum campo válido' }, 400);
+    await env.DB.prepare(`UPDATE links SET ${fields.map(f => `${f} = ?`).join(', ')} WHERE id = ?`)
+      .bind(...fields.map(f => validators[f](body[f])), id).run();
+    return json({ ok: true });
+  } catch (error) { return errorResponse(error); }
 }
 
-// DELETE /api/admin/links/:id
 export async function onRequestDelete({ request, env, params }) {
-  const deny = requireAuth(request, env);
-  if (deny) return deny;
-
+  const deny = await requireAuth(request, env); if (deny) return deny;
   try {
-    const id = parseInt(params.id);
-    if (!id) return Response.json({ error: 'Invalid id' }, { status: 400 });
-
+    const id = integer(params.id, { min: 1 });
     await env.DB.prepare(`DELETE FROM links WHERE id = ?`).bind(id).run();
-    return Response.json({ ok: true });
-  } catch (e) {
-    return Response.json({ error: 'DB error' }, { status: 500 });
-  }
+    return json({ ok: true });
+  } catch (error) { return errorResponse(error); }
 }

@@ -173,7 +173,7 @@
   <div class="page">
     <div class="card">
       <div class="card-header">
-        <img src="Images/Logotipo.PNG" alt="Maninho Criativos" class="card-logo"
+        <img src="Images/Logotipo.webp" alt="Maninho Criativos" class="card-logo" width="800" height="533"
              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
         <div class="card-logo-fallback" style="display:none">MC</div>
         <div>
@@ -228,12 +228,9 @@
   </div>
 
   <script>
-    const TOKEN_KEY = 'mc_admin_token';
-
-    // Já logado? Redireciona
-    if (sessionStorage.getItem(TOKEN_KEY)) {
-      window.location.replace('/admin.html');
-    }
+    fetch('/api/admin/verify').then(res => {
+      if (res.ok) window.location.replace('/admin.html');
+    }).catch(() => {});
 
     function togglePwd() {
       const inp = document.getElementById('inp-pwd');
@@ -260,8 +257,6 @@
         });
 
         if (res.ok) {
-          const { token } = await res.json();
-          sessionStorage.setItem(TOKEN_KEY, token);
           window.location.replace('/admin.html');
         } else {
           const data = await res.json().catch(() => ({}));

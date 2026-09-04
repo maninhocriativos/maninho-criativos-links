@@ -1,16 +1,10 @@
 /* ══ Auth ══ */
-const TOKEN_KEY = 'mc_admin_token';
-const token = () => sessionStorage.getItem(TOKEN_KEY);
-
 async function checkAuth() {
-  const t = token();
-  if (!t) return window.location.replace('/login.html');
-  const res = await fetch('/api/admin/verify', { headers: { Authorization: `Bearer ${t}` } });
-  if (!res.ok) {
-    sessionStorage.removeItem(TOKEN_KEY);
-    return window.location.replace('/login.html');
-  }
-  showPanel();
+  try {
+    const res = await fetch('/api/admin/verify');
+    if (!res.ok) return window.location.replace('/login.html');
+    showPanel();
+  } catch { window.location.replace('/login.html'); }
 }
 
 function showPanel() {
@@ -18,8 +12,8 @@ function showPanel() {
   loadAllData();
 }
 
-function logout() {
-  sessionStorage.removeItem(TOKEN_KEY);
+async function logout() {
+  await fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
   window.location.replace('/login.html');
 }
 
@@ -58,12 +52,10 @@ async function loadAllData() {
 
 /* ══ Quick stats bar ══ */
 async function loadQuickStats() {
-  const t = token();
-  if (!t) return;
   try {
     const [analyticsRes, leadsRes] = await Promise.all([
-      fetch('/api/admin/analytics', { headers: { Authorization: `Bearer ${t}` } }),
-      fetch('/api/admin/leads',     { headers: { Authorization: `Bearer ${t}` } })
+      fetch('/api/admin/analytics'),
+      fetch('/api/admin/leads')
     ]);
     if (analyticsRes.ok) {
       const a = await analyticsRes.json();
@@ -315,17 +307,14 @@ function resetColorDefaults() {
 
 /* ══ Helpers ══ */
 async function authFetch(url, opts = {}) {
-  const t = token();
-  if (!t) { showLogin(); return null; }
   const res = await fetch(url, {
     ...opts,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${t}`,
       ...(opts.headers || {})
     }
   });
-  if (res.status === 401) { showLogin(); return null; }
+  if (res.status === 401) { window.location.replace('/login.html'); return null; }
   return res;
 }
 
@@ -396,11 +385,23 @@ function renderPortfolioTable(items) {
 
 async function submitNewPortfolio(e) {
   e.preventDefault();
+  const file = document.getElementById('pf-file')?.files?.[0];
+  let imageUrl = getVal('pf-url');
+  if (file) {
+    const uploaded = await authFetch('/api/admin/upload', {
+      method: 'POST', headers: { 'Content-Type': file.type }, body: file
+    });
+    if (!uploaded?.ok) { toast('Erro ao enviar imagem', true); return; }
+    imageUrl = (await uploaded.json()).url;
+  }
+  if (!imageUrl) { toast('Informe uma imagem', true); return; }
   const body = {
     title:       getVal('pf-title'),
     category:    getVal('pf-cat'),
     description: getVal('pf-desc'),
-    image_url:   getVal('pf-url'),
+    image_url:   imageUrl,
+    image_mobile_url: getVal('pf-mobile-url'),
+    project_url: getVal('pf-project-url'),
     order_index: parseInt(getVal('pf-order')) || 0,
   };
   const res = await authFetch('/api/admin/portfolio', { method: 'POST', body: JSON.stringify(body) });
@@ -437,11 +438,9 @@ async function loadLeads() {
   if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#666">Carregando...</td></tr>';
 
-  const t = token();
-  if (!t) return;
   let data;
   try {
-    const res = await fetch('/api/admin/leads', { headers: { Authorization: `Bearer ${t}` } });
+    const res = await fetch('/api/admin/leads');
     if (!res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#f87171">Erro ao carregar.</td></tr>'; return; }
     data = await res.json();
   } catch { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#f87171">Erro de conexão.</td></tr>'; return; }
@@ -472,10 +471,10 @@ async function loadLeads() {
       <td>${l.id}</td>
       <td><strong>${esc(l.name)}</strong></td>
       <td><a href="https://wa.me/55${l.phone.replace(/\D/g,'')}" target="_blank" class="lead-wa">${esc(l.phone)}</a></td>
-      <td>${l.instagram ? `<a href="https://instagram.com/${l.instagram.replace('@','')}" target="_blank">${esc(l.instagram)}</a>` : '—'}</td>
+      <td>${l.instagram ? `<a href="https://instagram.com/${encodeURIComponent(String(l.instagram).replace(/^@/,''))}" target="_blank" rel="noopener noreferrer">${esc(l.instagram)}</a>` : '—'}</td>
       <td><span class="lead-tag">${esc(l.service || '—')}</span></td>
       <td class="lead-msg">${esc(l.message || '—')}</td>
-      <td><span class="lead-page lead-page-${l.page}">${l.page || '—'}</span></td>
+      <td><span class="lead-page lead-page-${l.page === 'portfolio' ? 'portfolio' : 'links'}">${l.page === 'portfolio' ? 'portfolio' : 'links'}</span></td>
       <td class="lead-date">${formatDate(l.created_at)}</td>
       <td><button class="btn-danger-sm" onclick="deleteLead(${l.id})">✕</button></td>
     </tr>
@@ -495,10 +494,6 @@ function formatDate(dt) {
   return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
 
-function esc(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
 /* ══ ANALYTICS ══ */
 async function loadAnalytics() {
   const loadingEl = document.getElementById('analytics-loading');
@@ -507,12 +502,9 @@ async function loadAnalytics() {
   loadingEl.style.display = 'block';
   contentEl.style.display = 'none';
 
-  const t = token();
-  if (!t) return;
-
   let d;
   try {
-    const res = await fetch('/api/admin/analytics', { headers: { Authorization: `Bearer ${t}` } });
+    const res = await fetch('/api/admin/analytics');
     if (!res.ok) {
       loadingEl.textContent = 'Erro ao carregar analytics. Tente novamente.';
       return;

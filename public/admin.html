@@ -17,7 +17,7 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <img src="Images/Logotipo.PNG" alt="Maninho Criativos" class="sidebar-logo-img"
+        <img src="Images/Logotipo.webp" alt="Maninho Criativos" class="sidebar-logo-img" width="800" height="533"
              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
         <span class="sidebar-logo-fallback" style="display:none">MC</span>
         <button class="sidebar-close-btn" id="sidebar-close-btn" onclick="closeSidebar()">✕</button>
@@ -206,7 +206,21 @@
             </div>
             <div class="form-field">
               <label>URL da imagem *</label>
-              <input class="admin-input" id="pf-url" type="url" placeholder="https://... ou /ensaio/foto-1.webp" required />
+              <input class="admin-input" id="pf-url" type="text" placeholder="https://... ou /ensaio/foto-1.webp" />
+            </div>
+            <div class="form-field">
+              <label>Ou enviar imagem (WebP, AVIF, PNG ou JPEG; até 5 MB)</label>
+              <input class="admin-input" id="pf-file" type="file" accept="image/webp,image/avif,image/png,image/jpeg" />
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label>URL da imagem mobile</label>
+                <input class="admin-input" id="pf-mobile-url" type="text" placeholder="/Images/exemplo-mobile.webp" />
+              </div>
+              <div class="form-field">
+                <label>URL do projeto</label>
+                <input class="admin-input" id="pf-project-url" type="url" placeholder="https://..." />
+              </div>
             </div>
             <div class="form-field">
               <label>Descrição (opcional)</label>

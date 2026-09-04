@@ -1,7 +1,7 @@
 import { requireAuth } from './_auth.js';
 
 export async function onRequestGet({ request, env }) {
-  const deny = requireAuth(request, env);
+  const deny = await requireAuth(request, env);
   if (deny) return deny;
 
   const { results } = await env.DB.prepare(
@@ -12,7 +12,7 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestDelete({ request, env }) {
-  const deny = requireAuth(request, env);
+  const deny = await requireAuth(request, env);
   if (deny) return deny;
 
   const url = new URL(request.url);

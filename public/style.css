@@ -38,12 +38,12 @@ body {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: url('Images/banner-pc.png') center top / cover no-repeat;
+  background: url('Images/banner-pc.webp') center top / cover no-repeat;
   z-index: 0;
 }
 
 @media (max-width: 600px) {
-  .hero-bg { background-image: url('Images/banner-mobile.png'); background-position: right top; }
+  .hero-bg { background-image: url('Images/banner-mobile.webp'); background-position: right top; }
 }
 
 .hero-overlay {
@@ -1152,3 +1152,6 @@ body {
   box-shadow: 0 0 48px rgba(37,211,102,0.4), 0 8px 24px rgba(0,0,0,0.3);
 }
 .modal-submit:active { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

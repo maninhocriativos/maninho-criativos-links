@@ -2,15 +2,18 @@
   "name": "maninho-criativos-links",
   "version": "1.0.0",
   "description": "Página de links premium — Maninho Criativos",
+  "type": "module",
   "scripts": {
-    "dev": "npx wrangler pages dev public --d1=DB",
+    "dev": "wrangler pages dev public",
     "deploy": "npx wrangler pages deploy public",
     "db:create": "npx wrangler d1 create maninho-links-db",
-    "db:migrate": "npx wrangler d1 execute maninho-links-db --file=./schema.sql",
-    "db:migrate:prod": "npx wrangler d1 execute maninho-links-db --remote --file=./schema.sql"
+    "db:migrate": "wrangler d1 migrations apply maninho-links-db --local",
+    "db:migrate:prod": "wrangler d1 migrations apply maninho-links-db --remote",
+    "check": "node scripts/check.mjs",
+    "test": "node --test"
   },
   "devDependencies": {
     "wrangler": "^4.0.0",
-    "sharp": "^0.34.0"
+    "sharp": "^0.35.4"
   }
 }

@@ -3,7 +3,7 @@
   // Gera ou recupera session_id
   let sid = sessionStorage.getItem('mc_sid');
   if (!sid) {
-    sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    sid = crypto.randomUUID();
     sessionStorage.setItem('mc_sid', sid);
   }
 
@@ -12,7 +12,7 @@
 
   function send(type, data) {
     navigator.sendBeacon
-      ? navigator.sendBeacon('/api/track', JSON.stringify({ type, page, data, session_id: sid, referrer: ref }))
+      ? navigator.sendBeacon('/api/track', new Blob([JSON.stringify({ type, page, data, session_id: sid, referrer: ref })], { type: 'application/json' }))
       : fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, page, data, session_id: sid, referrer: ref }), keepalive: true });
   }
 
