@@ -1,6 +1,6 @@
 # Maninho Criativos — Resumo Completo do Sistema
 
-> Atualização de segurança (2026-09-04): o schema oficial agora está em `migrations/`; a autenticação usa sessão aleatória em cookie `HttpOnly` com expiração de 8 horas; `/admin.html` é o único painel oficial; uploads do portfólio usam o binding R2 `STORAGE`; endpoints públicos possuem validação, limites de payload e rate limiting no D1. Os arquivos `schema*.sql` na raiz são apenas históricos.
+> Atualização de segurança (2026-09-04): o schema oficial agora está em `migrations/`; a autenticação usa e-mail + senha + código temporário enviado pelo Resend e sessão aleatória em cookie `HttpOnly` com expiração de 8 horas; `/admin.html` é o único painel oficial; uploads do portfólio usam o binding R2 `STORAGE`; endpoints públicos possuem validação, limites de payload e rate limiting no D1. Os arquivos `schema*.sql` na raiz são apenas históricos.
 Gerado em: 2026-05-31
 
 ---

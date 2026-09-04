@@ -184,12 +184,22 @@
 
       <form class="form" id="login-form" onsubmit="doLogin(event)">
         <div class="field">
-          <label for="inp-user">Usuário</label>
+          <label for="inp-email">E-mail administrativo</label>
           <div class="field-wrap">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
             </svg>
-            <input id="inp-user" type="text" placeholder="Seu usuário" autocomplete="username" required />
+            <input id="inp-email" type="email" placeholder="seu@email.com" autocomplete="username" required />
+          </div>
+        </div>
+
+        <div class="field" id="otp-step" hidden>
+          <label for="inp-code">Código enviado por e-mail</label>
+          <div class="field-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M4 4h16v16H4z"/><path d="m4 7 8 6 8-6"/>
+            </svg>
+            <input id="inp-code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code" />
           </div>
         </div>
 
@@ -228,6 +238,7 @@
   </div>
 
   <script>
+    let challengeId = null;
     fetch('/api/admin/verify').then(res => {
       if (res.ok) window.location.replace('/admin.html');
     }).catch(() => {});
@@ -239,8 +250,9 @@
 
     async function doLogin(e) {
       e.preventDefault();
-      const username = document.getElementById('inp-user').value.trim();
+      const email    = document.getElementById('inp-email').value.trim();
       const password = document.getElementById('inp-pwd').value;
+      const code     = document.getElementById('inp-code').value.trim();
       const btn      = document.getElementById('btn-login');
       const errBox   = document.getElementById('error-box');
       const errMsg   = document.getElementById('error-msg');
@@ -250,19 +262,32 @@
       btn.disabled = true;
 
       try {
-        const res = await fetch('/api/admin/login', {
+        const res = await fetch(challengeId ? '/api/admin/verify-email' : '/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify(challengeId ? { challenge_id: challengeId, code } : { email, password })
         });
 
         if (res.ok) {
-          window.location.replace('/admin.html');
+          const data = await res.json();
+          if (data.requires_verification) {
+            challengeId = data.challenge_id;
+            document.getElementById('otp-step').hidden = false;
+            document.getElementById('inp-code').required = true;
+            document.getElementById('inp-email').disabled = true;
+            document.getElementById('inp-pwd').disabled = true;
+            document.querySelector('.btn-text').textContent = 'Verificar código';
+            document.querySelector('.card-sub').textContent = 'Digite o código enviado para seu e-mail';
+            document.getElementById('inp-code').focus();
+          } else {
+            window.location.replace('/admin.html');
+          }
         } else {
           const data = await res.json().catch(() => ({}));
-          errMsg.textContent = data.error || 'Usuário ou senha incorretos';
+          errMsg.textContent = data.error || 'Não foi possível autenticar';
           errBox.classList.add('show');
-          document.getElementById('inp-pwd').value = '';
+          if (challengeId) document.getElementById('inp-code').value = '';
+          else document.getElementById('inp-pwd').value = '';
         }
       } catch {
         errMsg.textContent = 'Erro de conexão. Tente novamente.';
