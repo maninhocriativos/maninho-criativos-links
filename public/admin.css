@@ -702,12 +702,27 @@ textarea.admin-input { height: auto; padding-top: 12px; }
 .receipt-signature strong { font-size: .82rem; }
 .receipt-signature small, .receipt-paper footer { color: #8490a1; font-size: .66rem; }
 .receipt-paper footer { text-align: center; border-top: 1px solid #e3e8ef; padding-top: 14px; }
-.signature-field { border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; background: #080c12; }
-.signature-heading { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border); }
-.signature-heading > div { display: flex; flex-direction: column; gap: 2px; }
-.signature-heading strong { font-size: .8rem; }
+.signature-field { border: 1px solid var(--border2); border-radius: 14px; overflow: hidden; background: #080c12; transition: border-color .2s, box-shadow .2s; }
+.signature-field:focus-within { border-color: rgba(22,131,255,.6); box-shadow: 0 0 0 3px rgba(22,131,255,.12); }
+.signature-heading { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.signature-title { display: flex; align-items: center; gap: 10px; }
+.signature-title > div { display: flex; flex-direction: column; gap: 2px; }
+.signature-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; background: rgba(22,131,255,.12); color: #58a6ff; font-size: 1rem; }
+.signature-heading strong { font-size: .84rem; }
 .signature-heading small { color: var(--text3); font-size: .7rem; }
-#signature-pad { display: block; width: 100%; height: 130px; background: #fff; cursor: crosshair; touch-action: none; }
+.signature-status { padding: 5px 9px; border: 1px solid var(--border2); border-radius: 999px; color: var(--text3); font-size: .68rem; font-weight: 700; }
+.signature-status.signed { color: #4ade80; border-color: rgba(74,222,128,.28); background: rgba(74,222,128,.08); }
+.signature-canvas-wrap { position: relative; margin: 14px; overflow: hidden; border: 1px dashed #aeb8c7; border-radius: 10px; background: linear-gradient(#fff,#fbfcfe); }
+#signature-pad { position: relative; z-index: 3; display: block; width: 100%; height: 170px; background: transparent; cursor: crosshair; touch-action: none; }
+.signature-placeholder { position: absolute; z-index: 1; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; color: #64748b; transition: opacity .2s; }
+.signature-placeholder span { font-family: Georgia,serif; font-size: 1.35rem; font-style: italic; }
+.signature-placeholder small { margin-top: 3px; font-size: .68rem; }
+.signature-placeholder.hidden { opacity: 0; }
+.signature-guide { position: absolute; z-index: 2; left: 16%; right: 16%; bottom: 36px; border-top: 1px solid #b7c0cd; pointer-events: none; }
+.signature-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px 14px; }
+.signature-actions > small { color: var(--text3); font-size: .68rem; }
+.signature-actions > div { display: flex; gap: 7px; }
+.signature-actions button:disabled { opacity: .4; cursor: not-allowed; }
 
 @media (max-width: 1024px) {
   #admin-panel { grid-template-columns: 220px minmax(0,1fr); }

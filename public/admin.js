@@ -631,13 +631,14 @@ function printReceipt() {
 }
 
 let signatureDirty = false;
+let signatureHistory = [];
 function setupSignaturePad() {
   const canvas = document.getElementById('signature-pad'); if (!canvas) return;
   const context = canvas.getContext('2d');
   context.lineWidth = 4; context.lineCap = 'round'; context.lineJoin = 'round'; context.strokeStyle = '#111827';
   let drawing = false;
   const point = event => { const rect = canvas.getBoundingClientRect(); return { x:(event.clientX-rect.left)*(canvas.width/rect.width), y:(event.clientY-rect.top)*(canvas.height/rect.height) }; };
-  canvas.addEventListener('pointerdown', event => { drawing=true; signatureDirty=true; canvas.setPointerCapture(event.pointerId); const p=point(event); context.beginPath(); context.moveTo(p.x,p.y); });
+  canvas.addEventListener('pointerdown', event => { signatureHistory.push(context.getImageData(0,0,canvas.width,canvas.height)); if(signatureHistory.length>20)signatureHistory.shift(); drawing=true; signatureDirty=true; canvas.setPointerCapture(event.pointerId); const p=point(event); context.beginPath(); context.moveTo(p.x,p.y); updateSignatureUi(); });
   canvas.addEventListener('pointermove', event => { if(!drawing)return; const p=point(event); context.lineTo(p.x,p.y); context.stroke(); updateSignaturePreview(); });
   const stop = () => { if(!drawing)return; drawing=false; updateSignaturePreview(); };
   canvas.addEventListener('pointerup', stop); canvas.addEventListener('pointercancel', stop);
@@ -647,11 +648,29 @@ function updateSignaturePreview() {
   const image=document.getElementById('preview-signature'); const canvas=document.getElementById('signature-pad');
   image.hidden=!signatureDirty;
   if(signatureDirty) image.src=canvas.toDataURL('image/png'); else image.removeAttribute('src');
+  updateSignatureUi();
+}
+
+function updateSignatureUi() {
+  const status=document.getElementById('signature-status');
+  status.textContent=signatureDirty?'Assinado':'Não assinado'; status.classList.toggle('signed',signatureDirty);
+  document.getElementById('signature-placeholder').classList.toggle('hidden',signatureDirty);
+  document.getElementById('signature-clear').disabled=!signatureDirty;
+  document.getElementById('signature-undo').disabled=!signatureHistory.length;
+}
+
+function undoSignature() {
+  const canvas=document.getElementById('signature-pad'), context=canvas.getContext('2d');
+  const previous=signatureHistory.pop(); if(!previous)return;
+  context.clearRect(0,0,canvas.width,canvas.height); context.putImageData(previous,0,0);
+  const pixels=context.getImageData(0,0,canvas.width,canvas.height).data;
+  signatureDirty=false; for(let i=3;i<pixels.length;i+=4){if(pixels[i]){signatureDirty=true;break;}}
+  updateSignaturePreview();
 }
 
 function clearSignature() {
   const canvas=document.getElementById('signature-pad'); canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
-  signatureDirty=false; updateSignaturePreview();
+  signatureDirty=false; signatureHistory=[]; updateSignaturePreview();
 }
 
 async function uploadSignature() {
