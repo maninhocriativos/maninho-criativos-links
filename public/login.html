@@ -95,6 +95,7 @@
     .form { display: flex; flex-direction: column; gap: 14px; }
 
     .field { display: flex; flex-direction: column; gap: 6px; }
+    [hidden] { display: none !important; }
     .field label {
       font-size: .72rem; font-weight: 700; letter-spacing: .5px;
       text-transform: uppercase; color: var(--text2);
@@ -183,7 +184,7 @@
       </div>
 
       <form class="form" id="login-form" onsubmit="doLogin(event)">
-        <div class="field">
+        <div class="field" id="email-step">
           <label for="inp-email">E-mail administrativo</label>
           <div class="field-wrap">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -203,7 +204,7 @@
           </div>
         </div>
 
-        <div class="field">
+        <div class="field" id="password-step">
           <label for="inp-pwd">Senha</label>
           <div class="field-wrap">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -226,7 +227,7 @@
         </div>
 
         <button type="submit" class="btn-login" id="btn-login">
-          <span class="btn-text">Entrar</span>
+          <span class="btn-text">Enviar código</span>
           <div class="spinner"></div>
         </button>
       </form>
@@ -273,6 +274,8 @@
           if (data.requires_verification) {
             challengeId = data.challenge_id;
             document.getElementById('otp-step').hidden = false;
+            document.getElementById('email-step').hidden = true;
+            document.getElementById('password-step').hidden = true;
             document.getElementById('inp-code').required = true;
             document.getElementById('inp-email').disabled = true;
             document.getElementById('inp-pwd').disabled = true;

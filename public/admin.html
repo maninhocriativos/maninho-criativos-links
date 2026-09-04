@@ -38,6 +38,10 @@
           <span>Leads</span>
           <span class="snav-badge" id="leads-count"></span>
         </button>
+        <button class="snav-item" data-tab="receipts" onclick="setTab('receipts',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>
+          <span>Recibos</span>
+        </button>
         <button class="snav-item" data-tab="analytics" onclick="setTab('analytics',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           <span>Analytics</span>
@@ -328,6 +332,36 @@
                 <tr><td colspan="9" style="text-align:center;color:#666;padding:32px">Carregando...</td></tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TAB: RECIBOS ── -->
+      <section id="tab-receipts" class="tab-content">
+        <div class="panel-card">
+          <div class="panel-card-header"><h3>✉️ Enviar recibo por e-mail</h3></div>
+          <form class="link-form" id="receipt-form" onsubmit="submitReceipt(event)">
+            <div class="form-row">
+              <div class="form-field"><label>Nome do cliente *</label><input class="admin-input" id="r-name" maxlength="120" required /></div>
+              <div class="form-field"><label>E-mail do cliente *</label><input class="admin-input" id="r-email" type="email" required /></div>
+            </div>
+            <div class="form-field"><label>Descrição do pagamento *</label><input class="admin-input" id="r-description" maxlength="500" placeholder="Ex.: Criação de identidade visual" required /></div>
+            <div class="form-row">
+              <div class="form-field"><label>Valor (R$) *</label><input class="admin-input" id="r-amount" type="number" min="0.01" max="1000000" step="0.01" required /></div>
+              <div class="form-field"><label>Forma de pagamento</label><input class="admin-input" id="r-payment" maxlength="80" placeholder="PIX, transferência..." /></div>
+              <div class="form-field"><label>Data do recibo *</label><input class="admin-input" id="r-date" type="date" required /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-field"><label>Quando enviar?</label><select class="admin-input" id="r-mode" onchange="toggleReceiptSchedule()"><option value="now">Enviar agora</option><option value="scheduled">Agendar envio</option></select></div>
+              <div class="form-field" id="r-schedule-field" hidden><label>Data e hora do envio *</label><input class="admin-input" id="r-scheduled" type="datetime-local" /></div>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn-primary" id="receipt-submit">Enviar recibo</button></div>
+          </form>
+        </div>
+        <div class="links-table-wrap">
+          <div class="table-header-row"><span class="table-count" id="receipts-count">0 recibos</span><button class="btn-secondary small" onclick="loadReceipts()">↻ Atualizar</button></div>
+          <div class="table-wrap">
+            <table class="leads-table"><thead><tr><th>#</th><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Envio</th><th>Status</th><th>Ação</th></tr></thead><tbody id="receipts-tbody"></tbody></table>
           </div>
         </div>
       </section>

@@ -23,10 +23,11 @@ function setTab(name, btn) {
   document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'));
   document.getElementById(`tab-${name}`)?.classList.add('active');
   btn.classList.add('active');
-  const titles = { links: 'Gerenciar Links', portfolio: 'Portfólio', profile: 'Editar Perfil', leads: 'Leads Captados', analytics: 'Analytics' };
+  const titles = { links: 'Gerenciar Links', portfolio: 'Portfólio', profile: 'Editar Perfil', leads: 'Leads Captados', receipts: 'Recibos por e-mail', analytics: 'Analytics' };
   document.getElementById('admin-page-title').textContent = titles[name] || name;
   if (name === 'portfolio') loadPortfolioAdmin();
   if (name === 'leads') loadLeads();
+  if (name === 'receipts') loadReceipts();
   if (name === 'analytics') loadAnalytics();
   closeSidebar();
 }
@@ -493,6 +494,71 @@ function formatDate(dt) {
   const d = new Date(dt);
   return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
+
+/* ══ RECIBOS POR E-MAIL ══ */
+function toggleReceiptSchedule() {
+  const scheduled = getVal('r-mode') === 'scheduled';
+  document.getElementById('r-schedule-field').hidden = !scheduled;
+  document.getElementById('r-scheduled').required = scheduled;
+  document.getElementById('receipt-submit').textContent = scheduled ? 'Agendar recibo' : 'Enviar recibo';
+}
+
+async function submitReceipt(event) {
+  event.preventDefault();
+  const button = document.getElementById('receipt-submit');
+  const amount = Number(getVal('r-amount'));
+  const scheduled = getVal('r-mode') === 'scheduled';
+  const scheduledValue = getVal('r-scheduled');
+  if (!Number.isFinite(amount) || amount <= 0) { toast('Informe um valor válido', true); return; }
+  if (scheduled && !scheduledValue) { toast('Informe a data e hora do envio', true); return; }
+  const body = {
+    recipient_name: getVal('r-name'), recipient_email: getVal('r-email'),
+    description: getVal('r-description'), amount_cents: Math.round(amount * 100),
+    payment_method: getVal('r-payment'), receipt_date: getVal('r-date'),
+    scheduled_at: scheduled ? new Date(scheduledValue).toISOString() : null,
+  };
+  button.disabled = true;
+  try {
+    const res = await authFetch('/api/admin/receipts', { method: 'POST', body: JSON.stringify(body) });
+    if (res?.ok) {
+      event.target.reset();
+      document.getElementById('r-date').value = new Date().toISOString().slice(0, 10);
+      toggleReceiptSchedule();
+      toast(scheduled ? 'Recibo agendado ✓' : 'Recibo enviado ✓');
+      loadReceipts();
+    } else if (res) {
+      const data = await res.json().catch(() => ({}));
+      toast(data.error || 'Erro ao processar recibo', true);
+    }
+  } finally { button.disabled = false; }
+}
+
+async function loadReceipts() {
+  const tbody = document.getElementById('receipts-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:28px">Carregando...</td></tr>';
+  const res = await authFetch('/api/admin/receipts');
+  if (!res?.ok) { tbody.innerHTML = '<tr><td colspan="7">Erro ao carregar recibos.</td></tr>'; return; }
+  const { receipts = [] } = await res.json();
+  document.getElementById('receipts-count').textContent = `${receipts.length} recibo${receipts.length === 1 ? '' : 's'}`;
+  if (!receipts.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:28px">Nenhum recibo enviado.</td></tr>'; return; }
+  const labels = { sent: 'Enviado', scheduled: 'Agendado', cancelled: 'Cancelado', failed: 'Falhou', pending: 'Processando' };
+  tbody.innerHTML = receipts.map(receipt => `
+    <tr><td>#${receipt.id}</td><td><strong>${esc(receipt.recipient_name)}</strong><br><small>${esc(receipt.recipient_email)}</small></td>
+    <td>${esc(receipt.description)}</td><td>${(receipt.amount_cents / 100).toLocaleString('pt-BR', { style:'currency', currency:'BRL' })}</td>
+    <td>${formatDate(receipt.scheduled_at || receipt.created_at)}</td><td><span class="lead-tag">${labels[receipt.status] || esc(receipt.status)}</span></td>
+    <td>${receipt.status === 'scheduled' ? `<button class="btn-danger-sm" onclick="cancelReceipt(${receipt.id})">Cancelar</button>` : '—'}</td></tr>`).join('');
+}
+
+async function cancelReceipt(id) {
+  if (!confirm('Cancelar este envio agendado?')) return;
+  const res = await authFetch(`/api/admin/receipts/${id}`, { method: 'DELETE' });
+  if (res?.ok) { toast('Agendamento cancelado'); loadReceipts(); }
+  else { const data = await res?.json().catch(() => ({})); toast(data?.error || 'Erro ao cancelar', true); }
+}
+
+const receiptDate = document.getElementById('r-date');
+if (receiptDate) receiptDate.value = new Date().toISOString().slice(0, 10);
 
 /* ══ ANALYTICS ══ */
 async function loadAnalytics() {
