@@ -630,6 +630,16 @@ body { font-size: 15px; background: radial-gradient(circle at 70% -20%, rgba(22,
 .sidebar-logo-img { height: 34px; max-width: 180px; }
 .sidebar-section-label { padding: 18px 14px 7px; }
 .sidebar-nav { gap: 5px; padding: 0 4px; }
+.nav-group-label { padding: 18px 12px 5px; color: var(--text3); font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.snav-item[data-tab="dashboard"] { order: 1; }
+.snav-item[data-tab="leads"] { order: 2; }
+.snav-item[data-tab="clients"] { order: 3; }
+.snav-item[data-tab="projects"] { order: 4; }
+.snav-item[data-tab="receipts"] { order: 5; }
+.nav-group-digital { order: 6; }
+.snav-item[data-tab="links"] { order: 7; }
+.snav-item[data-tab="portfolio"] { order: 8; }
+.snav-item[data-tab="analytics"] { order: 9; }
 .snav-item { min-height: 42px; padding: 10px 13px; border-radius: 10px; font-size: .88rem; gap: 11px; }
 .snav-item svg { width: 18px; height: 18px; }
 .snav-item.active { background: linear-gradient(90deg, rgba(22,131,255,.18), rgba(22,131,255,.06)); color: #fff; }
@@ -723,12 +733,45 @@ textarea.admin-input { height: auto; padding-top: 12px; }
 .signature-actions > small { color: var(--text3); font-size: .68rem; }
 .signature-actions > div { display: flex; gap: 7px; }
 .signature-actions button:disabled { opacity: .4; cursor: not-allowed; }
+.crm-kpis { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 14px; margin-bottom: 22px; }
+.crm-kpi { padding: 20px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg2); display: flex; flex-direction: column; gap: 5px; }
+.crm-kpi small { color: var(--text2); font-size: .75rem; }
+.crm-kpi strong { font-size: 1.55rem; letter-spacing: -.04em; }
+.crm-kpi span { color: var(--text3); font-size: .68rem; }
+.crm-dashboard-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 20px; }
+.crm-list { padding: 8px; }
+.crm-list button { width: 100%; border: 0; background: transparent; color: var(--text); display: flex; align-items: center; justify-content: space-between; padding: 13px; border-radius: 9px; text-align: left; cursor: pointer; }
+.crm-list button:hover { background: var(--bg-hover); }
+.crm-list button span,.crm-activity div { display: flex; flex-direction: column; gap: 3px; }
+.crm-list small { color: var(--text3); font-size: .7rem; }
+.crm-list time { color: var(--text2); font-size: .75rem; }
+.crm-activity { display: flex; gap: 11px; padding: 12px; }
+.crm-activity > span { width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+.crm-empty { padding: 34px; text-align: center; color: var(--text3); }
+.project-board { display: grid; grid-template-columns: repeat(5,minmax(220px,1fr)); gap: 12px; overflow-x: auto; padding-bottom: 8px; }
+.project-column { min-width: 220px; border: 1px solid var(--border); border-radius: 13px; background: rgba(13,17,24,.65); overflow: hidden; }
+.project-column > header { display: flex; justify-content: space-between; align-items: center; padding: 13px 14px; border-bottom: 1px solid var(--border); color: var(--text2); font-size: .76rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.project-column > header b { min-width: 22px; height: 22px; display: grid; place-items: center; border-radius: 99px; background: var(--bg3); font-size: .68rem; }
+.project-column > div { padding: 9px; display: flex; flex-direction: column; gap: 9px; }
+.project-card { padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg2); cursor: pointer; transition: transform .15s,border-color .15s; }
+.project-card:hover { transform: translateY(-2px); border-color: var(--border2); }
+.project-card > small { color: var(--accent); font-size: .65rem; font-weight: 700; text-transform: uppercase; }
+.project-card h4 { margin-top: 7px; font-size: .88rem; }
+.project-card p { margin-top: 4px; color: var(--text3); font-size: .72rem; }
+.project-progress { height: 5px; margin-top: 14px; border-radius: 4px; background: var(--bg3); overflow: hidden; }
+.project-progress span { display: block; height: 100%; background: var(--accent); border-radius: inherit; }
+.project-card footer { display: flex; justify-content: space-between; margin-top: 8px; color: var(--text3); font-size: .65rem; }
+.project-empty { padding: 25px 8px; color: var(--text3); text-align: center; font-size: .72rem; }
+.crm-status-select { height: 28px; border: 1px solid var(--border); border-radius: 99px; background: var(--bg3); color: var(--text2); padding: 0 9px; font: inherit; font-size: .7rem; outline: none; }
+.crm-status-select:focus { border-color: var(--accent); }
 
 @media (max-width: 1024px) {
   #admin-panel { grid-template-columns: 220px minmax(0,1fr); }
   .tab-content { padding: 22px; }
   .receipt-workspace { grid-template-columns: 1fr; }
   .receipt-preview-panel { position: static; }
+  .crm-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .crm-dashboard-grid { grid-template-columns: 1fr; }
 }
 
 @media print {
@@ -744,4 +787,6 @@ textarea.admin-input { height: auto; padding-top: 12px; }
   .tab-content { padding: 16px; }
   .panel-card, .links-table-wrap { border-radius: 12px; }
   .link-form { padding: 18px; }
+  .crm-kpis { grid-template-columns: 1fr 1fr; gap: 9px; }
+  .crm-kpi { padding: 15px; }
 }

@@ -19,10 +19,10 @@ async function logout() {
 }
 
 /* ══ Tabs ══ */
-const tabTitles = { links: ['Gerenciar Links','Organize os destinos da sua página'], portfolio: ['Portfólio','Gerencie seus projetos publicados'], profile: ['Editar Perfil','Identidade e aparência da página'], leads: ['Leads Captados','Contatos recebidos pelo site'], clients: ['Clientes','Cadastro central para propostas e recibos'], receipts: ['Recibos por e-mail','Envie agora ou programe o disparo'], analytics: ['Analytics','Acompanhe o desempenho do site'] };
+const tabTitles = { dashboard: ['Visão geral','Seu estúdio em um só lugar'], links: ['Links públicos','Organize os destinos da sua página'], portfolio: ['Portfólio público','Gerencie os cases publicados'], profile: ['Configurações','Identidade e aparência da página'], leads: ['Funil comercial','Transforme contatos em clientes'], clients: ['Clientes','Relacionamento e dados cadastrais'], projects: ['Projetos','Produção, revisão e entregas'], receipts: ['Financeiro e recibos','Recebimentos, documentos e envios'], analytics: ['Marketing e Analytics','Desempenho dos canais digitais'] };
 
 function setTab(name, btn, persist = true) {
-  if (!document.getElementById(`tab-${name}`)) name = 'links';
+  if (!document.getElementById(`tab-${name}`)) name = 'dashboard';
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'));
   document.getElementById(`tab-${name}`)?.classList.add('active');
@@ -36,6 +36,8 @@ function setTab(name, btn, persist = true) {
   if (name === 'portfolio') loadPortfolioAdmin();
   if (name === 'leads') loadLeads();
   if (name === 'clients') loadClients();
+  if (name === 'projects') loadProjects();
+  if (name === 'dashboard') loadCrmDashboard();
   if (name === 'receipts') { loadClientOptions(); loadReceipts(); }
   if (name === 'analytics') loadAnalytics();
   closeSidebar();
@@ -44,7 +46,7 @@ function setTab(name, btn, persist = true) {
 function restoreTab() {
   const hashTab = location.hash.replace('#', '');
   const savedTab = localStorage.getItem('mc_admin_tab');
-  setTab(hashTab || savedTab || 'links', null, false);
+  setTab(hashTab || savedTab || 'dashboard', null, false);
 }
 
 window.addEventListener('hashchange', () => restoreTab());
@@ -461,7 +463,7 @@ async function loadLeads() {
   const tbody = document.getElementById('leads-tbody');
   const stats = document.getElementById('leads-stats');
   if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#666">Carregando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:#666">Carregando...</td></tr>';
 
   let data;
   try {
@@ -499,12 +501,15 @@ async function loadLeads() {
       <td>${l.instagram ? `<a href="https://instagram.com/${encodeURIComponent(String(l.instagram).replace(/^@/,''))}" target="_blank" rel="noopener noreferrer">${esc(l.instagram)}</a>` : '—'}</td>
       <td><span class="lead-tag">${esc(l.service || '—')}</span></td>
       <td class="lead-msg">${esc(l.message || '—')}</td>
+      <td><select class="crm-status-select status-${esc(l.status||'new')}" onchange="updateLeadStatus(${l.id},this.value)"><option value="new" ${l.status==='new'?'selected':''}>Novo</option><option value="qualified" ${l.status==='qualified'?'selected':''}>Qualificado</option><option value="negotiation" ${l.status==='negotiation'?'selected':''}>Negociação</option><option value="won" ${l.status==='won'?'selected':''}>Ganho</option><option value="lost" ${l.status==='lost'?'selected':''}>Perdido</option></select></td>
       <td><span class="lead-page lead-page-${l.page === 'portfolio' ? 'portfolio' : 'links'}">${l.page === 'portfolio' ? 'portfolio' : 'links'}</span></td>
       <td class="lead-date">${formatDate(l.created_at)}</td>
       <td><button class="btn-danger-sm" onclick="deleteLead(${l.id})">✕</button></td>
     </tr>
   `).join('');
 }
+
+async function updateLeadStatus(id,status){const res=await authFetch('/api/admin/leads',{method:'PATCH',body:JSON.stringify({id,status})});if(res?.ok){toast('Oportunidade atualizada ✓');loadLeads();}else toast('Erro ao atualizar oportunidade',true);}
 
 async function deleteLead(id) {
   if (!confirm('Remover este lead?')) return;
@@ -518,6 +523,43 @@ function formatDate(dt) {
   const d = new Date(dt);
   return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
+
+/* ══ CRM — VISÃO GERAL E PROJETOS ══ */
+const projectStages = { briefing:'Briefing', creation:'Criação', review:'Revisão', approved:'Aprovado', delivered:'Entregue', paused:'Pausado', cancelled:'Cancelado' };
+let projectsCache = [];
+
+async function loadCrmDashboard() {
+  const res = await authFetch('/api/admin/crm-dashboard'); if(!res?.ok)return;
+  const data = await res.json(); const money = cents => (cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  document.getElementById('crm-kpis').innerHTML = [
+    ['Clientes ativos',data.clients,'Relacionamentos'],['Oportunidades',data.open_leads,'No funil'],['Projetos ativos',data.active_projects,'Em produção'],['Pipeline',money(data.pipeline_cents),'Valor dos projetos'],['Recebimentos',money(data.revenue_cents),'Recibos emitidos']
+  ].map(([label,value,hint])=>`<div class="crm-kpi"><small>${label}</small><strong>${value}</strong><span>${hint}</span></div>`).join('');
+  const deadlines=document.getElementById('crm-deadlines');
+  deadlines.innerHTML=data.deadlines.length?data.deadlines.map(item=>`<button onclick="setTab('projects')"><span><strong>${esc(item.title)}</strong><small>${esc(item.client_name)} • ${projectStages[item.status]||item.status}</small></span><time>${receiptDateLabel(item.deadline)}</time></button>`).join(''):'<div class="crm-empty">Nenhuma entrega programada.</div>';
+  const activities=document.getElementById('crm-activities');
+  activities.innerHTML=data.activities.length?data.activities.map(item=>`<div class="crm-activity"><span></span><div><strong>${esc(item.details||item.action)}</strong><small>${esc(item.entity_type)} • ${formatDate(item.created_at)}</small></div></div>`).join(''):'<div class="crm-empty">As movimentações aparecerão aqui.</div>';
+}
+
+async function loadProjects() {
+  const [projectsRes] = await Promise.all([authFetch('/api/admin/projects'), loadProjectClientOptions()]); if(!projectsRes?.ok)return;
+  projectsCache=(await projectsRes.json()).projects||[]; renderProjectBoard();
+}
+async function loadProjectClientOptions() {
+  const clients=clientsCache.length?clientsCache:await fetchClients(); const select=document.getElementById('pr-client'); if(!select)return;
+  const current=select.value; select.innerHTML='<option value="">Selecione</option>'+clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(''); select.value=current;
+}
+function renderProjectBoard() {
+  const board=document.getElementById('project-board'); if(!board)return;
+  const stages=['briefing','creation','review','approved','delivered'];
+  board.innerHTML=stages.map(stage=>{const items=projectsCache.filter(p=>p.status===stage);return `<section class="project-column"><header><span>${projectStages[stage]}</span><b>${items.length}</b></header><div>${items.length?items.map(p=>`<article class="project-card" onclick="editProject(${p.id})"><small>${esc(p.service)}</small><h4>${esc(p.title)}</h4><p>${esc(p.client_name)}</p><div class="project-progress"><span style="width:${p.progress}%"></span></div><footer><span>${p.progress}%</span><time>${p.deadline?receiptDateLabel(p.deadline):'Sem prazo'}</time></footer></article>`).join(''):'<p class="project-empty">Nenhum projeto</p>'}</div></section>`}).join('');
+}
+async function submitProject(event) {
+  event.preventDefault(); const id=Number(getVal('pr-id'))||null; const value=Number(getVal('pr-value'))||0;
+  const body={id,client_id:Number(getVal('pr-client')),title:getVal('pr-title'),service:getVal('pr-service'),status:getVal('pr-status'),deadline:getVal('pr-deadline'),value_cents:Math.round(value*100),progress:Number(getVal('pr-progress'))||0,notes:getVal('pr-notes')};
+  const res=await authFetch('/api/admin/projects',{method:id?'PUT':'POST',body:JSON.stringify(body)}); if(res?.ok){toast(id?'Projeto atualizado ✓':'Projeto criado ✓');resetProjectForm();loadProjects();}else if(res){const d=await res.json().catch(()=>({}));toast(d.error||'Erro ao salvar projeto',true);}
+}
+function editProject(id) { const p=projectsCache.find(item=>item.id===id);if(!p)return;for(const [field,key] of [['pr-id','id'],['pr-client','client_id'],['pr-title','title'],['pr-service','service'],['pr-status','status'],['pr-deadline','deadline'],['pr-progress','progress'],['pr-notes','notes']])setVal(field,p[key]??'');setVal('pr-value',(p.value_cents/100).toFixed(2));document.getElementById('pr-submit').textContent='Salvar projeto';document.getElementById('pr-cancel').hidden=false;document.getElementById('project-form').scrollIntoView({behavior:'smooth'}); }
+function resetProjectForm(){document.getElementById('project-form').reset();setVal('pr-id','');setVal('pr-progress','0');document.getElementById('pr-submit').textContent='Criar projeto';document.getElementById('pr-cancel').hidden=true;}
 
 /* ══ CLIENTES ══ */
 let clientsCache = [];
