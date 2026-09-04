@@ -602,6 +602,31 @@ async function loadClientOptions() {
 function selectReceiptClient() {
   const client = clientsCache.find(item => item.id === Number(getVal('r-client')));
   setVal('r-email-preview', client?.email || '');
+  updateReceiptPreview();
+}
+
+function receiptDateLabel(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return '—';
+  const [year, month, day] = value.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+function updateReceiptPreview() {
+  const client = clientsCache.find(item => item.id === Number(getVal('r-client')));
+  const amount = Number(getVal('r-amount')) || 0;
+  document.getElementById('preview-client').textContent = client?.name || 'Selecione um cliente';
+  document.getElementById('preview-document').textContent = client?.document ? `CPF/CNPJ ${client.document}` : '';
+  document.getElementById('preview-amount').textContent = amount.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+  document.getElementById('preview-description').textContent = getVal('r-description') || 'Descrição do pagamento';
+  document.getElementById('preview-payment').textContent = getVal('r-payment') || 'Não informada';
+  document.getElementById('preview-date').textContent = receiptDateLabel(getVal('r-date'));
+  const address = client ? [client.address, [client.city, client.state].filter(Boolean).join(' / '), client.postal_code ? `CEP ${client.postal_code}` : ''].filter(Boolean).join(' • ') : '';
+  document.getElementById('preview-address').textContent = address;
+}
+
+function printReceipt() {
+  updateReceiptPreview();
+  window.print();
 }
 
 /* ══ RECIBOS POR E-MAIL ══ */
@@ -631,8 +656,10 @@ async function submitReceipt(event) {
     const res = await authFetch('/api/admin/receipts', { method: 'POST', body: JSON.stringify(body) });
     if (res?.ok) {
       event.target.reset();
-      document.getElementById('r-date').value = new Date().toISOString().slice(0, 10);
+      const now = new Date();
+      document.getElementById('r-date').value = new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
       toggleReceiptSchedule();
+      updateReceiptPreview();
       toast(scheduled ? 'Recibo agendado ✓' : 'Recibo enviado ✓');
       loadReceipts();
     } else if (res) {
@@ -667,7 +694,12 @@ async function cancelReceipt(id) {
 }
 
 const receiptDate = document.getElementById('r-date');
-if (receiptDate) receiptDate.value = new Date().toISOString().slice(0, 10);
+if (receiptDate) {
+  const now = new Date(); const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
+  receiptDate.value = localDate.toISOString().slice(0, 10);
+}
+['r-description','r-amount','r-payment','r-date'].forEach(id => document.getElementById(id)?.addEventListener('input', updateReceiptPreview));
+updateReceiptPreview();
 
 /* ══ ANALYTICS ══ */
 async function loadAnalytics() {

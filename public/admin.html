@@ -359,6 +359,7 @@
 
       <!-- ── TAB: RECIBOS ── -->
       <section id="tab-receipts" class="tab-content">
+        <div class="receipt-workspace">
         <div class="panel-card">
           <div class="panel-card-header"><h3>✉️ Enviar recibo por e-mail</h3></div>
           <form class="link-form" id="receipt-form" onsubmit="event.preventDefault(); submitReceipt(event)">
@@ -378,6 +379,20 @@
             </div>
             <div class="form-actions"><button type="submit" class="btn-primary" id="receipt-submit">Enviar recibo</button></div>
           </form>
+        </div>
+        <aside class="receipt-preview-panel">
+          <div class="receipt-preview-toolbar"><div><strong>Pré-visualização</strong><small>Atualização em tempo real</small></div><button type="button" class="btn-secondary small" onclick="printReceipt()">Imprimir / PDF</button></div>
+          <article class="receipt-paper" id="receipt-preview">
+            <header class="receipt-paper-header"><div><span class="receipt-brand">MANINHO CRIATIVOS</span><h2>RECIBO</h2></div><span class="receipt-number">Nº —</span></header>
+            <div class="receipt-total"><small>VALOR RECEBIDO</small><strong id="preview-amount">R$ 0,00</strong></div>
+            <p>Recebemos de <strong id="preview-client">Selecione um cliente</strong><span id="preview-document"></span>, a importância acima referente a:</p>
+            <div class="receipt-description" id="preview-description">Descrição do pagamento</div>
+            <dl class="receipt-meta"><div><dt>Forma de pagamento</dt><dd id="preview-payment">Não informada</dd></div><div><dt>Data</dt><dd id="preview-date">—</dd></div></dl>
+            <div class="receipt-client-details" id="preview-address"></div>
+            <div class="receipt-signature"><span></span><strong>Maninho Criativos</strong><small>Assinatura do responsável</small></div>
+            <footer>Recibo emitido eletronicamente por Maninho Criativos.</footer>
+          </article>
+        </aside>
         </div>
         <div class="links-table-wrap">
           <div class="table-header-row"><span class="table-count" id="receipts-count">0 recibos</span><button class="btn-secondary small" onclick="loadReceipts()">↻ Atualizar</button></div>
@@ -467,6 +482,6 @@
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <script src="admin.js?v=20260904-3"></script>
+  <script src="admin.js?v=20260904-4"></script>
 </body>
 </html>

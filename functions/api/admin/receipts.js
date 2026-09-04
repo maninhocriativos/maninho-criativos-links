@@ -26,6 +26,8 @@ function receiptHtml(receipt) {
           <p style="margin:0 0 12px"><strong>Data:</strong> ${escapeHtml(date)}</p>
           ${receipt.payment_method ? `<p style="margin:0"><strong>Forma de pagamento:</strong> ${escapeHtml(receipt.payment_method)}</p>` : ''}
         </div>
+        ${receipt.client_document ? `<p style="font-size:13px;color:#64748b"><strong>CPF/CNPJ:</strong> ${escapeHtml(receipt.client_document)}</p>` : ''}
+        ${receipt.client_address ? `<p style="font-size:13px;color:#64748b"><strong>Endereço:</strong> ${escapeHtml(receipt.client_address)}</p>` : ''}
         <div style="margin-top:52px;text-align:center"><div style="border-top:1px solid #334155;width:280px;margin:0 auto 8px"></div><strong>Maninho Criativos</strong><br><span style="font-size:12px;color:#64748b">Assinatura do responsável</span></div>
         <p style="font-size:13px;color:#64748b">Este recibo foi emitido eletronicamente por Maninho Criativos.</p>
       </div>
@@ -45,12 +47,14 @@ export async function onRequestPost({ request, env }) {
     if (!env.RESEND_API_KEY || !env.RESEND_FROM_EMAIL) throw new HttpError(503, 'Resend não configurado');
     const body = await readJson(request, 16_384);
     const clientId = integer(body.client_id, { min: 1 });
-    const client = await env.DB.prepare(`SELECT id,name,email FROM clients WHERE id=? AND is_active=1`).bind(clientId).first();
+    const client = await env.DB.prepare(`SELECT * FROM clients WHERE id=? AND is_active=1`).bind(clientId).first();
     if (!client) throw new HttpError(404, 'Cliente não encontrado ou arquivado');
     const receipt = {
       client_id: client.id,
       recipient_name: text(client.name, { required: true, max: 120 }),
       recipient_email: validEmail(client.email),
+      client_document: client.document || '',
+      client_address: [client.address, [client.city, client.state].filter(Boolean).join(' / '), client.postal_code ? `CEP ${client.postal_code}` : ''].filter(Boolean).join(' • '),
       description: text(body.description, { required: true, max: 500 }),
       amount_cents: integer(body.amount_cents, { min: 1, max: 100_000_000 }),
       payment_method: text(body.payment_method, { max: 80 }),
