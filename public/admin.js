@@ -544,6 +544,32 @@ async function archiveClient(id) {
   if (res?.ok) { toast('Cliente arquivado'); loadClients(); } else toast('Erro ao arquivar', true);
 }
 
+let cepTimer;
+function handleCepInput(input) {
+  const digits = input.value.replace(/\D/g, '').slice(0, 8);
+  input.value = digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+  clearTimeout(cepTimer);
+  if (digits.length === 8) cepTimer = setTimeout(lookupCep, 350);
+  else document.getElementById('cep-status').textContent = '';
+}
+
+async function lookupCep() {
+  const cep = getVal('c-postal').replace(/\D/g, '');
+  if (cep.length !== 8) return;
+  const status = document.getElementById('cep-status');
+  status.textContent = 'Buscando endereço...'; status.style.color = 'var(--text2)';
+  const res = await authFetch(`/api/admin/cep/${cep}`);
+  if (!res?.ok) {
+    const data = await res?.json().catch(() => ({}));
+    status.textContent = data?.error || 'CEP não encontrado'; status.style.color = 'var(--red)'; return;
+  }
+  const data = await res.json();
+  setVal('c-address', [data.address, data.neighborhood].filter(Boolean).join(' — '));
+  setVal('c-city', data.city); setVal('c-state', data.state);
+  status.textContent = 'Endereço preenchido ✓'; status.style.color = '#22c55e';
+  document.getElementById('c-address').focus();
+}
+
 async function loadClientOptions() {
   const clients = await fetchClients(); const select = document.getElementById('r-client'); if (!select) return;
   select.innerHTML = '<option value="">Selecione um cliente</option>' + clients.map(client => `<option value="${client.id}">${esc(client.name)} — ${esc(client.email)}</option>`).join('');
