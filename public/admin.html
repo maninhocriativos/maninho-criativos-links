@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="admin.css?v=20260904-2" />
+  <link rel="stylesheet" href="admin.css?v=20260904-3" />
 </head>
 <body>
 
@@ -138,6 +138,10 @@
 
       <!-- ── TAB: LINKS ── -->
       <section id="tab-links" class="tab-content">
+        <div class="section-hero">
+          <div><span class="eyebrow">Presença digital</span><h1>Links da bio</h1><p>Organize seus canais, acompanhe cliques e controle o que aparece na sua página.</p></div>
+          <a class="btn-secondary" href="/" target="_blank">Abrir página pública ↗</a>
+        </div>
         <!-- Add link form -->
         <div class="panel-card content-modal" id="add-link-panel">
           <div class="panel-card-header">
@@ -208,6 +212,10 @@
 
       <!-- ── TAB: PORTFÓLIO ── -->
       <section id="tab-portfolio" class="tab-content">
+        <div class="section-hero">
+          <div><span class="eyebrow">Vitrine criativa</span><h1>Portfólio</h1><p>Gerencie projetos publicados e mantenha sua apresentação visual sempre atualizada.</p></div>
+          <a class="btn-secondary" href="/portfolio.html" target="_blank">Visualizar portfólio ↗</a>
+        </div>
         <div class="panel-card content-modal" id="add-portfolio-panel">
           <div class="panel-card-header">
             <h3>➕ Novo item</h3>
@@ -389,12 +397,19 @@
 
       <!-- ── TAB: RECIBOS ── -->
       <section id="tab-receipts" class="tab-content">
+        <div class="finance-subnav" role="tablist">
+          <button class="active" id="finance-tab-cash" onclick="setFinanceView('cash')">Fluxo de caixa</button>
+          <button id="finance-tab-receipts" onclick="setFinanceView('receipts')">Recibos e documentos</button>
+        </div>
+        <div id="finance-view-cash" class="finance-view active">
         <div class="finance-header"><div><h3>Fluxo de caixa</h3><p>Controle receitas, despesas e valores pendentes.</p></div><div><input class="admin-input finance-month" id="finance-month" type="month" onchange="loadCashFlow()"/><button class="btn-primary" onclick="openCashModal()">+ Novo lançamento</button></div></div>
         <div class="finance-kpis" id="finance-kpis"></div>
         <div class="finance-grid">
-          <div class="panel-card"><div class="panel-card-header"><div><h3>Movimentações do mês</h3><p class="panel-description" id="finance-period-label"></p></div></div><div class="table-wrap"><table class="leads-table"><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Status</th><th>Valor</th><th>Ações</th></tr></thead><tbody id="cash-tbody"></tbody></table></div></div>
+          <div class="panel-card"><div class="panel-card-header finance-list-header"><div><h3>Movimentações do mês</h3><p class="panel-description" id="finance-period-label"></p></div><button class="btn-secondary small" onclick="exportCashFlow()">Exportar CSV</button></div><div class="finance-filters"><input class="admin-input" id="cash-search" placeholder="Buscar lançamento..." oninput="filterCashFlow()"><select class="admin-input" id="cash-type-filter" onchange="filterCashFlow()"><option value="">Entradas e saídas</option><option value="income">Somente entradas</option><option value="expense">Somente saídas</option></select><select class="admin-input" id="cash-status-filter" onchange="filterCashFlow()"><option value="">Todos os status</option><option value="paid">Pagos</option><option value="pending">Pendentes</option><option value="cancelled">Cancelados</option></select></div><div class="table-wrap"><table class="leads-table"><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Status</th><th>Valor</th><th>Ações</th></tr></thead><tbody id="cash-tbody"></tbody></table></div></div>
           <div class="panel-card"><div class="panel-card-header"><div><h3>Relatório mensal</h3><p class="panel-description">Receitas x despesas dos últimos 12 meses</p></div></div><div class="finance-chart" id="finance-chart"></div><div class="finance-categories" id="finance-categories"></div></div>
         </div>
+        </div>
+        <div id="finance-view-receipts" class="finance-view">
         <div class="finance-section-title"><div><h3>Recibos e documentos</h3><p>Gere, assine, envie e acompanhe comprovantes.</p></div></div>
         <div class="receipt-workspace">
         <div class="panel-card">
@@ -441,6 +456,7 @@
           <div class="table-wrap">
             <table class="leads-table"><thead><tr><th>#</th><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Envio</th><th>Status</th><th>Ação</th></tr></thead><tbody id="receipts-tbody"></tbody></table>
           </div>
+        </div>
         </div>
       </section>
 
@@ -526,6 +542,6 @@
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <script src="admin.js?v=20260904-8"></script>
+  <script src="admin.js?v=20260904-9"></script>
 </body>
 </html>
