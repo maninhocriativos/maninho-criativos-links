@@ -117,7 +117,8 @@ function createPortfolioCard(item, i) {
     const deskImg = document.createElement('img');
     deskImg.src = item.image_url;
     deskImg.alt = `${item.title} - Desktop`;
-    deskImg.loading = 'lazy';
+    deskImg.loading = i < 9 ? 'eager' : 'lazy';
+    if (i < 3) deskImg.fetchPriority = 'high';
     deskImg.decoding = 'async';
     desktop.appendChild(deskImg);
 
@@ -127,7 +128,7 @@ function createPortfolioCard(item, i) {
     const mobImg = document.createElement('img');
     mobImg.src = item.image_mobile_url || item.image_url;
     mobImg.alt = `${item.title} - Mobile`;
-    mobImg.loading = 'lazy';
+    mobImg.loading = i < 9 ? 'eager' : 'lazy';
     mobImg.decoding = 'async';
     mobile.appendChild(mobImg);
 
