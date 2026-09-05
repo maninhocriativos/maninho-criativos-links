@@ -662,8 +662,9 @@ body { background:#06090e; color:#f4f7fb; }
 .pf-screenshot.desktop img{width:100%;height:100%;object-fit:cover;object-position:center top}
 .pf-card::after{content:'';position:absolute;inset:0;pointer-events:none;border:1px solid rgba(148,163,184,.13);border-radius:16px;z-index:12}
 .pf-card:hover::after{border-color:rgba(88,166,255,.5)}
-.pf-overlay{padding:20px;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:linear-gradient(180deg,transparent 52%,rgba(3,7,13,.18) 66%,rgba(3,7,13,.96) 100%)}.pf-overlay-info{align-self:flex-start;margin-top:auto}.pf-overlay-title{text-shadow:0 2px 12px rgba(0,0,0,.8)}
+.pf-overlay{inset:auto 0 0!important;min-height:34%;padding:48px 20px 18px;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:linear-gradient(180deg,transparent,rgba(3,7,13,.94) 52%,#03070d 100%)!important}.pf-overlay-info{align-self:flex-start;margin-top:auto}.pf-overlay-title{text-shadow:0 2px 12px rgba(0,0,0,.8)}
 .pf-screenshot.desktop img{position:relative;z-index:2;opacity:1}
+.pf-screenshot.desktop{background-size:cover;background-position:center top;background-repeat:no-repeat}
 .pf-overlay-link{width:auto;align-self:flex-end;padding:9px 12px}.gallery-count{margin-bottom:4px}
 @media (max-width:760px){.pf-hero{min-height:0}.pf-hero-inner{padding:62px 20px 48px}.hero-title{font-size:clamp(2.35rem,12vw,3.5rem)}.pf-grid:not(.gallery-groups){grid-template-columns:1fr 1fr;gap:10px}.pf-card-inner{min-height:0}}
 @media (max-width:480px){.pf-grid:not(.gallery-groups){grid-template-columns:1fr}}

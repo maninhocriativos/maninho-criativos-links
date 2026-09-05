@@ -114,6 +114,7 @@ function createPortfolioCard(item, i) {
     /* Desktop screenshot (esquerda, grande) */
     const desktop = document.createElement('div');
     desktop.className = 'pf-screenshot desktop';
+    desktop.style.backgroundImage = `url("${String(item.image_url).replaceAll('"','%22')}")`;
     const deskImg = document.createElement('img');
     deskImg.src = item.image_url;
     deskImg.alt = `${item.title} - Desktop`;
