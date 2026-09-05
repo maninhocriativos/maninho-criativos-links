@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="portfolio.css" />
+  <link rel="stylesheet" href="portfolio.css?v=20260904-5" />
 </head>
 <body data-page="portfolio">
 
@@ -39,13 +39,13 @@
       <div class="hero-grid-lines"></div>
     </div>
     <div class="pf-hero-inner">
-      <span class="hero-tag"><span class="tag-dot"></span>Trabalhos entregues</span>
-      <h1 class="hero-title">Portfólio de<br><em>Trabalhos Realizados</em></h1>
-      <p class="hero-desc">Projetos reais, clientes reais — veja o que já foi construído e escolha a categoria que mais te interessa.</p>
+      <span class="hero-tag"><span class="tag-dot"></span>Design • Desenvolvimento • IA</span>
+      <h1 class="hero-title">Ideias transformadas<br>em <em>experiências digitais.</em></h1>
+      <p class="hero-desc">Uma seleção de projetos criados para marcas que querem comunicar melhor, vender mais e construir presença digital.</p>
       <div class="hero-stats">
         <div class="hstat"><span class="hstat-n" id="stat-n">37</span><span class="hstat-l">Projetos</span></div>
         <div class="hstat-sep"></div>
-        <div class="hstat"><span class="hstat-n">6</span><span class="hstat-l">Categorias</span></div>
+        <div class="hstat"><span class="hstat-n" id="stat-categories">6</span><span class="hstat-l">Especialidades</span></div>
         <div class="hstat-sep"></div>
         <div class="hstat"><span class="hstat-n">100%</span><span class="hstat-l">Satisfação</span></div>
       </div>
@@ -56,11 +56,11 @@
   <nav class="cat-nav" id="cat-nav" aria-label="Categorias do portfólio">
     <div class="cat-nav-inner">
 
-      <button class="cat-btn active" data-cat="home" aria-selected="true">
+      <button class="cat-btn active" data-cat="all" aria-selected="true">
         <span class="cat-btn-icon home-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </span>
-        <span class="cat-btn-label">Visão Geral</span>
+        <span class="cat-btn-label">Todos os projetos</span>
       </button>
 
       <button class="cat-btn" data-cat="Ensaio Fotográfico">
@@ -112,7 +112,7 @@
   <main class="pf-content">
 
     <!-- HOME: visão geral / vendas -->
-    <div class="pf-home" id="pf-home">
+    <div class="pf-home" id="pf-home" hidden>
       <div class="pf-home-inner">
 
         <div class="home-intro">
@@ -201,9 +201,9 @@
     </div>
 
     <!-- GALERIA: grade de projetos por categoria -->
-    <div class="pf-gallery" id="pf-gallery" style="display:none">
+    <div class="pf-gallery" id="pf-gallery">
       <div class="gallery-header">
-        <h2 class="gallery-title" id="gallery-title">Projetos</h2>
+        <div><span class="gallery-eyebrow">Projetos selecionados</span><h2 class="gallery-title" id="gallery-title">Todos os trabalhos</h2></div>
         <span class="gallery-count" id="gallery-count"></span>
       </div>
       <div class="pf-grid" id="pf-grid">
@@ -215,6 +215,10 @@
         <div class="pf-skel"></div>
       </div>
       <p class="pf-empty" id="pf-empty" style="display:none">Nenhum projeto nesta categoria ainda.</p>
+      <section class="portfolio-cta">
+        <div><span>Tem um projeto em mente?</span><h2>Vamos criar algo que represente sua marca.</h2><p>Conte o que você precisa e receba uma proposta personalizada.</p></div>
+        <button onclick="openModal()">Iniciar um projeto <span>↗</span></button>
+      </section>
     </div>
   </main>
 
@@ -293,7 +297,7 @@
     </div>
   </div>
 
-  <script src="portfolio.js"></script>
+  <script src="portfolio.js?v=20260904-5"></script>
   <script src="track.js"></script>
 </body>
 </html>

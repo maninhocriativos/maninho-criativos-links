@@ -18,8 +18,12 @@ async function init() {
 
   const statEl = document.getElementById('stat-n');
   if (statEl && allItems.length) statEl.textContent = allItems.length;
+  const categories = new Set(allItems.map(item => item.category).filter(Boolean));
+  const categoryStat = document.getElementById('stat-categories');
+  if (categoryStat && categories.size) categoryStat.textContent = categories.size;
 
   setupNav();
+  showGallery('all');
 
   document.querySelectorAll('.srv-big-card').forEach(card => {
     card.setAttribute('role', 'button');
@@ -45,11 +49,7 @@ function setupNav() {
       btn.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
 
       const cat = btn.dataset.cat;
-      if (cat === 'home') {
-        showHome();
-      } else {
-        showGallery(cat);
-      }
+      showGallery(cat);
     });
   });
 }
@@ -72,13 +72,13 @@ function showGallery(cat) {
     'Ensaio Fotográfico':'Ensaio Fotográfico com IA','Design 3D':'Design 3D','IA Generativa':'IA Generativa',
     'Desenvolvimento de Apps':'Apps & Landing Pages','CRM & Meta':'CRM Integrado à Meta','Automação de IA':'Automação de IA para Vendas',
   };
-  title.textContent = labels[cat] || cat;
+  title.textContent = cat === 'all' ? 'Todos os trabalhos' : (labels[cat] || cat);
 
   grid.innerHTML = Array(6).fill(0).map((_,i) => `<div class="pf-skel${i%3===1?' tall':''}"></div>`).join('');
   empty.style.display = 'none';
 
   setTimeout(() => {
-    filtered = allItems.filter(i => i.category === cat);
+    filtered = cat === 'all' ? [...allItems] : allItems.filter(i => i.category === cat);
     count.textContent = filtered.length ? `${filtered.length} projeto${filtered.length>1?'s':''}` : '';
 
     if (!filtered.length) {
