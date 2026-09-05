@@ -107,10 +107,14 @@ async function loadLinks() {
   if (!res) return;
   const { links } = await res.json();
   linksCache = links || [];
+  renderLinkInsights();
   renderLinks(linksCache);
 }
 let linksCache=[];
-function filterLinks(){const q=getVal('links-search').toLowerCase();renderLinks(linksCache.filter(link=>`${link.title} ${link.url}`.toLowerCase().includes(q)));}
+function filterLinks(){const q=getVal('links-search').toLowerCase(),sort=getVal('links-sort')||'order';const items=linksCache.filter(link=>`${link.title} ${link.url}`.toLowerCase().includes(q));items.sort((a,b)=>sort==='clicks'?(b.click_count||0)-(a.click_count||0):sort==='name'?a.title.localeCompare(b.title,'pt-BR'):(a.order_index||0)-(b.order_index||0));renderLinks(items);}
+function renderLinkInsights(){const host=document.getElementById('link-insights');if(!host)return;const active=linksCache.filter(link=>link.is_active).length,total=linksCache.reduce((sum,link)=>sum+(link.click_count||0),0),best=[...linksCache].sort((a,b)=>(b.click_count||0)-(a.click_count||0))[0];host.innerHTML=`<div><span class="insight-icon">${uiIcon('link')}</span><small>Links publicados</small><strong>${active}</strong><em>de ${linksCache.length} cadastrados</em></div><div><span class="insight-icon">${uiIcon('cursor')}</span><small>Cliques acumulados</small><strong>${total.toLocaleString('pt-BR')}</strong><em>em todos os canais</em></div><div><span class="insight-icon">${uiIcon('trend')}</span><small>Melhor desempenho</small><strong class="insight-name">${esc(best?.title||'—')}</strong><em>${best?.click_count||0} cliques</em></div>`;}
+function uiIcon(name){const paths={link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',cursor:'<path d="m4 3 7 17 2.4-6.6L20 11 4 3Z"/><path d="m14 14 5 5"/>',trend:'<path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/>',edit:'<path d="m4 20 4.2-1 10.9-10.9a2 2 0 0 0-3-3L5.2 16 4 20Z"/>',trash:'<path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7M10 11v5m4-5v5"/>'};return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||paths.link}</svg>`;}
+function brandIcon(link){const value=`${link.title||''} ${link.url||''}`.toLowerCase();let path;if(value.includes('instagram'))path='<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>';else if(value.includes('youtube')||value.includes('youtu.be'))path='<path d="M21 8.2a3 3 0 0 0-2.1-2.1C17 5.5 12 5.5 12 5.5s-5 0-6.9.6A3 3 0 0 0 3 8.2 31 31 0 0 0 2.5 12 31 31 0 0 0 3 15.8a3 3 0 0 0 2.1 2.1c1.9.6 6.9.6 6.9.6s5 0 6.9-.6a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-3.8 31 31 0 0 0-.5-3.8Z"/><path d="m10 9 5 3-5 3V9Z"/>';else if(value.includes('tiktok'))path='<path d="M15 4v10.2a5 5 0 1 1-4-4.9"/><path d="M15 4c.5 3 2.2 4.5 5 4.7"/>';else if(value.includes('whatsapp')||value.includes('wa.me'))path='<path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.4-4A8 8 0 1 1 20 11.5Z"/><path d="M9 8.5c.5 2.8 2 4.3 5 5"/>';else if(value.includes('portfolio')||value.includes('portfólio'))path='<rect x="3" y="5" width="18" height="15" rx="3"/><path d="M9 5V3h6v2M3 11h18M10 11v2h4v-2"/>';else path='<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>';return `<svg viewBox="0 0 24 24" role="img" aria-label="${esc(link.title)}">${path}</svg>`;}
 
 async function loadProfile() {
   const res = await authFetch('/api/admin/profile');
@@ -142,13 +146,11 @@ function renderLinks(links) {
     row.dataset.id = link.id;
 
     row.innerHTML = `
-      <div class="table-row-icon" style="background:linear-gradient(135deg,${esc(link.color_from)},${esc(link.color_to)})">
-        ${esc(link.icon)}
-      </div>
+      <div class="table-row-icon brand-icon">${brandIcon(link)}</div>
       <div class="table-row-info">
         <div class="table-row-title">
           ${esc(link.title)}
-          <span class="click-count">👆 ${link.click_count || 0}</span>
+          <span class="click-count">${uiIcon('cursor')} ${link.click_count || 0}</span>
         </div>
         <div class="table-row-url">${esc(link.url)}</div>
       </div>
@@ -157,8 +159,8 @@ function renderLinks(links) {
           onclick="toggleActive(${link.id}, ${link.is_active})">
           ${link.is_active ? '● Ativo' : '○ Inativo'}
         </button>
-        <button class="btn-icon" onclick="openEdit(${link.id})" title="Editar">✏️</button>
-        <button class="btn-danger" onclick="deleteLink(${link.id})" title="Excluir">🗑</button>
+        <button class="btn-icon" onclick="openEdit(${link.id})" title="Editar">${uiIcon('edit')}</button>
+        <button class="btn-danger icon-only" onclick="deleteLink(${link.id})" title="Excluir">${uiIcon('trash')}</button>
       </div>
     `;
     table.appendChild(row);

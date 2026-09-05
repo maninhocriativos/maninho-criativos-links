@@ -142,6 +142,7 @@
           <div><span class="eyebrow">Presença digital</span><h1>Links da bio</h1><p>Organize seus canais, acompanhe cliques e controle o que aparece na sua página.</p></div>
           <a class="btn-secondary" href="/" target="_blank">Abrir página pública ↗</a>
         </div>
+        <div class="link-insights" id="link-insights"></div>
         <!-- Add link form -->
         <div class="panel-card content-modal" id="add-link-panel">
           <div class="panel-card-header">
@@ -155,8 +156,8 @@
                 <input class="admin-input" id="l-title" type="text" placeholder="ex: Instagram" required />
               </div>
               <div class="form-field">
-                <label>Ícone (emoji)</label>
-                <input class="admin-input" id="l-icon" type="text" placeholder="📸" maxlength="4" />
+                <label>Ícone alternativo</label>
+                <input class="admin-input" id="l-icon" type="text" placeholder="Detectado automaticamente pela URL" maxlength="4" />
               </div>
             </div>
             <div class="form-field">
@@ -200,7 +201,7 @@
         <div class="links-table-wrap">
           <div class="table-header-row">
             <span class="table-count" id="links-count">0 links</span>
-            <div class="list-toolbar"><input class="admin-input" id="links-search" placeholder="Buscar links..." oninput="filterLinks()"/><button class="btn-primary" onclick="togglePanel('add-link-panel')">+ Novo link</button></div>
+            <div class="list-toolbar"><input class="admin-input" id="links-search" placeholder="Buscar links..." oninput="filterLinks()"/><select class="admin-input link-sort" id="links-sort" onchange="filterLinks()"><option value="order">Ordem manual</option><option value="clicks">Mais clicados</option><option value="name">Nome A–Z</option></select><button class="btn-primary" onclick="togglePanel('add-link-panel')">+ Novo link</button></div>
           </div>
           <div id="links-table" class="links-table">
             <div class="table-skeleton"></div>
@@ -556,6 +557,6 @@
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <script src="admin.js?v=20260904-10"></script>
+  <script src="admin.js?v=20260904-11"></script>
 </body>
 </html>
