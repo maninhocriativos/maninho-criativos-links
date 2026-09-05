@@ -10,12 +10,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260904-5" />
 </head>
 <body data-page="links">
+  <header class="hub-nav">
+    <a href="#top" class="hub-brand"><b>MANINHO</b><span>CRIATIVOS</span></a>
+    <nav><a href="#servicos">Serviços</a><a href="portfolio.html">Portfólio</a><a href="#links">Links</a></nav>
+    <button onclick="openModal({title:'um projeto',url:'https://wa.me/5592986096874',color_from:'#1683ff',color_to:'#0055ff'})">Solicitar orçamento</button>
+  </header>
 
   <!-- ══ HERO ══ -->
-  <section class="hero">
+  <section class="hero" id="top">
     <div class="hero-bg"></div><!-- foto via CSS para pc/mobile -->
     <div class="hero-overlay"></div>
     <div class="hero-grid-lines"></div>
@@ -25,6 +30,7 @@
            onerror="this.style.display='none'" />
 
       <h1 class="hero-headline">Criatividade<br>Digital que Gera<br><span class="hero-headline-em">Resultados</span></h1>
+      <p class="hero-intro">Design, desenvolvimento e inteligência artificial para transformar sua presença digital em uma ferramenta de crescimento.</p>
 
       <div class="hero-badge">
         <span class="badge-dot"></span> Criador de Conteúdo Digital
@@ -44,12 +50,26 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Falar no WhatsApp
       </button>
+      <a href="portfolio.html" class="hero-portfolio-btn">Conhecer meus trabalhos <span>↗</span></a>
 
       <a href="#links" class="scroll-btn" aria-label="Ver links">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
         </svg>
       </a>
+    </div>
+  </section>
+
+  <section class="service-hub" id="servicos">
+    <div class="service-hub-inner">
+      <header class="hub-section-title" data-reveal><span>Central de serviços</span><h2>Como posso ajudar sua marca?</h2><p>Escolha uma especialidade para solicitar um orçamento ou conhecer melhor o trabalho.</p></header>
+      <div class="hub-proof" data-reveal><div><strong>+60</strong><span>projetos publicados</span></div><div><strong>Design + Dev</strong><span>solução completa</span></div><div><strong>Atendimento direto</strong><span>do briefing à entrega</span></div></div>
+      <div class="service-hub-grid">
+        <article class="hub-service featured" data-reveal><span class="hub-service-number">01</span><div class="hub-service-icon"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3zM7 9h10M7 13h6"/></svg></div><div><small>Produto digital</small><h3>Sites, landing pages e sistemas</h3><p>Projetos responsivos, integrações, painéis administrativos e automações para seu negócio.</p></div><button onclick="openModal({title:'Desenvolvimento de sites e sistemas',url:'https://wa.me/5592986096874',color_from:'#1683ff',color_to:'#0055ff'})">Solicitar projeto →</button></article>
+        <article class="hub-service" data-reveal><span class="hub-service-number">02</span><div class="hub-service-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8v8H8z"/></svg></div><div><small>Identidade</small><h3>Design e social media</h3><p>Identidade visual, campanhas e conteúdo que aumentam a percepção de valor da sua marca.</p></div><button onclick="openModal({title:'Design e Social Media',url:'https://wa.me/5592986096874',color_from:'#1683ff',color_to:'#0055ff'})">Quero saber mais →</button></article>
+        <article class="hub-service" data-reveal><span class="hub-service-number">03</span><div class="hub-service-icon"><svg viewBox="0 0 24 24"><path d="M4 17 10 11l4 4 6-8M17 7h3v3"/></svg></div><div><small>Operação</small><h3>CRM e automações</h3><p>Funis comerciais, gestão de clientes e processos automatizados para ganhar produtividade.</p></div><button onclick="openModal({title:'CRM e Automações',url:'https://wa.me/5592986096874',color_from:'#1683ff',color_to:'#0055ff'})">Automatizar negócio →</button></article>
+        <article class="hub-service" data-reveal><span class="hub-service-number">04</span><div class="hub-service-icon"><svg viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="4"/></svg></div><div><small>Imagem profissional</small><h3>Ensaios fotográficos com IA</h3><p>Retratos profissionais com direção visual, sem estúdio e com entrega totalmente digital.</p></div><a href="#ensaio">Ver ensaios →</a></article>
+      </div>
     </div>
   </section>
 
@@ -160,6 +180,8 @@
             <option value="Ensaio Fotográfico com IA">📸 Ensaio Fotográfico com IA</option>
             <option value="Design 3D">🎨 Design 3D</option>
             <option value="IA Generativa">🤖 IA Generativa</option>
+            <option value="Sites e Sistemas">Sites e Sistemas</option>
+            <option value="CRM e Automações">CRM e Automações</option>
             <option value="Conteúdo & Tutoriais">▶️ Conteúdo & Tutoriais</option>
             <option value="Parceria / Colaboração">🤝 Parceria / Colaboração</option>
             <option value="Outro">✨ Outro</option>
@@ -180,7 +202,7 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=20260904-5"></script>
   <script src="track.js"></script>
 </body>
 </html>
