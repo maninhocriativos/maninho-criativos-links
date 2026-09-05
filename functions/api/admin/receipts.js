@@ -113,8 +113,9 @@ export async function onRequestPost({ request, env }) {
       throw new HttpError(502, provider.message || 'Não foi possível enviar o recibo');
     }
     const status = receipt.scheduled_at ? 'scheduled' : 'sent';
-    await env.DB.prepare(`UPDATE receipt_emails SET status=?, resend_id=?, updated_at=datetime('now') WHERE id=?`)
-      .bind(status, provider.id, created.id).run();
+    const statements = [env.DB.prepare(`UPDATE receipt_emails SET status=?, resend_id=?, updated_at=datetime('now') WHERE id=?`).bind(status, provider.id, created.id)];
+    if (!receipt.scheduled_at) statements.push(env.DB.prepare(`INSERT INTO cash_transactions(client_id,type,category,description,amount_cents,due_date,paid_date,status,payment_method,notes) VALUES(?,'income','Recibos',?,?,?,?,'paid',?,'Gerado automaticamente pelo recibo')`).bind(receipt.client_id,`Recibo ${receipt.document_code}`,receipt.amount_cents,receipt.receipt_date,receipt.receipt_date,receipt.payment_method));
+    await env.DB.batch(statements);
     return json({ id: created.id, resend_id: provider.id, status, document_code: receipt.document_code, pdf_url: pdfUrl }, 201);
   } catch (error) { return errorResponse(error); }
 }

@@ -38,7 +38,7 @@ function setTab(name, btn, persist = true) {
   if (name === 'clients') loadClients();
   if (name === 'projects') loadProjects();
   if (name === 'dashboard') loadCrmDashboard();
-  if (name === 'receipts') { loadClientOptions(); loadReceipts(); }
+  if (name === 'receipts') { loadClientOptions(); loadReceipts(); loadCashFlow(); }
   if (name === 'analytics') loadAnalytics();
   closeSidebar();
 }
@@ -106,8 +106,11 @@ async function loadLinks() {
   const res = await authFetch('/api/admin/links');
   if (!res) return;
   const { links } = await res.json();
-  renderLinks(links || []);
+  linksCache = links || [];
+  renderLinks(linksCache);
 }
+let linksCache=[];
+function filterLinks(){const q=getVal('links-search').toLowerCase();renderLinks(linksCache.filter(link=>`${link.title} ${link.url}`.toLowerCase().includes(q)));}
 
 async function loadProfile() {
   const res = await authFetch('/api/admin/profile');
@@ -183,6 +186,11 @@ async function deleteLink(id) {
 /* ══ Panel toggle ══ */
 function togglePanel(id) {
   const el = document.getElementById(id);
+  if (el?.classList.contains('content-modal')) {
+    el.classList.toggle('open');
+    document.body.classList.toggle('modal-open', el.classList.contains('open'));
+    return;
+  }
   const isOpen = el.classList.contains('open') || el.querySelector('.link-form');
   const inner = el.querySelector('.link-form');
   if (!inner) return;
@@ -372,8 +380,11 @@ async function loadPortfolioAdmin() {
   const res = await authFetch('/api/admin/portfolio');
   if (!res) return;
   const { items } = await res.json();
-  renderPortfolioTable(items || []);
+  portfolioCache = items || [];
+  renderPortfolioTable(portfolioCache);
 }
+let portfolioCache=[];
+function filterPortfolio(){const category=getVal('portfolio-filter');renderPortfolioTable(portfolioCache.filter(item=>!category||item.category===category));}
 
 function renderPortfolioTable(items) {
   const table = document.getElementById('portfolio-table');
@@ -560,6 +571,19 @@ async function submitProject(event) {
 }
 function editProject(id) { const p=projectsCache.find(item=>item.id===id);if(!p)return;for(const [field,key] of [['pr-id','id'],['pr-client','client_id'],['pr-title','title'],['pr-service','service'],['pr-status','status'],['pr-deadline','deadline'],['pr-progress','progress'],['pr-notes','notes']])setVal(field,p[key]??'');setVal('pr-value',(p.value_cents/100).toFixed(2));document.getElementById('pr-submit').textContent='Salvar projeto';document.getElementById('pr-cancel').hidden=false;document.getElementById('project-form').scrollIntoView({behavior:'smooth'}); }
 function resetProjectForm(){document.getElementById('project-form').reset();setVal('pr-id','');setVal('pr-progress','0');document.getElementById('pr-submit').textContent='Criar projeto';document.getElementById('pr-cancel').hidden=true;}
+
+/* ══ FINANCEIRO ══ */
+let cashCache=[];
+const cashCategories={income:['Projetos de design','Identidade visual','Social media','Website','Consultoria','Outras receitas'],expense:['Software e assinaturas','Publicidade','Equipamentos','Freelancers','Impostos','Escritório','Outras despesas']};
+const brl=cents=>(Number(cents||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+async function loadCashFlow(){const input=document.getElementById('finance-month');if(!input)return;if(!input.value)input.value=new Date().toISOString().slice(0,7);const res=await authFetch(`/api/admin/cash-flow?month=${input.value}`);if(!res?.ok)return;const data=await res.json();cashCache=data.transactions||[];const s=data.summary||{};document.getElementById('finance-kpis').innerHTML=[['Receitas recebidas',brl(s.income_paid),'income'],['Despesas pagas',brl(s.expense_paid),'expense'],['Saldo do mês',brl((s.income_paid||0)-(s.expense_paid||0)),'balance'],['A receber',brl(s.receivable),'pending'],['A pagar',brl(s.payable),'pending']].map(([l,v,t])=>`<div class="finance-kpi ${t}"><small>${l}</small><strong>${v}</strong></div>`).join('');document.getElementById('finance-period-label').textContent=new Date(`${data.month}-02T12:00:00`).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});renderCashTable();renderFinanceReport(data.monthly||[],data.categories||[]);}
+function renderCashTable(){const tbody=document.getElementById('cash-tbody');if(!tbody)return;const labels={pending:'Pendente',paid:'Pago',cancelled:'Cancelado'};tbody.innerHTML=cashCache.length?cashCache.map(t=>`<tr><td>${receiptDateLabel(t.due_date)}</td><td><strong>${esc(t.description)}</strong><br><small>${esc(t.client_name||t.project_title||'')}</small></td><td>${esc(t.category)}</td><td><span class="cash-status ${t.status}">${labels[t.status]}</span></td><td class="cash-value ${t.type}">${t.type==='expense'?'-':'+'} ${brl(t.amount_cents)}</td><td><button class="btn-secondary small" onclick="editCash(${t.id})">Editar</button></td></tr>`).join(''):'<tr><td colspan="6"><div class="crm-empty">Nenhum lançamento neste mês.</div></td></tr>';}
+function renderFinanceReport(monthly,categories){const max=Math.max(1,...monthly.flatMap(m=>[m.income||0,m.expense||0]));document.getElementById('finance-chart').innerHTML=monthly.length?monthly.map(m=>`<div class="finance-bar-group"><div class="finance-bars"><i class="bar-income" style="height:${Math.max(3,(m.income/max)*100)}%"></i><i class="bar-expense" style="height:${Math.max(3,(m.expense/max)*100)}%"></i></div><small>${m.month.slice(5)}/${m.month.slice(2,4)}</small></div>`).join(''):'<div class="crm-empty">Sem dados para o relatório.</div>';document.getElementById('finance-categories').innerHTML=categories.slice(0,6).map(c=>`<div><span>${esc(c.category)}</span><strong class="${c.type}">${brl(c.total)}</strong></div>`).join('');}
+async function openCashModal(transaction=null){if(!clientsCache.length)await fetchClients();if(!projectsCache.length){const r=await authFetch('/api/admin/projects');if(r?.ok)projectsCache=(await r.json()).projects||[];}document.getElementById('cf-client').innerHTML='<option value="">Sem cliente</option>'+clientsCache.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');document.getElementById('cf-project').innerHTML='<option value="">Sem projeto</option>'+projectsCache.map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('');document.getElementById('cash-form').reset();setVal('cf-id',transaction?.id||'');setVal('cf-type',transaction?.type||'income');updateCashCategories();if(transaction){for(const [f,k]of[['cf-status','status'],['cf-description','description'],['cf-category','category'],['cf-due','due_date'],['cf-paid','paid_date'],['cf-client','client_id'],['cf-project','project_id'],['cf-payment','payment_method']])setVal(f,transaction[k]||'');setVal('cf-amount',(transaction.amount_cents/100).toFixed(2));}else{setVal('cf-due',new Date().toISOString().slice(0,10));}document.getElementById('cash-modal-title').textContent=transaction?'Editar lançamento':'Novo lançamento';document.getElementById('cash-modal').classList.add('open');document.body.classList.add('modal-open');}
+function closeCashModal(event){if(event&&event.target!==document.getElementById('cash-modal'))return;document.getElementById('cash-modal').classList.remove('open');document.body.classList.remove('modal-open');}
+function updateCashCategories(){const type=getVal('cf-type')||'income',select=document.getElementById('cf-category'),current=select.value;select.innerHTML=cashCategories[type].map(c=>`<option>${c}</option>`).join('');if(cashCategories[type].includes(current))select.value=current;}
+function editCash(id){openCashModal(cashCache.find(t=>t.id===id));}
+async function submitCashTransaction(event){event.preventDefault();const id=Number(getVal('cf-id'))||null,amount=Number(getVal('cf-amount'));const body={id,type:getVal('cf-type'),status:getVal('cf-status'),description:getVal('cf-description'),category:getVal('cf-category'),amount_cents:Math.round(amount*100),due_date:getVal('cf-due'),paid_date:getVal('cf-paid'),client_id:Number(getVal('cf-client'))||null,project_id:Number(getVal('cf-project'))||null,payment_method:getVal('cf-payment'),notes:''};const res=await authFetch('/api/admin/cash-flow',{method:id?'PUT':'POST',body:JSON.stringify(body)});if(res?.ok){toast('Lançamento salvo ✓');closeCashModal();loadCashFlow();loadCrmDashboard();}else if(res){const d=await res.json().catch(()=>({}));toast(d.error||'Erro ao salvar lançamento',true);}}
 
 /* ══ CLIENTES ══ */
 let clientsCache = [];
