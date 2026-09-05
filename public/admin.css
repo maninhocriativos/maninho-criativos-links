@@ -639,6 +639,10 @@ html, body {
 .content-modal { border-color:rgba(148,163,184,.22); box-shadow:0 0 0 100vmax rgba(1,4,9,.82),0 30px 90px rgba(0,0,0,.72); }
 .content-modal .panel-card-header { position:sticky; top:0; z-index:2; background:rgba(13,17,24,.96); backdrop-filter:blur(14px); }
 .modal-backdrop.open { backdrop-filter:blur(6px); }
+.recurrence-box { padding:15px; border:1px solid rgba(22,131,255,.2); border-radius:12px; background:rgba(22,131,255,.055); }
+.recurrence-box .form-row { margin:0; }
+.recurrence-box > small { display:block; margin-top:10px; color:var(--text3); font-size:.7rem; line-height:1.45; }
+.recurrence-chip { display:inline-flex; margin-left:6px; padding:3px 6px; border-radius:6px; background:rgba(22,131,255,.12); color:#67b1ff; font-size:.6rem; font-weight:750; vertical-align:2px; }
 
 @media (max-width: 768px) {
   .section-hero { align-items:flex-start; flex-direction:column; gap:14px; }
