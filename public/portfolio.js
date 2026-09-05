@@ -93,8 +93,18 @@ function showGallery(cat) {
 function renderGrid(items) {
   const grid = document.getElementById('pf-grid');
   grid.innerHTML = '';
+  const isEssayGallery = items.length && items.every(item => item.category === 'Ensaio Fotográfico') && items.some(item => item.gallery_name);
+  grid.classList.toggle('gallery-groups', isEssayGallery);
+  if (isEssayGallery) {
+    const groups = new Map();
+    items.forEach(item => { const name=item.gallery_name||'Outros ensaios';if(!groups.has(name))groups.set(name,[]);groups.get(name).push(item); });
+    groups.forEach((groupItems,name)=>{const section=document.createElement('section');section.className='essay-gallery';section.innerHTML=`<header><div><span>Ensaio fotográfico com IA</span><h3>${esc(name)}</h3></div><small>${groupItems.length} foto${groupItems.length===1?'':'s'}</small></header>`;const gallery=document.createElement('div');gallery.className='essay-gallery-grid';groupItems.forEach(item=>gallery.appendChild(createPortfolioCard(item,items.indexOf(item))));section.appendChild(gallery);grid.appendChild(section);});
+    return;
+  }
+  items.forEach((item, i) => grid.appendChild(createPortfolioCard(item,i)));
+}
 
-  items.forEach((item, i) => {
+function createPortfolioCard(item, i) {
     const card = document.createElement('div');
     card.className = 'pf-card';
 
@@ -138,11 +148,9 @@ function renderGrid(items) {
     inner.appendChild(mobile);
     inner.appendChild(ov);
     card.appendChild(inner);
-    grid.appendChild(card);
-
     card.addEventListener('click', () => openLightbox(i));
     requestAnimationFrame(() => setTimeout(() => card.classList.add('in'), i * 38));
-  });
+    return card;
 }
 
 function openLightbox(idx) {

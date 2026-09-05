@@ -20,10 +20,10 @@ export async function onRequestPost({ request, env }) {
   try {
     const body = await readJson(request);
     const result = await env.DB.prepare(
-      `INSERT INTO portfolio (title, category, description, image_url, image_mobile_url, project_url, order_index)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO portfolio (title, category, gallery_name, description, image_url, image_mobile_url, project_url, order_index)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
-      text(body.title, { required: true, max: 150 }), text(body.category, { max: 100 }) || 'Ensaio Fotográfico',
+      text(body.title, { required: true, max: 150 }), text(body.category, { max: 100 }) || 'Ensaio Fotográfico', text(body.gallery_name, { max: 150 }),
       text(body.description, { max: 2_000 }), mediaUrl(body.image_url, true), mediaUrl(body.image_mobile_url),
       httpUrl(body.project_url), integer(body.order_index, { max: 100_000 })
     ).run();

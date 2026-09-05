@@ -383,10 +383,12 @@ async function loadPortfolioAdmin() {
   if (!res) return;
   const { items } = await res.json();
   portfolioCache = items || [];
+  const galleries=[...new Set(portfolioCache.map(item=>item.gallery_name).filter(Boolean))];
+  const list=document.getElementById('portfolio-galleries');if(list)list.innerHTML=galleries.map(name=>`<option value="${esc(name)}"></option>`).join('');
   renderPortfolioTable(portfolioCache);
 }
 let portfolioCache=[];
-function filterPortfolio(){const category=getVal('portfolio-filter');renderPortfolioTable(portfolioCache.filter(item=>!category||item.category===category));}
+function filterPortfolio(){const category=getVal('portfolio-filter'),query=(getVal('portfolio-search')||'').toLowerCase();renderPortfolioTable(portfolioCache.filter(item=>(!category||item.category===category)&&(!query||`${item.title} ${item.gallery_name||''} ${item.category}`.toLowerCase().includes(query))));}
 
 function renderPortfolioTable(items) {
   const table = document.getElementById('portfolio-table');
@@ -409,13 +411,14 @@ function renderPortfolioTable(items) {
       </div>
       <div class="table-row-info">
         <div class="table-row-title">${esc(item.title)}</div>
-        <div class="table-row-url">${esc(item.category)}</div>
+        <div class="table-row-url">${esc(item.category)}${item.gallery_name?` <span class="portfolio-gallery-chip">${esc(item.gallery_name)}</span>`:''}</div>
       </div>
       <div class="table-row-actions">
         <button class="status-badge ${item.is_active ? 'on' : 'off'}"
           onclick="togglePortfolioItem(${item.id}, ${item.is_active})">
           ${item.is_active ? '● Ativo' : '○ Inativo'}
         </button>
+        <button class="btn-icon" onclick="editPortfolioItem(${item.id})" title="Editar">${uiIcon('edit')}</button>
         <button class="btn-danger" onclick="deletePortfolioItem(${item.id})">🗑</button>
       </div>
     `;
@@ -436,24 +439,29 @@ async function submitNewPortfolio(e) {
   }
   if (!imageUrl) { toast('Informe uma imagem', true); return; }
   const body = {
+    id:          Number(getVal('pf-id')) || null,
     title:       getVal('pf-title'),
     category:    getVal('pf-cat'),
+    gallery_name:getVal('pf-gallery'),
     description: getVal('pf-desc'),
     image_url:   imageUrl,
     image_mobile_url: getVal('pf-mobile-url'),
     project_url: getVal('pf-project-url'),
     order_index: parseInt(getVal('pf-order')) || 0,
   };
-  const res = await authFetch('/api/admin/portfolio', { method: 'POST', body: JSON.stringify(body) });
+  const res = await authFetch(body.id?`/api/admin/portfolio/${body.id}`:'/api/admin/portfolio', { method: body.id?'PATCH':'POST', body: JSON.stringify(body) });
   if (res?.ok) {
     e.target.reset();
+    setVal('pf-id','');document.getElementById('pf-submit').textContent='Adicionar';
     togglePanel('add-portfolio-panel');
-    toast('Item adicionado ✓');
+    toast(body.id?'Item atualizado ✓':'Item adicionado ✓');
     loadPortfolioAdmin();
   } else {
     toast('Erro ao adicionar', true);
   }
 }
+
+function editPortfolioItem(id){const item=portfolioCache.find(entry=>entry.id===id);if(!item)return;for(const [field,key] of [['pf-id','id'],['pf-title','title'],['pf-cat','category'],['pf-gallery','gallery_name'],['pf-url','image_url'],['pf-mobile-url','image_mobile_url'],['pf-project-url','project_url'],['pf-desc','description'],['pf-order','order_index']])setVal(field,item[key]??'');document.getElementById('pf-submit').textContent='Salvar alterações';togglePanel('add-portfolio-panel');}
 
 async function togglePortfolioItem(id, current) {
   const res = await authFetch(`/api/admin/portfolio/${id}`, {

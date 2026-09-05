@@ -608,6 +608,15 @@ body { background:#06090e; color:#f4f7fb; }
 .pf-overlay-cat { color:#67b1ff; }
 .pf-overlay-link { background:#1683ff; border-color:#1683ff; border-radius:8px; }
 .pf-empty { padding:80px 20px; border:1px dashed rgba(148,163,184,.18); border-radius:16px; background:#0d1118; }
+.pf-grid.gallery-groups { columns:auto; display:flex; flex-direction:column; gap:55px; }
+.essay-gallery { width:100%; }
+.essay-gallery > header { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid rgba(148,163,184,.12); }
+.essay-gallery > header span { color:#58a6ff; font-size:.62rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+.essay-gallery > header h3 { margin-top:5px; font-size:1.35rem; letter-spacing:-.035em; }
+.essay-gallery > header small { color:#69768a; font-size:.72rem; }
+.essay-gallery-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.essay-gallery-grid .pf-card { margin:0; }
+.essay-gallery-grid .pf-card-inner { min-height:360px; }
 .portfolio-cta { display:flex; align-items:center; justify-content:space-between; gap:32px; margin-top:80px; padding:46px; border:1px solid rgba(22,131,255,.25); border-radius:20px; background:radial-gradient(circle at 90% 0,rgba(22,131,255,.2),transparent 45%),#0d1118; }
 .portfolio-cta > div > span { color:#67b1ff; font-size:.68rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
 .portfolio-cta h2 { max-width:650px; margin-top:10px; font-size:clamp(1.6rem,3vw,2.6rem); line-height:1.12; letter-spacing:-.045em; }
@@ -630,8 +639,11 @@ body { background:#06090e; color:#f4f7fb; }
   .cat-btn { flex:0 0 auto; height:38px; padding:0 12px; }
   .pf-content { padding:44px 16px 80px; }
   .pf-grid { columns:1; }
+  .essay-gallery-grid { grid-template-columns:1fr 1fr; gap:10px; }
+  .essay-gallery-grid .pf-card-inner { min-height:260px; }
   .pf-card-inner { min-height:340px; }
   .gallery-header { align-items:flex-start; flex-direction:column; gap:12px; }
   .portfolio-cta { align-items:flex-start; flex-direction:column; margin-top:50px; padding:28px 22px; }
   .portfolio-cta button { width:100%; }
 }
+@media (max-width:480px) { .essay-gallery-grid { grid-template-columns:1fr; } }

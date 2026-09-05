@@ -223,6 +223,7 @@
             <button class="btn-icon" onclick="togglePanel('add-portfolio-panel')">✕</button>
           </div>
           <form class="link-form" id="add-portfolio-form" onsubmit="submitNewPortfolio(event)">
+            <input type="hidden" id="pf-id" />
             <div class="form-row">
               <div class="form-field">
                 <label>Título *</label>
@@ -234,8 +235,17 @@
                   <option value="Ensaio Fotográfico">📸 Ensaio Fotográfico</option>
                   <option value="Design 3D">🎨 Design 3D</option>
                   <option value="IA Generativa">🤖 IA Generativa</option>
+                  <option value="Desenvolvimento de Apps">Desenvolvimento de Apps</option>
+                  <option value="CRM & Meta">CRM & Meta</option>
+                  <option value="Automação de IA">Automação de IA</option>
                 </select>
               </div>
+            </div>
+            <div class="form-field" id="pf-gallery-field">
+              <label>Galeria / nome do ensaio</label>
+              <input class="admin-input" id="pf-gallery" type="text" placeholder="Ex.: Ensaio executivo — Vanessa" list="portfolio-galleries" />
+              <datalist id="portfolio-galleries"></datalist>
+              <small class="field-hint">Use o mesmo nome em várias fotos para reuni-las no mesmo álbum.</small>
             </div>
             <div class="form-field">
               <label>URL da imagem *</label>
@@ -265,7 +275,7 @@
             </div>
             <div class="form-actions">
               <button type="button" class="btn-secondary" onclick="togglePanel('add-portfolio-panel')">Cancelar</button>
-              <button type="submit" class="btn-primary">Adicionar</button>
+              <button type="submit" class="btn-primary" id="pf-submit">Adicionar</button>
             </div>
           </form>
         </div>
@@ -274,7 +284,7 @@
           <div class="table-header-row">
             <span class="table-count" id="portfolio-count">0 itens</span>
             <div class="list-toolbar">
-              <select class="admin-input" id="portfolio-filter" onchange="filterPortfolio()"><option value="">Todas as categorias</option><option>Ensaio Fotográfico</option><option>Design 3D</option><option>IA Generativa</option></select>
+              <select class="admin-input" id="portfolio-filter" onchange="filterPortfolio()"><option value="">Todas as categorias</option><option>Ensaio Fotográfico</option><option>Design 3D</option><option>IA Generativa</option><option>Desenvolvimento de Apps</option><option>CRM & Meta</option><option>Automação de IA</option></select><input class="admin-input" id="portfolio-search" placeholder="Buscar projeto ou galeria..." oninput="filterPortfolio()" />
               <a href="/portfolio.html" target="_blank" class="btn-secondary small" style="text-decoration:none;font-size:0.8rem;padding:7px 14px">Ver portfólio ↗</a>
               <button class="btn-primary small" onclick="togglePanel('add-portfolio-panel')">+ Novo item</button>
             </div>
@@ -557,6 +567,6 @@
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <script src="admin.js?v=20260904-11"></script>
+  <script src="admin.js?v=20260904-12"></script>
 </body>
 </html>

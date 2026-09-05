@@ -657,6 +657,13 @@ html, body {
 .click-count svg { width:11px; height:11px; }
 .icon-only { width:30px; padding:0; }
 .link-sort { width:155px!important; }
+.field-hint { color:var(--text3); font-size:.68rem; line-height:1.45; }
+.portfolio-gallery-chip { display:inline-flex; margin-left:6px; padding:3px 6px; border-radius:6px; background:rgba(22,131,255,.1); color:#67b1ff; font-size:.62rem; }
+#tab-portfolio .links-table-wrap { background:linear-gradient(180deg,rgba(22,131,255,.035),rgba(13,17,24,.94) 140px); }
+#portfolio-table .table-row { min-height:132px; }
+#portfolio-table .table-row-info { align-self:center; }
+#portfolio-table .table-row-title { font-size:.92rem; }
+#portfolio-search { width:220px; }
 #links-table .table-row { padding:17px; }
 #links-table .table-row-title { font-size:.88rem; }
 #links-table .table-row-url { margin-top:5px; }

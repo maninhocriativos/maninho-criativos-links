@@ -3,7 +3,7 @@ import { errorResponse, httpUrl, integer, json, readJson, text } from '../../_ut
 
 function mediaUrl(value) { const v = text(value, { max: 2_048 }); return v.startsWith('/') ? v : httpUrl(v); }
 const validators = {
-  title: v => text(v, { required: true, max: 150 }), category: v => text(v, { required: true, max: 100 }),
+  title: v => text(v, { required: true, max: 150 }), category: v => text(v, { required: true, max: 100 }), gallery_name: v => text(v, { max: 150 }),
   description: v => text(v, { max: 2_000 }), image_url: mediaUrl, image_mobile_url: mediaUrl,
   project_url: v => httpUrl(v), order_index: v => integer(v, { max: 100_000 }),
   is_active: v => integer(v, { min: 0, max: 1 }),
