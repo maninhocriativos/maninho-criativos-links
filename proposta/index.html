@@ -417,6 +417,110 @@
       .deco { display: none; }
       .shape.sq, .shape.ring { opacity: .45; }
     }
+
+    /* ===== WOW: progresso, capítulos, cursor, palavras, manifesto, números, ciclo fixado ===== */
+    #progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 300; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, #60a5fa, #d9b45f 60%, #f6e7b8); will-change: transform; pointer-events: none; }
+    .nav { transition: transform .45s cubic-bezier(.2,.7,.2,1); }
+    .nav.hide { transform: translateY(-100%); }
+    .chapters { position: fixed; right: 18px; top: 50%; transform: translateY(-50%); z-index: 250; display: none; flex-direction: column; }
+    .opened .chapters { display: flex; }
+    .chapters a { position: relative; display: block; width: 10px; height: 10px; margin: 8px 0; border-radius: 50%; background: rgba(120,140,170,.55); box-shadow: 0 0 0 1px rgba(255,255,255,.35); transition: transform .3s, background .3s; }
+    .chapters a.on { background: #d9b45f; transform: scale(1.6); box-shadow: 0 0 0 1px rgba(10,22,38,.25), 0 0 12px rgba(217,180,95,.7); }
+    .chapters a::after { content: attr(data-label); position: absolute; right: 22px; top: 50%; transform: translateY(-50%); padding: 5px 10px; border-radius: 6px; background: #0a1626; color: #fff; font-size: 11px; font-weight: 600; letter-spacing: .04em; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .chapters a:hover::after, .chapters a:focus-visible::after { opacity: 1; }
+    @media (max-width: 1199px) { .chapters { display: none !important; } }
+
+    .cur-dot, .cur-ring { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 9999; opacity: 0; transition: opacity .3s; will-change: transform; }
+    .cur-dot { width: 10px; height: 10px; border-radius: 50%; background: #d9b45f; }
+    .cur-ring { width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(217,180,95,.65); }
+    .cur-dot.hover { background: #fff; mix-blend-mode: difference; }
+    html.cursor-on .cur-dot, html.cursor-on .cur-ring { opacity: 1; }
+    html.cursor-on, html.cursor-on * { cursor: none !important; }
+
+    /* palavras que sobem de uma máscara */
+    .js .sec-h2 .w, .js .final-title .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .14em; margin-bottom: -.14em; }
+    .js .sec-h2 .w > i, .js .final-title .w > i { display: inline-block; font-style: normal; transform: translateY(115%); transition: transform 1.1s cubic-bezier(.2,.75,.2,1); transition-delay: calc(var(--i, 0) * 60ms + 120ms); will-change: transform; }
+    .js .in .sec-h2 .w > i, .js .in .final-title .w > i { transform: none; }
+
+    /* luz que segue o mouse nos cards */
+    .glow { position: relative; }
+    .glow::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .4s ease; background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgba(37,99,235,.10), transparent 60%); }
+    .glow.gd::before { background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgba(217,180,95,.16), transparent 60%); }
+    .glow:hover::before { opacity: 1; }
+
+    .scroll-cue { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,255,255,.45); pointer-events: none; }
+    .scroll-cue i { width: 1px; height: 38px; background: linear-gradient(#d9b45f, transparent); transform-origin: 50% 0; animation: cue 2.2s ease-in-out infinite; }
+    @keyframes cue { 0% { transform: scaleY(0); opacity: 1; } 55% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
+    @media (max-width: 900px), (max-height: 700px) { .scroll-cue { display: none; } }
+
+    /* faixa "em números" */
+    .numbers { background: var(--bg); padding: 60px 0; border-bottom: 1px solid var(--line); position: relative; }
+    .num-grid { list-style: none; display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .num-grid li { padding: 4px 20px; border-left: 1px solid rgba(10,22,38,.12); }
+    .num-grid li:first-child { border-left: 0; padding-left: 0; }
+    .num-grid strong { display: block; font-size: clamp(42px, 4.8vw, 68px); font-weight: 700; letter-spacing: -.045em; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .num-grid strong::after { content: ""; display: block; width: 28px; height: 2px; margin: 14px 0 10px; background: linear-gradient(90deg, #d9b45f, #f6e7b8); }
+    .num-grid span { font-size: 13px; line-height: 1.5; color: var(--muted); display: block; }
+
+    /* manifesto: as palavras acendem conforme a rolagem */
+    .manifesto { position: relative; background: radial-gradient(60% 50% at 50% 40%, #12305f 0%, #071224 70%, #050b16 100%); color: #fff; }
+    .man-wrap { position: relative; height: 240vh; }
+    .man-stick { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 24px; overflow: hidden; text-align: center; }
+    .man-kicker { font-size: 11px; letter-spacing: .34em; text-transform: uppercase; color: #d9b45f; font-weight: 600; margin-bottom: 28px; display: inline-flex; align-items: center; gap: 12px; }
+    .man-kicker::before, .man-kicker::after { content: ""; width: 34px; height: 1px; background: linear-gradient(90deg, transparent, #d9b45f); }
+    .man-kicker::after { transform: scaleX(-1); }
+    .man-text { max-width: 1040px; font-size: clamp(28px, 4.7vw, 66px); font-weight: 600; line-height: 1.14; letter-spacing: -.035em; position: relative; z-index: 1; }
+    .mw { color: rgba(255,255,255,.16); transition: color .5s ease; }
+    .mw.lit { color: #fff; }
+    .mw.k.lit { color: #ecd08a; }
+    .man-sub { margin-top: 34px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.4); position: relative; z-index: 1; }
+    html:not(.js) .mw { color: #fff; }
+    html:not(.js) .mw.k { color: #ecd08a; }
+
+    /* ciclo: jornada horizontal fixada na rolagem (desktop) */
+    .cycle-stick { position: relative; }
+    .cycle-view { width: min(1200px, calc(100% - 48px)); margin: 0 auto; }
+    .cycle-meta { display: none; }
+    #ciclo.pin-on { padding: 0; overflow: visible; overflow: clip; }
+    #ciclo.pin-on .cycle-stick { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; justify-content: center; gap: 30px; padding-top: 76px; overflow: hidden; }
+    #ciclo.pin-on .sec-hdr { margin-bottom: 0; }
+    #ciclo.pin-on .cycle-view { width: 100%; margin: 0; overflow: visible; }
+    #ciclo.pin-on .cycle { display: flex; width: max-content; gap: 22px; padding: 6px max(24px, calc((100vw - 1200px) / 2)) 24px; will-change: transform; }
+    #ciclo.pin-on .cy { flex: 0 0 340px; min-height: 290px; padding: 30px 28px 26px; display: flex; flex-direction: column; justify-content: flex-end; opacity: .5; overflow: hidden; transition: opacity .45s ease, background .45s ease, border-color .45s ease, translate .45s ease; }
+    #ciclo.pin-on .cy.on { opacity: 1; background: rgba(96,165,250,.10); border-color: rgba(217,180,95,.6); translate: 0 -8px; }
+    #ciclo.pin-on .cy .n { position: absolute; top: 12px; left: 22px; font-size: 92px; font-weight: 800; letter-spacing: -.05em; line-height: 1; color: transparent; -webkit-text-stroke: 1.2px rgba(147,197,253,.38); }
+    #ciclo.pin-on .cy.on .n { -webkit-text-stroke-color: rgba(217,180,95,.85); }
+    #ciclo.pin-on .cy h3 { font-size: 24px; margin: 0 0 10px; }
+    #ciclo.pin-on .cy p { font-size: 14.5px; }
+    #ciclo.pin-on .cycle-foot { display: flex; align-items: center; gap: 28px; }
+    #ciclo.pin-on .cycle-meta { display: flex; align-items: center; gap: 16px; flex: 1; }
+    #ciclo.pin-on .cycle-note { margin: 0; flex: 1; }
+    .cycle-rail { flex: 1; height: 3px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
+    .cycle-rail i { display: block; height: 100%; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, #60a5fa, #d9b45f); will-change: transform; }
+    #cycleCount { font-size: 12px; font-weight: 700; letter-spacing: .16em; color: #d9b45f; font-variant-numeric: tabular-nums; }
+
+    .next-steps { list-style: none; display: grid; gap: 12px; margin: 0 0 30px; counter-reset: s; }
+    .next-steps li { display: flex; gap: 12px; align-items: flex-start; color: rgba(255,255,255,.82); font-size: 14px; line-height: 1.5; counter-increment: s; }
+    .next-steps li::before { content: counter(s); flex: none; width: 22px; height: 22px; border-radius: 7px; background: rgba(217,180,95,.2); color: #f6e7b8; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+    .final-desc { margin-bottom: 22px; }
+
+    @media (max-width: 1000px) {
+      .num-grid { grid-template-columns: repeat(3, 1fr); gap: 26px 8px; }
+      .num-grid li:nth-child(4) { border-left: 0; padding-left: 0; }
+      .man-wrap { height: 200vh; }
+    }
+    @media (max-width: 600px) {
+      .num-grid { grid-template-columns: repeat(2, 1fr); }
+      .num-grid li { border-left: 0; padding: 4px 8px 4px 0; }
+      .numbers { padding: 44px 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .js .sec-h2 .w > i, .js .final-title .w > i { transform: none; transition: none; }
+      .mw { color: #fff; transition: none; } .mw.k { color: #ecd08a; }
+      .man-wrap { height: auto; } .man-stick { position: relative; height: auto; padding: 120px 24px; }
+      .scroll-cue i { animation: none; }
+    }
+    html.locked .scroll-cue i { animation-play-state: paused; }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       *, *::before, *::after { animation: none !important; }
@@ -486,6 +590,7 @@
   </div>
 
   <div id="page">
+    <div id="progress" aria-hidden="true"></div>
     <nav class="nav" aria-label="Principal">
       <div class="nav-inner">
         <a class="nav-logo" href="#top" aria-label="Carlos Mota, início">CARLOS <span>MOTA</span></a>
@@ -530,15 +635,30 @@
           <a href="#ciclo" class="btn-o">Entender o ciclo</a>
         </div>
         <div class="hero-facts a3">
-          <div class="fact"><strong>10</strong><span>etapas em ciclo contínuo</span></div>
-          <div class="fact"><strong>4</strong><span>fontes de avaliação</span></div>
-          <div class="fact"><strong>2</strong><span>painéis: líder e empresa</span></div>
+          <div class="fact"><strong data-count="10">10</strong><span>etapas em ciclo contínuo</span></div>
+          <div class="fact"><strong data-count="4">4</strong><span>fontes de avaliação</span></div>
+          <div class="fact"><strong data-count="2">2</strong><span>painéis: líder e empresa</span></div>
         </div>
       </div>
+      <div class="scroll-cue a3" aria-hidden="true"><span>Role</span><i></i></div>
     </header>
 
     <div class="band" aria-hidden="true"><div class="band-in" data-speedx="0.9"><span>AVALIAR</span><i></i><span class="f">TREINAR</span><i></i><span>APLICAR</span><i></i><span class="f">MEDIR</span><i></i><span>ADAPTAR</span><i></i><span class="f">AVALIAR</span><i></i><span>TREINAR</span><i></i><span class="f">APLICAR</span><i></i></div></div>
     <main>
+      <!-- EM NÚMEROS -->
+      <section class="numbers" aria-label="A proposta em números">
+        <div class="c">
+          <ul class="num-grid reveal">
+            <li><strong data-count="10">10</strong><span>etapas no ciclo de formação contínua</span></li>
+            <li><strong data-count="9">9</strong><span>competências mapeadas no Diagnóstico 360</span></li>
+            <li><strong data-count="6">6</strong><span>passos em cada microtrilha individual</span></li>
+            <li><strong data-count="4">4</strong><span>fontes de avaliação cruzadas</span></li>
+            <li><strong data-count="2">2</strong><span>painéis: o do líder e o da empresa</span></li>
+            <li><strong data-count="3">3</strong><span>fases de construção, com entrega em cada uma</span></li>
+          </ul>
+        </div>
+      </section>
+
       <!-- 01 VALOR -->
       <section class="section section-white" id="valor">
         <div class="deco" data-speed="0.34" data-rot="6" aria-hidden="true">01</div>
@@ -580,36 +700,58 @@
         </div>
       </section>
 
+      <!-- MANIFESTO -->
+      <section class="manifesto" id="manifesto" aria-label="Manifesto">
+        <div class="man-wrap" id="manWrap">
+          <div class="man-stick">
+            <i class="shape orb" style="width:640px;height:640px;left:-200px;top:8%" data-speed="0.3" aria-hidden="true"></i>
+            <i class="shape ring" style="width:300px;height:300px;right:6%;bottom:8%;border-color:rgba(217,180,95,.28)" data-speed="-0.35" data-rot="20" aria-hidden="true"></i>
+            <div class="man-kicker">Manifesto</div>
+            <p class="man-text" id="manText">Líder não se forma só assistindo aulas. Forma-se <b>praticando</b>, recebendo <b>direção</b> e medindo a própria <b>evolução</b> — no ritmo e nas lacunas de cada um.</p>
+            <div class="man-sub">Sistema Inteligente de Formação Contínua de Líderes</div>
+          </div>
+        </div>
+      </section>
+
       <!-- 02 CICLO -->
       <section class="section section-dark" id="ciclo">
         <div class="deco" data-speed="0.34" data-rot="6" aria-hidden="true">02</div>
         <i class="shape orb" style="width:560px;height:560px;right:-180px;top:28%" data-speed="-0.32" aria-hidden="true"></i>
         <i class="shape sq" style="width:150px;height:150px;left:4%;bottom:12%" data-speed="0.5" data-rot="-35" aria-hidden="true"></i>
         <i class="shape ring" style="width:320px;height:320px;left:42%;top:-140px" data-speed="0.25" data-rot="15" aria-hidden="true"></i>
-        <div class="c">
-          <div class="sec-hdr reveal">
-            <div>
-              <div class="sec-num">02 — O ciclo</div>
-              <h2 class="sec-h2">Avaliar, treinar, aplicar, medir. E recomeçar mais preciso.</h2>
+        <div class="cycle-pin" id="cyclePin">
+          <div class="cycle-stick">
+            <div class="c">
+              <div class="sec-hdr reveal">
+                <div>
+                  <div class="sec-num">02 — O ciclo</div>
+                  <h2 class="sec-h2">Avaliar, treinar, aplicar, medir. E recomeçar mais preciso.</h2>
+                </div>
+                <p class="sec-lead">Cada volta do ciclo alimenta a próxima. A formação deixa de ser um evento e passa a ser um processo que se ajusta ao que o líder realmente faz.</p>
+              </div>
             </div>
-            <p class="sec-lead">Cada volta do ciclo alimenta a próxima. A formação deixa de ser um evento e passa a ser um processo que se ajusta ao que o líder realmente faz.</p>
+            <div class="cycle-view">
+              <ol class="cycle" id="cycleTrack">
+                <li class="cy"><div class="n">01</div><h3>Avaliar</h3><p>Diagnóstico 360 do Líder na entrada.</p></li>
+                <li class="cy"><div class="n">02</div><h3>Identificar perfil</h3><p>Estilo, experiência e nível de liderança.</p></li>
+                <li class="cy"><div class="n">03</div><h3>Diagnosticar lacunas</h3><p>Onde há mais distância entre o atual e o esperado.</p></li>
+                <li class="cy"><div class="n">04</div><h3>Criar trilha individual</h3><p>Prioridades e microtrilhas sob medida.</p></li>
+                <li class="cy"><div class="n">05</div><h3>Treinar</h3><p>Vídeo, método e estudo de caso.</p></li>
+                <li class="cy"><div class="n">06</div><h3>Aplicar na prática</h3><p>Simulação com IA e desafio real da semana.</p></li>
+                <li class="cy"><div class="n">07</div><h3>IA acompanhar</h3><p>Prepara a conversa e pergunta como foi.</p></li>
+                <li class="cy"><div class="n">08</div><h3>Medir resultado</h3><p>Rubricas do método aplicadas às atividades.</p></li>
+                <li class="cy"><div class="n">09</div><h3>Reavaliar</h3><p>Compara com o diagnóstico anterior.</p></li>
+                <li class="cy loop"><div class="n">10</div><h3>Adaptar a formação</h3><p>Ajusta a próxima trilha — e o ciclo recomeça.</p></li>
+              </ol>
+            </div>
+            <div class="c cycle-foot">
+              <div class="cycle-meta"><div class="cycle-rail"><i id="cycleFill"></i></div><span id="cycleCount">01 / 10</span></div>
+              <p class="cycle-note reveal">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+                Formação contínua: quanto mais o líder usa, mais preciso o sistema fica.
+              </p>
+            </div>
           </div>
-          <ol class="cycle reveal">
-            <li class="cy"><div class="n">01</div><h3>Avaliar</h3><p>Diagnóstico 360 do Líder na entrada.</p></li>
-            <li class="cy"><div class="n">02</div><h3>Identificar perfil</h3><p>Estilo, experiência e nível de liderança.</p></li>
-            <li class="cy"><div class="n">03</div><h3>Diagnosticar lacunas</h3><p>Onde há mais distância entre o atual e o esperado.</p></li>
-            <li class="cy"><div class="n">04</div><h3>Criar trilha individual</h3><p>Prioridades e microtrilhas sob medida.</p></li>
-            <li class="cy"><div class="n">05</div><h3>Treinar</h3><p>Vídeo, método e estudo de caso.</p></li>
-            <li class="cy"><div class="n">06</div><h3>Aplicar na prática</h3><p>Simulação com IA e desafio real da semana.</p></li>
-            <li class="cy"><div class="n">07</div><h3>IA acompanhar</h3><p>Prepara a conversa e pergunta como foi.</p></li>
-            <li class="cy"><div class="n">08</div><h3>Medir resultado</h3><p>Rubricas do método aplicadas às atividades.</p></li>
-            <li class="cy"><div class="n">09</div><h3>Reavaliar</h3><p>Compara com o diagnóstico anterior.</p></li>
-            <li class="cy loop"><div class="n">10</div><h3>Adaptar a formação</h3><p>Ajusta a próxima trilha — e o ciclo recomeça.</p></li>
-          </ol>
-          <p class="cycle-note reveal">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
-            Formação contínua: quanto mais o líder usa, mais preciso o sistema fica.
-          </p>
         </div>
       </section>
 
@@ -836,6 +978,11 @@
             <div class="chip dark">A proposta</div>
             <h2 class="final-title">Vamos construir o sistema que forma líderes de verdade.</h2>
             <p class="final-desc">Uma solução que não se compara com plataformas de treinamento: avalia, personaliza, acompanha e mede. Vamos alinhar escopo, cronograma e investimento para começar.</p>
+            <ol class="next-steps">
+              <li>Alinhamento de escopo e dos instrumentos de avaliação.</li>
+              <li>Protótipo navegável do Diagnóstico 360 do Líder.</li>
+              <li>Desenvolvimento em fases, com entrega a cada etapa.</li>
+            </ol>
             <a class="final-btn" href="https://wa.me/5592986096874?text=Ol%C3%A1%2C%20Maninho!%20Vi%20a%20proposta%20do%20Sistema%20de%20Forma%C3%A7%C3%A3o%20de%20L%C3%ADderes%20e%20quero%20alinhar%20os%20pr%C3%B3ximos%20passos." target="_blank" rel="noopener">Alinhar próximos passos →</a>
           </div>
           <div class="final-right">
@@ -1095,83 +1242,193 @@
     });
     renderResult();
 
-    /* ---------- Reveal (sweep-based, safe for anchor jumps) ---------- */
-    var pending = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
-    var revealQueued = false;
-    function sweep() {
-      revealQueued = false;
-      var edge = window.innerHeight * 0.92;
-      pending = pending.filter(function (n) { if (n.getBoundingClientRect().top < edge) { n.classList.add('in'); return false; } return true; });
+    /* ---------- Palavras que sobem de uma máscara (títulos) ---------- */
+    var fine = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+    document.querySelectorAll('.sec-h2, .final-title').forEach(function (h) {
+      var text = h.textContent.trim().replace(/\s+/g, ' ');
+      h.setAttribute('aria-label', text); h.textContent = '';
+      text.split(' ').forEach(function (w, i, a) {
+        var s = el('span', 'w'); s.setAttribute('aria-hidden', 'true');
+        var inner = el('i', null, w); inner.style.setProperty('--i', String(i)); s.appendChild(inner); h.appendChild(s);
+        if (i < a.length - 1) h.appendChild(document.createTextNode(' '));
+      });
+    });
+
+    /* ---------- Manifesto: palavras que acendem com a rolagem ---------- */
+    var man = { wrap: $('manWrap'), text: $('manText'), words: [], lit: 0 };
+    (function () {
+      var full = man.text.textContent.trim().replace(/\s+/g, ' ');
+      var nodes = Array.prototype.slice.call(man.text.childNodes); man.text.textContent = '';
+      man.text.setAttribute('aria-label', full);
+      nodes.forEach(function (n) {
+        var key = n.nodeType === 1;
+        n.textContent.split(/(\s+)/).forEach(function (tok) {
+          if (!tok) return;
+          if (/^\s+$/.test(tok)) { man.text.appendChild(document.createTextNode(' ')); return; }
+          var s = el('span', 'mw' + (key ? ' k' : ''), tok); s.setAttribute('aria-hidden', 'true');
+          man.text.appendChild(s); man.words.push(s);
+        });
+      });
+    })();
+
+    /* ---------- Números que contam ---------- */
+    var counters = Array.prototype.slice.call(document.querySelectorAll('[data-count]'));
+    counters.forEach(function (c) { c._to = Number(c.dataset.count); c._done = false; if (!reduced) c.textContent = '0'; });
+    function runCount(c) {
+      if (c._done) return; c._done = true;
+      if (reduced) { c.textContent = String(c._to); return; }
+      var t0 = performance.now();
+      (function step(t) { var p = Math.min(1, (t - t0) / 1500), e = 1 - Math.pow(1 - p, 3); c.textContent = String(Math.round(c._to * e)); if (p < 1) requestAnimationFrame(step); })(t0);
     }
 
-    /* ---------- Parallax (scroll + mouse) ---------- */
-    function stagger(sel, speeds) { document.querySelectorAll(sel).forEach(function (n, i) { n.setAttribute('data-speed', speeds[i % speeds.length]); n.setAttribute('data-stag', '1'); }); }
-    stagger('.cy', [0.07, -0.04, 0.09, -0.06, 0.05]);
-    stagger('.src', [0.07, -0.05, 0.09, -0.04]);
-    stagger('.ph', [0.06, -0.05, 0.08]);
-    stagger('.ativo', [0.06, -0.05, 0.08, -0.07]);
+    /* ---------- Reveal + Parallax + ciclo fixado + progresso (um único quadro por rolagem) ---------- */
+    var pending = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
     var layers = Array.prototype.slice.call(document.querySelectorAll('[data-speed],[data-speedx]'));
     var depthEls = Array.prototype.slice.call(document.querySelectorAll('[data-depth]'));
     var heroEl = $('top'), heroIn = heroEl.querySelector('.hero-in');
-    /* cada elemento guarda o próprio estado e recebe o transform pronto (sem variáveis CSS herdadas) */
+    function stagger(sel, speeds) { document.querySelectorAll(sel).forEach(function (n, i) { n.setAttribute('data-speed', speeds[i % speeds.length]); n.setAttribute('data-stag', '1'); }); }
+    stagger('.src', [0.07, -0.05, 0.09, -0.04]);
+    stagger('.ph', [0.06, -0.05, 0.08]);
+    stagger('.ativo', [0.06, -0.05, 0.08, -0.07]);
+    layers = Array.prototype.slice.call(document.querySelectorAll('[data-speed],[data-speedx]'));
     layers.concat(depthEls).forEach(function (n) { if (!n._s) n._s = { px: 0, py: 0, dx: 0, dy: 0, rot: 0, sc: 1 }; });
     function paint(n) {
       var s = n._s;
       n.style.transform = 'translate3d(' + (s.px + s.dx).toFixed(1) + 'px,' + (s.py + s.dy).toFixed(1) + 'px,0)' + (s.rot ? ' rotate(' + s.rot.toFixed(2) + 'deg)' : '') + (s.sc !== 1 ? ' scale(' + s.sc.toFixed(3) + ')' : '');
     }
-    var pxQueued = false;
-    function parallax() {
-      pxQueued = false;
-      if (reduced || !window.__opened) return;
-      var vh = window.innerHeight, k = window.innerWidth < 700 ? 0.55 : 1, narrow = window.innerWidth < 1000;
-      var cache = new Map(), rects = [];
-      layers.forEach(function (n) {                       /* fase 1: só leituras */
-        var host = n.parentElement, r = cache.get(host);
-        if (!r) { r = host.getBoundingClientRect(); cache.set(host, r); }
-        rects.push(r);
-      });
+    function clamp01(v) { return Math.min(1, Math.max(0, v)); }
+    function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+    var navEl = document.querySelector('.nav'), progEl = $('progress');
+    var pin = { sec: $('ciclo'), wrap: $('cyclePin'), track: $('cycleTrack'), fill: $('cycleFill'), count: $('cycleCount'), cards: Array.prototype.slice.call(document.querySelectorAll('#cycleTrack .cy')), on: false, dist: 1, centers: [], active: -1 };
+    var chapters = [['top', 'Início'], ['valor', 'Valor'], ['manifesto', 'Manifesto'], ['ciclo', 'Ciclo'], ['diagnostico', 'Diagnóstico'], ['confianca', 'Avaliação'], ['gemeo', 'Gêmeo digital'], ['paineis', 'Painéis'], ['motor', 'Plataforma'], ['fases', 'Fases'], ['proposta', 'Proposta']];
+    var chapTops = [], chapEls = [], chapActive = -1, docH = 1, lastY = 0;
+    var chNav = el('nav', 'chapters'); chNav.setAttribute('aria-label', 'Capítulos');
+    chapters.forEach(function (c) { var a = el('a'); a.href = '#' + c[0]; a.setAttribute('data-label', c[1]); a.setAttribute('aria-label', c[1]); chNav.appendChild(a); chapEls.push(a); });
+    document.body.appendChild(chNav);
+
+    var ticking = false;
+    function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(tick); } }
+    function tick() {
+      ticking = false;
+      if (!window.__opened) return;
+      var y = window.scrollY, vh = window.innerHeight, vw = window.innerWidth, edge = vh * 0.92;
+      var k = vw < 700 ? 0.55 : 1, narrow = vw < 1000;
+
+      /* fase 1: só leituras */
+      var rv = pending.map(function (n) { return n.getBoundingClientRect().top; });
+      var cn = counters.map(function (n) { return n._done ? 1e9 : n.getBoundingClientRect().top; });
+      var cache = new Map(), rects = layers.map(function (n) { var h = n.parentElement, r = cache.get(h); if (!r) { r = h.getBoundingClientRect(); cache.set(h, r); } return r; });
       var hr = heroEl.getBoundingClientRect();
-      layers.forEach(function (n, i) {                    /* fase 2: só escritas */
-        var r = rects[i]; if (r.bottom < -600 || r.top > vh + 600) return;
-        var ds = n.dataset, s = n._s;
-        if (ds.stag && narrow) { if (s.py) { s.py = 0; paint(n); } return; }
-        var d = r.top + r.height / 2 - vh / 2;
-        s.py = -d * parseFloat(ds.speed || 0) * k;
-        s.px = -d * parseFloat(ds.speedx || 0) * k;
-        s.rot = ds.rot ? -d * parseFloat(ds.rot) / 1000 : 0;
-        s.sc = ds.scale ? 1 + Math.abs(d) * parseFloat(ds.scale) / 1000 : 1;
-        paint(n);
-      });
-      heroIn.style.opacity = (1 - Math.min(1, Math.max(0, -hr.top / (hr.height * 0.7)))).toFixed(3);
+      var pr = pin.on ? pin.wrap.getBoundingClientRect() : null;
+      var mr = man.wrap.getBoundingClientRect();
+
+      /* fase 2: só escritas */
+      var keep = []; pending.forEach(function (n, i) { if (rv[i] < edge) n.classList.add('in'); else keep.push(n); }); pending = keep;
+      counters.forEach(function (n, i) { if (cn[i] < edge) runCount(n); });
+      if (!reduced) {
+        layers.forEach(function (n, i) {
+          var r = rects[i]; if (r.bottom < -600 || r.top > vh + 600) return;
+          var ds = n.dataset, s = n._s;
+          if (ds.stag && narrow) { if (s.py) { s.py = 0; paint(n); } return; }
+          var d = r.top + r.height / 2 - vh / 2;
+          s.py = -d * parseFloat(ds.speed || 0) * k;
+          s.px = -d * parseFloat(ds.speedx || 0) * k;
+          s.rot = ds.rot ? -d * parseFloat(ds.rot) / 1000 : 0;
+          s.sc = ds.scale ? 1 + Math.abs(d) * parseFloat(ds.scale) / 1000 : 1;
+          paint(n);
+        });
+        heroIn.style.opacity = (1 - clamp01(-hr.top / (hr.height * 0.7))).toFixed(3);
+      }
+      if (pr) {
+        var p = clamp01(-pr.top / pin.dist);
+        pin.track.style.transform = 'translate3d(' + (-p * pin.dist).toFixed(1) + 'px,0,0)';
+        pin.fill.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+        var best = 0, bd = 1e9, mid = vw / 2;
+        pin.centers.forEach(function (c, i) { var d = Math.abs(c - p * pin.dist - mid); if (d < bd) { bd = d; best = i; } });
+        if (best !== pin.active) { pin.active = best; pin.cards.forEach(function (c, i) { c.classList.toggle('on', i === best); }); pin.count.textContent = pad(best + 1) + ' / ' + pad(pin.cards.length); }
+      }
+      var mp = clamp01(-mr.top / Math.max(1, mr.height - vh)), target = Math.min(man.words.length, Math.round(mp * 1.12 * man.words.length));
+      if (reduced) target = man.words.length;
+      if (target !== man.lit) { for (var q = Math.min(target, man.lit); q < Math.max(target, man.lit); q++) man.words[q].classList.toggle('lit', q < target); man.lit = target; }
+      progEl.style.transform = 'scaleX(' + clamp01(y / docH).toFixed(4) + ')';
+      if (y > 400 && y > lastY + 4) navEl.classList.add('hide'); else if (y < lastY - 4 || y < 200) navEl.classList.remove('hide');
+      lastY = y;
+      var probe = y + vh * 0.4, ci = 0; chapTops.forEach(function (tp, i) { if (tp <= probe) ci = i; });
+      if (ci !== chapActive) { chapActive = ci; chapEls.forEach(function (a, i) { a.classList.toggle('on', i === ci); }); }
     }
-    function onScroll() {
-      if (!revealQueued) { revealQueued = true; requestAnimationFrame(sweep); }
-      if (!pxQueued) { pxQueued = true; requestAnimationFrame(parallax); }
+    function layoutPin() {
+      var want = window.innerWidth >= 1000 && window.innerHeight >= 620 && !reduced;
+      pin.sec.classList.toggle('pin-on', want);
+      if (!want) { pin.on = false; pin.wrap.style.height = ''; pin.track.style.transform = ''; pin.cards.forEach(function (c) { c.classList.remove('on'); }); pin.active = -1; return; }
+      pin.on = true; pin.active = -1;
+      pin.wrap.style.height = 'auto';
+      pin.dist = Math.max(1, pin.track.scrollWidth - window.innerWidth);
+      pin.wrap.style.height = (pin.dist + window.innerHeight) + 'px';
+      pin.centers = pin.cards.map(function (c) { return c.offsetLeft + c.offsetWidth / 2; });
+    }
+    function relayout() {
+      layoutPin();
+      chapTops = chapters.map(function (c) { var n = $(c[0]); return n ? n.getBoundingClientRect().top + window.scrollY : 0; });
+      docH = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      tick();
     }
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    var mouseQueued = false, mx = 0, my = 0;
+    var resizeT; window.addEventListener('resize', function () { clearTimeout(resizeT); resizeT = setTimeout(relayout, 120); onScroll(); });
+
+    /* ---------- Cursor, botões magnéticos e luz nos cards (só com mouse) ---------- */
+    var cur = null;
+    if (fine && !reduced) {
+      var dot = el('div', 'cur-dot'), ring = el('div', 'cur-ring'); dot.setAttribute('aria-hidden', 'true'); ring.setAttribute('aria-hidden', 'true');
+      dot.style.transform = ring.style.transform = 'translate3d(-100px,-100px,0)'; document.body.appendChild(dot); document.body.appendChild(ring);
+      cur = { tx: -100, ty: -100, dx: -100, dy: -100, rx: -100, ry: -100, ds: 1, ts: 1, rs: 1, trs: 1, run: false };
+      var loop = function () {
+        cur.dx += (cur.tx - cur.dx) * 0.38; cur.dy += (cur.ty - cur.dy) * 0.38;
+        cur.rx += (cur.tx - cur.rx) * 0.15; cur.ry += (cur.ty - cur.ry) * 0.15;
+        cur.ds += (cur.ts - cur.ds) * 0.2; cur.rs += (cur.trs - cur.rs) * 0.2;
+        dot.style.transform = 'translate3d(' + cur.dx.toFixed(1) + 'px,' + cur.dy.toFixed(1) + 'px,0) translate(-50%,-50%) scale(' + cur.ds.toFixed(3) + ')';
+        ring.style.transform = 'translate3d(' + cur.rx.toFixed(1) + 'px,' + cur.ry.toFixed(1) + 'px,0) translate(-50%,-50%) scale(' + cur.rs.toFixed(3) + ')';
+        var still = Math.abs(cur.tx - cur.dx) + Math.abs(cur.ty - cur.dy) + Math.abs(cur.tx - cur.rx) + Math.abs(cur.ty - cur.ry) + Math.abs(cur.ts - cur.ds) + Math.abs(cur.trs - cur.rs);
+        if (still > 0.3) requestAnimationFrame(loop); else cur.run = false;
+      };
+      cur.kick = function () { if (!cur.run) { cur.run = true; requestAnimationFrame(loop); } };
+      document.addEventListener('mouseover', function (e) {
+        var hot = e.target.closest && e.target.closest('a, button, input, [role="button"]');
+        cur.ts = hot ? 5.6 : 1; cur.trs = hot ? 0 : 1; dot.classList.toggle('hover', !!hot); cur.kick();
+      });
+      document.querySelectorAll('.btn-p, .btn-o, .final-btn, .nav-cta').forEach(function (b) {
+        b.addEventListener('mousemove', function (e) { var r = b.getBoundingClientRect(); b.style.transform = 'translate(' + ((e.clientX - r.left - r.width / 2) * 0.3).toFixed(1) + 'px,' + ((e.clientY - r.top - r.height / 2) * 0.3).toFixed(1) + 'px)'; });
+        b.addEventListener('mouseleave', function () { b.style.transform = ''; });
+      });
+      document.querySelectorAll('.src, .ph, .panel:not(.dk), .sim-card, .trust-side, .engine-main, .cmp.old, .trail li, .ativo:nth-child(even)').forEach(function (n) { n.classList.add('glow'); });
+      document.querySelectorAll('.cy, .cmp.new, .panel.dk, .trust-card, .chat, .ativo:nth-child(odd)').forEach(function (n) { n.classList.add('glow', 'gd'); });
+    }
+    var mouseQueued = false, mx = 0, my = 0, mcx = 0, mcy = 0, mtarget = null;
     document.addEventListener('mousemove', function (e) {
+      if (cur) { cur.tx = e.clientX; cur.ty = e.clientY; cur.kick(); }
       if (!window.__opened || reduced) return;
-      mx = e.clientX / window.innerWidth - 0.5; my = e.clientY / window.innerHeight - 0.5;
+      mx = e.clientX / window.innerWidth - 0.5; my = e.clientY / window.innerHeight - 0.5; mcx = e.clientX; mcy = e.clientY; mtarget = e.target;
       if (mouseQueued) return;
       mouseQueued = true;
       requestAnimationFrame(function () {
         mouseQueued = false;
         depthEls.forEach(function (n) { var d = parseFloat(n.dataset.depth); n._s.dx = mx * d; n._s.dy = my * d; paint(n); });
+        var g = mtarget && mtarget.closest && mtarget.closest('.glow');
+        if (g) { var r = g.getBoundingClientRect(); g.style.setProperty('--mx', (mcx - r.left).toFixed(0) + 'px'); g.style.setProperty('--my', (mcy - r.top).toFixed(0) + 'px'); }
       });
     });
 
     /* ---------- Abertura (o envelope vive em script próprio) ---------- */
     function afterOpen() {
+      if (fine && !reduced) root.classList.add('cursor-on');
       var target = window.__target && document.getElementById(window.__target);
+      if (!chapTops.length) relayout();            /* o layout já foi medido durante o carregamento, sob o envelope */
       if (target) { root.style.scrollBehavior = 'auto'; target.scrollIntoView(); root.style.scrollBehavior = ''; }
-      sweep(); parallax();
+      tick();
     }
     if (window.__opened) afterOpen(); else document.addEventListener('proposal:open', afterOpen);
-    sweep(); parallax();
-    setTimeout(function () { sweep(); parallax(); }, 500);
-    setTimeout(sweep, 1400);
+    window.addEventListener('load', relayout);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
     window.__ready = true;
 
     /* ---------- Share ---------- */
