@@ -37,6 +37,7 @@ npm run db:migrate          # migrations no D1 local
 npm run db:migrate:prod     # migrations no D1 remoto
 npm run deploy              # deploy manual do Pages (normalmente o CI faz isso)
 npm run deploy:billing      # deploy do Worker de cobranças (NÃO é feito pelo CI)
+npm run deploy:proposta     # deploy da proposta comercial (projeto Pages separado; NÃO é feito pelo CI)
 ```
 
 Rode `npm test` e `npm run check` antes de qualquer commit.
@@ -87,6 +88,14 @@ Secrets (definidos no Cloudflare, **nunca** no repositório; `.env*` está no `.
 - Testes: `admin`, `billing-reminders`, `cash-flow`, `clients`, `infinitepay`, `utils` (30 passando em 2026-09-20).
 
 Estado do banco remoto em 2026-09-20: migrations 0001–0015 **já aplicadas** em produção.
+
+## 7.1 Proposta comercial (Mindora Edu)
+
+- Página estática em `proposta/index.html` (HTML/CSS/JS puros, uma só página; convertida de um componente React do Figma Make). Tem `proposta/_headers` (noindex, nosniff) e `<meta robots noindex>`.
+- Projeto Cloudflare Pages **próprio**: `maninho-proposta` (separado do site de links, para não ficar acessível em `links.maninhocriativos.com.br`). Deploy manual: `npm run deploy:proposta`.
+- Domínio: `proposta.maninhocriativos.com.br` (custom domain do projeto). Requer CNAME `proposta` → `maninho-proposta.pages.dev` (proxied) na zona `maninhocriativos.com.br`; o token do `.env.local` não tem `Zone → DNS → Edit`, então esse registro é criado no painel.
+- O diagnóstico é interativo: as 5 respostas (A–D) definem o perfil (Estrategista, Impulsionador, Conector, Executor); os percentuais e textos dos perfis são **ilustrativos**. O botão final abre o WhatsApp da Maninho com mensagem pronta.
+- Números da capa ("5x mais escala", "3 meses") vieram do texto original e não têm base comprovada; validar antes de enviar ao cliente. A proposta ainda não tem seção de investimento/prazo/valores.
 
 ## 8. Pendências / dívidas conhecidas
 
