@@ -85,18 +85,18 @@
       background: radial-gradient(circle, rgba(246,231,184,.5), rgba(217,180,95,.2) 38%, transparent 68%); transition: opacity .9s ease .5s, transform 1.2s ease .5s; }
     .gate.is-opening .env-glow { opacity: 1; transform: scale(1); }
     .gate.is-pulling .env-glow { opacity: 0; transform: scale(3); transition: opacity .9s ease, transform 1.1s ease; }
-    .env-float { animation: bob 6s ease-in-out infinite; }
+    .env-float { perspective: 1700px; animation: bob 6s ease-in-out infinite; }
     .gate.is-opening .env-float { animation: none; }
-    .env { position: relative; display: block; width: var(--ew); height: calc(var(--ew) * .64); border: 0; background: none; cursor: pointer; transform-style: preserve-3d; will-change: transform; transition: transform .3s ease-out; -webkit-tap-highlight-color: transparent; }
+    .env { position: relative; display: block; width: var(--ew); height: calc(var(--ew) * .64); border: 0; background: none; cursor: pointer; transform-style: flat; will-change: transform; transition: transform .3s ease-out; -webkit-tap-highlight-color: transparent; }
     .env > * { position: absolute; }
     .env-shadow { left: 4%; right: 4%; bottom: -60px; height: 90px; background: radial-gradient(ellipse at center, rgba(0,0,0,.6), transparent 68%); transition: opacity .6s ease .1s; }
     .env-back { inset: 0; border-radius: 12px; background: repeating-linear-gradient(45deg, rgba(217,180,95,.10) 0 1px, transparent 1px 15px), repeating-linear-gradient(-45deg, rgba(217,180,95,.10) 0 1px, transparent 1px 15px), linear-gradient(180deg, #08142f, #0f2350);
       box-shadow: 0 30px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(217,180,95,.28); transition: opacity .6s ease .1s; }
     .env-pocket { inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; transition: opacity .6s ease .1s; }
-    .env-flap { left: 0; top: 0; width: 100%; height: 62.5%; z-index: 4; transform-origin: 50% 0; transform-style: preserve-3d; will-change: transform; transition: transform .9s cubic-bezier(.5,0,.2,1) .2s, z-index 0s .55s, opacity .6s ease .1s; }
+    .env-flap { left: 0; top: 0; width: 100%; height: 62.5%; z-index: 4; transform-origin: 50% 0; transform-style: preserve-3d; transform: perspective(1600px) rotateX(0deg); will-change: transform; transition: transform .9s cubic-bezier(.5,0,.2,1) .2s, z-index 0s .56s, opacity .6s ease .1s; }
     .env-flap svg { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-    .env-flap .back { transform: rotateX(180deg); }
-    .gate.is-opening .env-flap { transform: rotateX(180deg); z-index: 1; }
+    .env-flap .back { transform: rotateY(180deg); }
+    .gate.is-opening .env-flap { transform: perspective(1600px) rotateX(180deg); z-index: 1; }
 
     /* a carta é desenhada já no tamanho final (cobre a tela) e só é reduzida: nunca fica borrada e nunca precisa ser re-rasterizada */
     .env-letter { z-index: 2; visibility: hidden; text-align: center; color: #fff; transform-origin: 50% 50%; will-change: transform; backface-visibility: hidden; -webkit-backface-visibility: hidden;
