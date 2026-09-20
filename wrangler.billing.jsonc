@@ -1,0 +1,36 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "maninho-cobrancas",
+  "main": "workers/billing-reminders.js",
+  "compatibility_date": "2026-09-05",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "maninho-links-db",
+      "database_id": "807715b6-58cd-4b3f-894d-1920ff97ff68",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "remote": true
+    }
+  ],
+  "vars": {
+    "BILLING_FROM_EMAIL": "contato@maninhocriativos.com.br"
+  },
+  "triggers": {
+    "crons": [
+      "0 13 * * *",
+      "0 17 * * *",
+      "0 21 * * *"
+    ]
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "head_sampling_rate": 1
+    }
+  }
+}

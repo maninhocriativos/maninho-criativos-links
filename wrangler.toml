@@ -2,6 +2,10 @@ name = "maninho-criativos-links"
 compatibility_date = "2026-09-04"
 pages_build_output_dir = "public"
 
+[vars]
+INFINITEPAY_HANDLE = "maninhocriativos"
+PUBLIC_BASE_URL = "https://links.maninhocriativos.com.br"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "maninho-links-db"
