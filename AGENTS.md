@@ -93,7 +93,7 @@ Estado do banco remoto em 2026-09-20: migrations 0001–0015 **já aplicadas** e
 1. **Alertas de 3 dias antes** (`finance_alert_deliveries`): schema pronto, lógica de envio **não implementada** no Worker.
 2. **Webhook InfinitePay é público e grava a cada chamada** — considerar rate limit. Reenvio do mesmo `transaction_nsu` volta o evento a `received` e reprocessa; ideal ignorar quando a cobrança já está `paid`.
 3. O CI não executa `npm test` — vale adicionar um passo.
-4. O Worker `maninho-cobrancas` precisa de deploy manual (`npm run deploy:billing`) e dos secrets Twilio/Z-API configurados nele; sem eles, SMS/WhatsApp falham com erro registrado (e-mail funciona via binding).
+4. O Worker `maninho-cobrancas` foi publicado pela primeira vez em 2026-09-20 (antes disso nunca existiu na conta). Deploy é manual (`npm run deploy:billing`), com `workers_dev`/`preview_urls` desativados (só cron, sem URL pública). Precisa dos secrets Twilio/Z-API **no próprio Worker** (`npx wrangler secret put NOME --config wrangler.billing.jsonc`); sem eles, SMS/WhatsApp falham com erro registrado (e-mail funciona via binding). O token em `.env.local` precisa de Workers Scripts: Edit.
 5. Lixo versionado na raiz: `CRM THIAGO.zip`, `design_handoff_crm_thiago/` (referência de design do CRM) e vários scripts de conversão de imagem (`*.py`, `convert-*.mjs`). Não remover sem confirmar com o dono.
 6. `SISTEMA.md` é de 2026-05-31 e está parcialmente desatualizado (arquitetura pré-CRM).
 
