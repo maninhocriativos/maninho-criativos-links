@@ -91,11 +91,15 @@ Estado do banco remoto em 2026-09-20: migrations 0001–0015 **já aplicadas** e
 
 ## 7.1 Proposta comercial (Mindora Edu)
 
-- Página estática em `proposta/index.html` (HTML/CSS/JS puros, uma só página; convertida de um componente React do Figma Make). Tem `proposta/_headers` (noindex, nosniff) e `<meta robots noindex>`.
-- Projeto Cloudflare Pages **próprio**: `maninho-proposta` (separado do site de links, para não ficar acessível em `links.maninhocriativos.com.br`). Deploy manual: `npm run deploy:proposta`.
-- Domínio: `proposta.maninhocriativos.com.br` (custom domain do projeto). Requer CNAME `proposta` → `maninho-proposta.pages.dev` (proxied) na zona `maninhocriativos.com.br`; o token do `.env.local` não tem `Zone → DNS → Edit`, então esse registro é criado no painel.
-- O diagnóstico é interativo: as 5 respostas (A–D) definem o perfil (Estrategista, Impulsionador, Conector, Executor); os percentuais e textos dos perfis são **ilustrativos**. O botão final abre o WhatsApp da Maninho com mensagem pronta.
-- Números da capa ("5x mais escala", "3 meses") vieram do texto original e não têm base comprovada; validar antes de enviar ao cliente. A proposta ainda não tem seção de investimento/prazo/valores.
+- Página estática em `proposta/index.html` (HTML/CSS/JS puros, um arquivo só) com `proposta/_headers` (noindex, nosniff) e `<meta robots noindex>`.
+- Projeto Cloudflare Pages **próprio**: `maninho-proposta` (separado do site de links). Deploy manual: `npm run deploy:proposta`. Domínio: `proposta.maninhocriativos.com.br` (CNAME `proposta` → `maninho-proposta.pages.dev`, proxied, já criado; o token do `.env.local` tem DNS Edit).
+- **Conteúdo (versão 2, 2026-09-20):** vende o "Sistema Inteligente de Formação Contínua de Líderes" (motor adaptativo, não um LMS). Seções: valor (comparativo), ciclo de 10 etapas, Diagnóstico 360 (simulador interativo), 4 fontes de avaliação + princípios de confiança, gêmeo de desenvolvimento, dois painéis (líder / RH), plataforma e ativos (M.O.T.A. é a primeira metodologia dentro do motor), fases e CTA.
+- **Envelope de abertura:** overlay `#gate` com envelope animado em CSS (aba abre, carta sobe, zoom e fade) que revela a proposta ao clicar. Links com hash (`/#diagnostico`) pulam o envelope. Respeita `prefers-reduced-motion`.
+- **Paralaxe:** elementos com `data-speed` (rolagem, via variável `--py`) e `data-depth` (mouse, `--dx/--dy`). O efeito de aparecer ao rolar usa varredura por `getBoundingClientRect` (não IntersectionObserver) para não deixar conteúdo escondido após saltos de âncora.
+- Simulador: 9 competências (M, O, T, A + Comunicação, Feedback, Delegação, Decisão, Desenvolvimento de pessoas); as 3 menores viram prioridades e a menor gera a microtrilha (teoria, simulação, prática real, acompanhamento, avaliação, reavaliação). Valores e painéis são **ilustrativos** e a página avisa.
+- Botão final abre o WhatsApp da Maninho com mensagem pronta.
+- **Não inventar** preço, prazo ou métricas: a página diz que escopo, cronograma e investimento são definidos com o cliente. Ainda não há seção de investimento.
+- Teste local: servir a pasta `proposta/` em http e abrir no Chrome; em screenshots headless use iframes (hash direto) e desative as transições, pois o fade não completa sob virtual-time.
 
 ## 8. Pendências / dívidas conhecidas
 
