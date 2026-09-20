@@ -479,6 +479,12 @@ body {
 }
 .footer-admin { color: var(--text3); text-decoration: none; opacity: 0.4; transition: opacity 0.2s; }
 .footer-admin:hover { opacity: 0.8; }
+.footer-email {
+  color: var(--text3);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-email:hover { color: var(--cyan); }
 .footer-portfolio-link {
   font-size: 0.78rem;
   font-weight: 700;

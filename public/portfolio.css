@@ -648,6 +648,25 @@ body { background:#06090e; color:#f4f7fb; }
 }
 @media (max-width:480px) { .essay-gallery-grid { grid-template-columns:1fr; } }
 
+.portfolio-footer {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:12px 20px;
+  padding:22px 20px;
+  border-top:1px solid rgba(148,163,184,.12);
+  color:#8e9aad;
+  font-size:.76rem;
+  background:#06090e;
+}
+.portfolio-footer a {
+  color:#67b1ff;
+  text-decoration:none;
+  transition:color .2s;
+}
+.portfolio-footer a:hover { color:#fff; }
+
 /* Final visual refinement v7 */
 .portfolio-wordmark{display:flex;align-items:baseline;gap:6px;color:#fff;letter-spacing:.04em}
 .portfolio-wordmark b{font-size:.84rem;font-weight:900}.portfolio-wordmark small{color:#58a6ff;font-size:.56rem;font-weight:800;letter-spacing:.16em}
