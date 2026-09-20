@@ -7,9 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="admin.css?v=20260904-3" />
+  <link rel="stylesheet" href="admin.css?v=20260907-2" />
 </head>
 <body>
+  <a class="skip-link" href="#admin-main" onclick="event.preventDefault();document.getElementById('admin-main').focus()">Pular para o conteúdo</a>
+  <div id="auth-loading" class="auth-loading" role="status"><strong>Preparando seu painel…</strong><p>Verificando acesso ao estúdio.</p></div>
 
   <!-- ── PAINEL ── -->
   <div id="admin-panel" style="display:none">
@@ -20,7 +22,7 @@
         <img src="Images/Logotipo.webp" alt="Maninho Criativos" class="sidebar-logo-img" width="800" height="533"
              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
         <span class="sidebar-logo-fallback" style="display:none">MC</span>
-        <button class="sidebar-close-btn" id="sidebar-close-btn" onclick="closeSidebar()">✕</button>
+        <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Fechar menu" onclick="closeSidebar()">✕</button>
       </div>
 
       <p class="sidebar-section-label">CRM de Design</p>
@@ -45,6 +47,10 @@
         <button class="snav-item" data-tab="receipts" onclick="setTab('receipts',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>
           <span>Financeiro</span>
+        </button>
+        <button class="snav-item" data-tab="household" onclick="setTab('household',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M9 20v-6h6v6"/></svg>
+          <span>Despesas de casa</span>
         </button>
         <button class="snav-item" data-tab="clients" onclick="setTab('clients',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
@@ -95,18 +101,19 @@
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
     <!-- Main content -->
-    <main class="admin-main">
+    <main class="admin-main" id="admin-main" tabindex="-1">
       <header class="admin-topbar">
-        <button class="topbar-menu-btn" id="mobile-menu-btn" onclick="openSidebar()">
+        <button class="topbar-menu-btn" id="mobile-menu-btn" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false" onclick="openSidebar()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <div class="topbar-title">
           <h2 id="admin-page-title">Links</h2>
           <span class="topbar-subtitle" id="admin-page-subtitle"></span>
         </div>
-        <div class="topbar-actions" id="tab-actions"></div>
+        <div class="topbar-actions" id="tab-actions"><select id="section-jump" class="admin-input section-jump" aria-label="Ir para uma área" onchange="setTab(this.value)"><option value="">Ir para…</option><option value="dashboard">Visão geral</option><option value="clients">Clientes</option><option value="leads">Leads</option><option value="projects">Projetos</option><option value="receipts">Financeiro</option><option value="household">Despesas de casa</option><option value="links">Links</option><option value="portfolio">Portfólio</option><option value="analytics">Analytics</option><option value="profile">Configurações</option></select><button class="btn-secondary small" onclick="refreshCurrentArea()" id="refresh-area">Atualizar</button></div>
       </header>
 
+      <div id="request-error" class="request-error" role="alert" hidden><span></span><button class="btn-secondary small" onclick="refreshCurrentArea()">Tentar novamente</button></div>
       <!-- ── QUICK STATS BAR ── -->
       <div class="quick-stats" id="quick-stats" style="display:none">
         <div class="quick-stat">
@@ -123,7 +130,7 @@
         </div>
         <div class="quick-stat qs-pulse">
           <span class="qs-dot"></span>
-          <span class="qs-label">Sistema online</span>
+          <span class="qs-label">Sessão autenticada</span>
         </div>
       </div>
 
@@ -286,7 +293,7 @@
             <div class="list-toolbar">
               <select class="admin-input" id="portfolio-filter" onchange="filterPortfolio()"><option value="">Todas as categorias</option><option>Ensaio Fotográfico</option><option>Design 3D</option><option>IA Generativa</option><option>Desenvolvimento de Apps</option><option>CRM & Meta</option><option>Automação de IA</option></select><input class="admin-input" id="portfolio-search" placeholder="Buscar projeto ou galeria..." oninput="filterPortfolio()" />
               <a href="/portfolio.html" target="_blank" class="btn-secondary small" style="text-decoration:none;font-size:0.8rem;padding:7px 14px">Ver portfólio ↗</a>
-              <button class="btn-primary small" onclick="togglePanel('add-portfolio-panel')">+ Novo item</button>
+              <button class="btn-primary small" onclick="openNewPortfolio()">+ Novo item</button>
             </div>
           </div>
           <div id="portfolio-table" class="links-table">
@@ -349,10 +356,10 @@
       <section id="tab-leads" class="tab-content">
         <div class="panel-card">
           <div class="panel-card-header">
-            <h3>📋 Leads captados pelo modal</h3>
+            <h3>Oportunidades comerciais</h3>
             <button class="btn-secondary" onclick="loadLeads()">↻ Atualizar</button>
           </div>
-          <div id="leads-stats" class="leads-stats"></div>
+          <div class="area-filters"><input id="leads-search" class="admin-input" type="search" aria-label="Buscar oportunidades" placeholder="Buscar nome, telefone ou serviço…" oninput="renderLeads()"><select id="leads-status-filter" class="admin-input" aria-label="Filtrar oportunidades por etapa" onchange="renderLeads()"><option value="">Todas as etapas</option><option value="new">Novo</option><option value="qualified">Qualificado</option><option value="negotiation">Negociação</option><option value="won">Ganho</option><option value="lost">Perdido</option></select></div><div id="leads-stats" class="leads-stats"></div>
           <div class="table-wrap">
             <table class="leads-table" id="leads-table">
               <thead>
@@ -382,28 +389,23 @@
         <div class="panel-card"><div class="panel-card-header"><div><h3>Novo projeto de design</h3><p class="panel-description">Controle briefing, criação, revisão e entrega.</p></div></div>
           <form class="link-form" id="project-form" onsubmit="event.preventDefault(); submitProject(event)"><input id="pr-id" type="hidden" />
             <div class="form-row"><div class="form-field"><label>Cliente *</label><select class="admin-input" id="pr-client" required></select></div><div class="form-field"><label>Projeto *</label><input class="admin-input" id="pr-title" required maxlength="160" placeholder="Ex.: Identidade visual da campanha" /></div></div>
-            <div class="form-row three"><div class="form-field"><label>Serviço *</label><select class="admin-input" id="pr-service"><option>Identidade visual</option><option>Social media</option><option>Website</option><option>Landing page</option><option>Ensaio com IA</option><option>Design gráfico</option><option>Outro</option></select></div><div class="form-field"><label>Etapa</label><select class="admin-input" id="pr-status"><option value="briefing">Briefing</option><option value="creation">Criação</option><option value="review">Revisão</option><option value="approved">Aprovado</option><option value="delivered">Entregue</option><option value="paused">Pausado</option></select></div><div class="form-field"><label>Prazo</label><div class="date-control"><input class="admin-input" id="pr-deadline" type="date" /><button type="button" class="date-button" onclick="openDatePicker('pr-deadline')">📅</button></div></div></div>
+            <div class="form-row three"><div class="form-field"><label>Serviço *</label><select class="admin-input" id="pr-service"><option>Identidade visual</option><option>Social media</option><option>Website</option><option>Landing page</option><option>Ensaio com IA</option><option>Design gráfico</option><option>Outro</option></select></div><div class="form-field"><label>Etapa</label><select class="admin-input" id="pr-status"><option value="briefing">Briefing</option><option value="creation">Criação</option><option value="review">Revisão</option><option value="approved">Aprovado</option><option value="delivered">Entregue</option><option value="paused">Pausado</option><option value="cancelled">Cancelado</option></select></div><div class="form-field"><label>Prazo</label><div class="date-control"><input class="admin-input" id="pr-deadline" type="date" /><button type="button" class="date-button" onclick="openDatePicker('pr-deadline')">📅</button></div></div></div>
             <div class="form-row"><div class="form-field"><label>Valor (R$)</label><input class="admin-input" id="pr-value" type="number" min="0" step="0.01" /></div><div class="form-field"><label>Progresso (%)</label><input class="admin-input" id="pr-progress" type="number" min="0" max="100" value="0" /></div></div>
             <div class="form-field"><label>Notas do projeto</label><textarea class="admin-input" id="pr-notes" rows="3" maxlength="1000"></textarea></div><div class="form-actions"><button class="btn-secondary" type="button" id="pr-cancel" hidden onclick="resetProjectForm()">Cancelar</button><button class="btn-primary" id="pr-submit">Criar projeto</button></div>
           </form></div>
-        <div class="project-board" id="project-board"></div>
+        <div class="area-filters"><input id="projects-search" class="admin-input" type="search" aria-label="Buscar projetos" placeholder="Buscar projeto, cliente ou serviço…" oninput="renderProjectBoard()"><select id="projects-status-filter" class="admin-input" aria-label="Filtrar projetos por etapa" onchange="renderProjectBoard()"><option value="">Todas as etapas</option><option value="briefing">Briefing</option><option value="creation">Criação</option><option value="review">Revisão</option><option value="approved">Aprovado</option><option value="delivered">Entregue</option><option value="paused">Pausado</option><option value="cancelled">Cancelado</option></select><span id="projects-count" role="status"></span></div><div class="project-board" id="project-board"></div>
       </section>
 
       <!-- ── TAB: CLIENTES ── -->
       <section id="tab-clients" class="tab-content clients-page">
-        <div class="panel-card client-card">
-          <div class="panel-card-header"><div><h3>👤 Cadastro de clientes</h3><p class="panel-description">Centralize os dados usados nos recibos e próximos atendimentos.</p></div></div>
-          <form class="link-form client-form" id="client-form" onsubmit="event.preventDefault(); submitClient(event)">
-            <input id="c-id" type="hidden" />
-            <div class="form-row"><div class="form-field"><label>Nome *</label><input class="admin-input" id="c-name" maxlength="120" required /></div><div class="form-field"><label>E-mail *</label><input class="admin-input" id="c-email" type="email" required /></div></div>
-            <div class="form-row three"><div class="form-field"><label>Telefone</label><input class="admin-input" id="c-phone" maxlength="30" /></div><div class="form-field"><label>CPF/CNPJ</label><input class="admin-input" id="c-document" maxlength="30" /></div><div class="form-field"><label>CEP</label><input class="admin-input" id="c-postal" maxlength="9" inputmode="numeric" placeholder="00000-000" oninput="handleCepInput(this)" onblur="lookupCep()" /><small id="cep-status" aria-live="polite"></small></div></div>
-            <div class="form-field"><label>Endereço</label><input class="admin-input" id="c-address" maxlength="240" /></div>
-            <div class="form-row"><div class="form-field"><label>Cidade</label><input class="admin-input" id="c-city" maxlength="100" /></div><div class="form-field"><label>UF</label><select class="admin-input" id="c-state"><option value="">Selecione</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div></div>
-            <div class="form-field"><label>Observações</label><textarea class="admin-input" id="c-notes" maxlength="500" rows="3"></textarea></div>
-            <div class="form-actions"><button type="button" class="btn-secondary" id="client-cancel" onclick="resetClientForm()" hidden>Cancelar edição</button><button type="submit" class="btn-primary" id="client-submit">Cadastrar cliente</button></div>
-          </form>
+        <div class="section-hero client-hero">
+          <div><span class="eyebrow">Relacionamento</span><h1>Seus clientes</h1><p>Consulte contatos, responsáveis e dados cadastrais em um só lugar.</p></div>
+          <button class="btn-primary" onclick="openClientModal()">+ Novo cliente</button>
         </div>
-        <div class="links-table-wrap"><div class="table-header-row"><span class="table-count" id="clients-count">0 clientes</span><button class="btn-secondary small" onclick="loadClients()">↻ Atualizar</button></div><div class="table-wrap"><table class="leads-table"><thead><tr><th>Cliente</th><th>Contato</th><th>Documento</th><th>Cidade</th><th>Ações</th></tr></thead><tbody id="clients-tbody"></tbody></table></div></div>
+        <div class="client-directory">
+          <div class="client-directory-header"><div><h3>Clientes cadastrados</h3><span class="table-count" id="clients-count">0 clientes</span></div><div class="client-directory-tools"><input class="admin-input client-search" type="search" id="clients-search" aria-label="Buscar clientes" placeholder="Buscar nome, responsável, e-mail ou documento…" oninput="renderClients()"><button class="btn-secondary small" onclick="loadClients()">↻ Atualizar</button></div></div>
+          <div class="client-grid" id="clients-list"></div>
+        </div>
       </section>
 
       <!-- ── TAB: RECIBOS ── -->
@@ -415,6 +417,7 @@
         <div id="finance-view-cash" class="finance-view active">
         <div class="finance-header"><div><h3>Fluxo de caixa</h3><p>Controle receitas, despesas e valores pendentes.</p></div><div><input class="admin-input finance-month" id="finance-month" type="month" onchange="loadCashFlow()"/><button class="btn-primary" onclick="openCashModal()">+ Novo lançamento</button></div></div>
         <div class="finance-kpis" id="finance-kpis"></div>
+        <div class="integrated-cost-card" id="finance-integrated-cost"></div>
         <div class="finance-grid">
           <div class="panel-card"><div class="panel-card-header finance-list-header"><div><h3>Movimentações do mês</h3><p class="panel-description" id="finance-period-label"></p></div><button class="btn-secondary small" onclick="exportCashFlow()">Exportar CSV</button></div><div class="finance-filters"><input class="admin-input" id="cash-search" placeholder="Buscar lançamento..." oninput="filterCashFlow()"><select class="admin-input" id="cash-type-filter" onchange="filterCashFlow()"><option value="">Entradas e saídas</option><option value="income">Somente entradas</option><option value="expense">Somente saídas</option></select><select class="admin-input" id="cash-status-filter" onchange="filterCashFlow()"><option value="">Todos os status</option><option value="paid">Pagos</option><option value="pending">Pendentes</option><option value="cancelled">Cancelados</option></select></div><div class="table-wrap"><table class="leads-table"><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Status</th><th>Valor</th><th>Ações</th></tr></thead><tbody id="cash-tbody"></tbody></table></div></div>
           <div class="panel-card"><div class="panel-card-header"><div><h3>Relatório mensal</h3><p class="panel-description">Receitas x despesas dos últimos 12 meses</p></div></div><div class="finance-chart" id="finance-chart"></div><div class="finance-categories" id="finance-categories"></div></div>
@@ -468,6 +471,25 @@
             <table class="leads-table"><thead><tr><th>#</th><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Envio</th><th>Status</th><th>Ação</th></tr></thead><tbody id="receipts-tbody"></tbody></table>
           </div>
         </div>
+        </div>
+      </section>
+
+      <!-- ── TAB: DESPESAS DE CASA ── -->
+      <section id="tab-household" class="tab-content household-page">
+        <div class="section-hero household-hero">
+          <div><span class="eyebrow">Organização pessoal</span><h1>Despesas de casa</h1><p>Acompanhe mercado, beleza, saúde, lazer e outros gastos do dia a dia sem misturar com a empresa.</p></div>
+          <button class="btn-primary" onclick="openHouseholdExpenseModal()">+ Nova despesa</button>
+        </div>
+        <div class="finance-header household-toolbar"><div><h3>Resumo do mês</h3><p id="household-period-label"></p></div><div><input class="admin-input finance-month" id="household-month" type="month" onchange="loadHouseholdExpenses()"/></div></div>
+        <div class="household-kpis" id="household-kpis"></div>
+        <div class="integrated-cost-card" id="household-integrated-cost"></div>
+        <div class="finance-grid household-grid">
+          <div class="panel-card">
+            <div class="panel-card-header finance-list-header"><div><h3>Gastos do dia a dia</h3><p class="panel-description">Somente despesas pessoais e da casa</p></div><button class="btn-secondary small" onclick="exportHouseholdExpenses()">Exportar CSV</button></div>
+            <div class="finance-filters household-filters"><input class="admin-input" id="household-search" placeholder="Buscar despesa ou estabelecimento..." oninput="filterHouseholdExpenses()"><select class="admin-input" id="household-category-filter" onchange="filterHouseholdExpenses()"><option value="">Todas as categorias</option></select><select class="admin-input" id="household-status-filter" onchange="filterHouseholdExpenses()"><option value="">Todos os status</option><option value="paid">Pagas</option><option value="pending">Pendentes</option><option value="cancelled">Canceladas</option></select></div>
+            <div class="table-wrap"><table class="leads-table"><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Status</th><th>Valor</th><th>Ações</th></tr></thead><tbody id="household-tbody"></tbody></table></div>
+          </div>
+          <div class="panel-card"><div class="panel-card-header"><div><h3>Por categoria</h3><p class="panel-description">Onde seu dinheiro foi usado neste mês</p></div></div><div class="household-categories" id="household-categories"></div></div>
         </div>
       </section>
 
@@ -549,24 +571,77 @@
   </div>
 
   <div id="cash-modal" class="modal-backdrop" onclick="closeCashModal(event)">
-    <div class="modal-box"><div class="modal-header"><div><h3 id="cash-modal-title">Novo lançamento</h3><p class="panel-description">Registre uma entrada ou saída do caixa.</p></div><button class="btn-icon" onclick="closeCashModal()">✕</button></div>
+    <div class="modal-box cash-modal-box"><div class="modal-header"><div><h3 id="cash-modal-title">Nova cobrança</h3><p class="panel-description" id="cash-modal-subtitle">Registre uma entrada a receber.</p></div><button class="btn-icon" onclick="closeCashModal()">✕</button></div>
       <form class="modal-body" id="cash-form" onsubmit="event.preventDefault();submitCashTransaction(event)">
         <input id="cf-id" type="hidden"/>
-        <div class="form-row"><div class="form-field"><label>Tipo</label><select class="admin-input" id="cf-type" onchange="updateCashCategories()"><option value="income">Receita</option><option value="expense">Despesa</option></select></div><div class="form-field"><label>Status</label><select class="admin-input" id="cf-status"><option value="pending">Pendente</option><option value="paid">Pago/Recebido</option><option value="cancelled">Cancelado</option></select></div></div>
+        <input id="cf-scope" type="hidden" value="business"/>
+        <div class="form-row"><div class="form-field"><label>Tipo</label><select class="admin-input" id="cf-type" onchange="updateCashCategories()"><option value="income">Receita</option><option value="expense">Despesa</option></select></div><div class="form-field"><label>Status</label><select class="admin-input" id="cf-status" onchange="toggleCashReminder()"><option value="pending" id="cf-status-pending">Pendente</option><option value="paid" id="cf-status-paid">Recebido</option><option value="cancelled">Cancelado</option></select></div></div>
         <div class="form-field"><label>Descrição *</label><input class="admin-input" id="cf-description" required maxlength="240"/></div>
         <div class="form-row"><div class="form-field"><label>Categoria *</label><select class="admin-input" id="cf-category"></select></div><div class="form-field"><label>Valor (R$) *</label><input class="admin-input" id="cf-amount" type="number" min="0.01" step="0.01" required/></div></div>
-        <div class="form-row"><div class="form-field"><label>Vencimento *</label><input class="admin-input" id="cf-due" type="date" required/></div><div class="form-field"><label>Pagamento</label><input class="admin-input" id="cf-paid" type="date"/></div></div>
-        <div class="recurrence-box"><div class="form-row"><div class="form-field"><label>Recorrência</label><select class="admin-input" id="cf-frequency" onchange="toggleCashRecurrence()"><option value="once">Lançamento avulso</option><option value="monthly">Mensal / contrato recorrente</option></select></div><div class="form-field" id="cf-months-field" hidden><label>Gerar por quantos meses?</label><select class="admin-input" id="cf-months"><option value="3">3 meses</option><option value="6">6 meses</option><option value="12" selected>12 meses</option><option value="18">18 meses</option><option value="24">24 meses</option><option value="36">36 meses</option></select></div></div><small id="cf-recurrence-help">Use mensal para clientes fixos, manutenção e contratos continuados.</small></div>
-        <div class="form-row"><div class="form-field"><label>Cliente</label><select class="admin-input" id="cf-client"></select></div><div class="form-field"><label>Projeto</label><select class="admin-input" id="cf-project"></select></div></div>
+        <div class="form-row"><div class="form-field"><label id="cf-due-label">Vencimento *</label><input class="admin-input" id="cf-due" type="date" required/></div><div class="form-field"><label id="cf-paid-label">Recebido em</label><input class="admin-input" id="cf-paid" type="date"/></div></div>
+        <div class="recurrence-box"><div class="form-row"><div class="form-field"><label id="cf-frequency-label">Recorrência da cobrança</label><select class="admin-input" id="cf-frequency" onchange="toggleCashRecurrence()"><option value="once" id="cf-frequency-once">Cobrança avulsa</option><option value="monthly" id="cf-frequency-monthly">Mensal / contrato recorrente</option></select></div><div class="form-field" id="cf-months-field" hidden><label>Gerar por quantos meses?</label><select class="admin-input" id="cf-months"><option value="3">3 meses</option><option value="6">6 meses</option><option value="12" selected>12 meses</option><option value="18">18 meses</option><option value="24">24 meses</option><option value="36">36 meses</option></select></div></div><small id="cf-recurrence-help">Use mensal para clientes fixos, manutenção e contratos continuados.</small></div>
+        <div class="recurrence-update-box" id="cf-series-update" hidden><div><strong>Atualizar recorrência</strong><small>Este lançamento faz parte de uma série mensal.</small></div><label><input type="checkbox" id="cf-update-series" checked/> Aplicar valor e dados compartilhados em todos os meses</label><small>Vencimentos, pagamentos e status de cada mês serão preservados.</small></div>
+        <div class="form-row" id="cf-income-links"><div class="form-field"><label>Cliente</label><select class="admin-input" id="cf-client"></select></div><div class="form-field"><label>Projeto</label><select class="admin-input" id="cf-project"></select></div></div>
+        <div class="service-company-box" id="cf-expense-details" hidden>
+          <div class="service-company-heading"><span class="service-company-icon">✦</span><div><strong>Empresa do serviço</strong><small>Escolha uma empresa de inteligência artificial ou software.</small></div></div>
+          <div class="form-row"><div class="form-field"><label>Empresa *</label><select class="admin-input" id="cf-company" onchange="toggleCustomCashCompany()"><option value="">Selecione a empresa</option><optgroup label="Empresas de IA"><option>OpenAI / ChatGPT</option><option>Anthropic / Claude</option><option>Google Gemini</option><option>Microsoft Copilot</option><option>Midjourney</option><option>Leonardo AI</option><option>Magnific AI</option><option>Runway</option><option>ElevenLabs</option></optgroup><optgroup label="Softwares e plataformas"><option>Adobe</option><option>Canva</option><option>Microsoft 365</option><option>Google Workspace</option><option>Cloudflare</option><option>Hostinger</option><option>GitHub</option><option>Notion</option><option>Figma</option><option>Meta</option></optgroup><option value="__other">Outra empresa ou prestador</option></select></div><div class="form-field" id="cf-custom-company-field" hidden><label>Nome da empresa *</label><input class="admin-input" id="cf-counterparty" maxlength="160" placeholder="Digite o nome da empresa ou prestador" oninput="syncCashCompany()"/></div></div>
+          <div class="form-field"><label>CPF/CNPJ do fornecedor</label><input class="admin-input" id="cf-counterparty-document" maxlength="30" placeholder="Opcional"/></div>
+        </div>
+        <div class="expense-party-box" id="cf-household-details" hidden><div class="form-row"><div class="form-field"><label>Estabelecimento ou beneficiário *</label><input class="admin-input" id="cf-household-counterparty" maxlength="160" placeholder="Ex.: supermercado, salão ou farmácia"/></div><div class="form-field"><label>CPF/CNPJ</label><input class="admin-input" id="cf-household-document" maxlength="30" placeholder="Opcional"/></div></div></div>
         <div class="form-field"><label>Forma de pagamento</label><select class="admin-input" id="cf-payment"><option value="">Selecione</option><option>PIX</option><option>Transferência bancária</option><option>Cartão de crédito</option><option>Dinheiro</option><option>Boleto</option></select></div>
-        <div class="form-actions modal-actions"><button type="button" class="btn-secondary" onclick="closeCashModal()">Cancelar</button><button class="btn-primary">Salvar lançamento</button></div>
+        <div class="form-field"><label>Observações</label><textarea class="admin-input" id="cf-notes" maxlength="500" rows="2" placeholder="Detalhes adicionais deste lançamento"></textarea></div>
+        <div class="billing-reminder-box infinitepay-box" id="cf-infinitepay-box">
+          <label class="reminder-master"><input id="cf-infinitepay-auto" type="checkbox" checked onchange="toggleInfinitePay()"/><span><strong>Gerar checkout automaticamente na InfinitePay</strong><small>Cria um link pelo Checkout Integrado da conta $maninhocriativos. Enquanto pendente, ele fica listado neste sistema, não na tela Gestão de Cobranças da InfinitePay.</small></span></label>
+          <div class="form-field" id="cf-manual-payment"><label>Link de pagamento manual</label><input class="admin-input" id="cf-payment-url" type="url" maxlength="2048" inputmode="url" placeholder="https://checkout.infinitepay.io/..."/><small class="field-hint">Use somente se preferir colar um link já criado.</small></div>
+        </div>
+        <div class="billing-reminder-box" id="cf-reminder-box">
+          <label class="reminder-master"><input id="cf-reminder-enabled" type="checkbox" onchange="toggleCashReminder()"/><span><strong>Enviar cobranças automaticamente</strong><small>Somente para receitas pendentes com cliente e link de pagamento.</small></span></label>
+          <div class="reminder-settings" id="cf-reminder-settings" hidden>
+            <div class="reminder-channels" role="group" aria-label="Canais de cobrança">
+              <label><input id="cf-reminder-email" type="checkbox" checked/> E-mail</label>
+              <label title="Será ativado quando o provedor de SMS for conectado"><input id="cf-reminder-sms" type="checkbox" disabled/> SMS <small>em breve</small></label>
+              <label title="Será ativado quando a Z-API for conectada"><input id="cf-reminder-whatsapp" type="checkbox" disabled/> WhatsApp <small>Z-API</small></label>
+            </div>
+            <p>Três lembretes no dia do vencimento: <strong>09h, 13h e 17h</strong> no horário de Manaus.</p>
+          </div>
+        </div>
+        <div class="form-actions modal-actions"><button type="button" class="btn-secondary" onclick="closeCashModal()">Cancelar</button><button id="cash-submit" type="submit" class="btn-primary">Salvar e gerar cobrança</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="cash-detail-modal" class="modal-backdrop" onclick="closeCashDetail(event)">
+    <div class="modal-box cash-detail-box"><div class="modal-header"><div><span class="detail-eyebrow" id="cash-detail-eyebrow">Lançamento</span><h3 id="cash-detail-title">Detalhes</h3></div><button class="btn-icon" onclick="closeCashDetail()">✕</button></div>
+      <div class="modal-body"><div class="cash-detail-amount" id="cash-detail-amount"></div><div class="cash-detail-grid" id="cash-detail-grid"></div><div class="cash-detail-notes" id="cash-detail-notes" hidden></div><div class="cash-detail-recurrence" id="cash-detail-recurrence" hidden></div><div class="form-actions modal-actions"><button type="button" class="btn-secondary" onclick="closeCashDetail()">Fechar</button><button type="button" class="btn-primary" id="cash-detail-edit">Editar lançamento</button></div></div>
+    </div>
+  </div>
+
+  <div id="client-modal" class="modal-backdrop" onclick="closeClientModal(event)">
+    <div class="modal-box client-modal-box">
+      <div class="modal-header"><div><h3 id="client-modal-title">Novo cliente</h3><p class="panel-description">Dados cadastrais e pessoas responsáveis pelos contatos.</p></div><button type="button" class="btn-icon" onclick="closeClientModal()">✕</button></div>
+      <form class="modal-body client-form" id="client-form" onsubmit="event.preventDefault(); submitClient(event)">
+        <input id="c-id" type="hidden" />
+        <div class="form-row"><div class="form-field"><label>Nome do cliente *</label><input class="admin-input" id="c-name" maxlength="120" required /></div><div class="form-field"><label>CPF/CNPJ</label><input class="admin-input" id="c-document" maxlength="30" /></div></div>
+        <div class="client-contact-section">
+          <div class="client-contact-heading"><div><strong>E-mails *</strong><small>O primeiro será usado como principal nas cobranças e nos recibos.</small></div><button type="button" class="btn-secondary small" onclick="addClientContact('email')">+ Adicionar e-mail</button></div>
+          <div class="client-contact-list" id="c-emails"></div>
+        </div>
+        <div class="client-contact-section">
+          <div class="client-contact-heading"><div><strong>Celulares e telefones</strong><small>Informe quem é o responsável por cada número.</small></div><button type="button" class="btn-secondary small" onclick="addClientContact('phone')">+ Adicionar celular</button></div>
+          <div class="client-contact-list" id="c-phones"></div>
+        </div>
+        <div class="form-row"><div class="form-field"><label>CEP</label><input class="admin-input" id="c-postal" maxlength="9" inputmode="numeric" placeholder="00000-000" oninput="handleCepInput(this)" onblur="lookupCep()" /><small id="cep-status" aria-live="polite"></small></div><div class="form-field"><label>Endereço</label><input class="admin-input" id="c-address" maxlength="240" /></div></div>
+        <div class="form-row"><div class="form-field"><label>Cidade</label><input class="admin-input" id="c-city" maxlength="100" /></div><div class="form-field"><label>UF</label><select class="admin-input" id="c-state"><option value="">Selecione</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div></div>
+        <div class="form-field"><label>Observações</label><textarea class="admin-input" id="c-notes" maxlength="500" rows="3"></textarea></div>
+        <div class="form-actions modal-actions"><button type="button" class="btn-secondary" id="client-cancel" onclick="closeClientModal()">Cancelar</button><button type="submit" class="btn-primary" id="client-submit">Cadastrar cliente</button></div>
       </form>
     </div>
   </div>
 
   <!-- Toast -->
-  <div id="toast" class="toast"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="admin.js?v=20260904-12"></script>
+  <script src="admin-ux.js?v=20260907-2"></script>
+  <script src="admin.js?v=20260907-2"></script>
 </body>
 </html>

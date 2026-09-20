@@ -2,24 +2,31 @@
 async function checkAuth() {
   try {
     const res = await fetch('/api/admin/verify');
-    if (!res.ok) return window.location.replace('/login.html');
+    if (res.status === 401) return window.location.replace('/login.html');
+    if (!res.ok) throw new Error('Falha ao verificar acesso');
     showPanel();
-  } catch { window.location.replace('/login.html'); }
+  } catch {
+    document.getElementById('auth-loading').innerHTML = '<strong>Não foi possível conectar ao painel.</strong><p>Verifique sua conexão e tente novamente.</p><button class="btn-primary" onclick="checkAuth()">Tentar novamente</button>';
+  }
 }
 
 function showPanel() {
+  document.getElementById('auth-loading').hidden = true;
   document.getElementById('admin-panel').style.display = 'grid';
   loadAllData();
   restoreTab();
 }
 
 async function logout() {
-  await fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
-  window.location.replace('/login.html');
+  try {
+    const res = await fetch('/api/admin/logout', { method: 'POST' });
+    if (!res.ok) throw new Error('Falha ao sair');
+    window.location.replace('/login.html');
+  } catch { toast('Não foi possível encerrar a sessão. Tente novamente.', true); }
 }
 
 /* ══ Tabs ══ */
-const tabTitles = { dashboard: ['Visão geral','Seu estúdio em um só lugar'], links: ['Links públicos','Organize os destinos da sua página'], portfolio: ['Portfólio público','Gerencie os cases publicados'], profile: ['Configurações','Identidade e aparência da página'], leads: ['Funil comercial','Transforme contatos em clientes'], clients: ['Clientes','Relacionamento e dados cadastrais'], projects: ['Projetos','Produção, revisão e entregas'], receipts: ['Financeiro e recibos','Recebimentos, documentos e envios'], analytics: ['Marketing e Analytics','Desempenho dos canais digitais'] };
+const tabTitles = { dashboard: ['Visão geral','Seu estúdio em um só lugar'], links: ['Links públicos','Organize os destinos da sua página'], portfolio: ['Portfólio público','Gerencie os cases publicados'], profile: ['Configurações','Identidade e aparência da página'], leads: ['Funil comercial','Transforme contatos em clientes'], clients: ['Clientes','Relacionamento e dados cadastrais'], projects: ['Projetos','Produção, revisão e entregas'], receipts: ['Financeiro e recibos','Recebimentos, documentos e envios'], household: ['Despesas de casa','Seus gastos pessoais separados da empresa'], analytics: ['Marketing e Analytics','Desempenho dos canais digitais'] };
 
 function setTab(name, btn, persist = true) {
   if (!document.getElementById(`tab-${name}`)) name = 'dashboard';
@@ -31,7 +38,7 @@ function setTab(name, btn, persist = true) {
   document.getElementById('admin-page-subtitle').textContent = tabTitles[name][1];
   if (persist) {
     localStorage.setItem('mc_admin_tab', name);
-    history.replaceState(null, '', `${location.pathname}${location.search}#${name}`);
+    if (location.hash !== `#${name}`) history.pushState(null, '', `${location.pathname}${location.search}#${name}`);
   }
   if (name === 'portfolio') loadPortfolioAdmin();
   if (name === 'leads') loadLeads();
@@ -39,7 +46,14 @@ function setTab(name, btn, persist = true) {
   if (name === 'projects') loadProjects();
   if (name === 'dashboard') loadCrmDashboard();
   if (name === 'receipts') { loadClientOptions(); loadCashFlow(); setFinanceView(sessionStorage.getItem('financeView') || 'cash'); }
+  if (name === 'household') loadHouseholdExpenses();
   if (name === 'analytics') loadAnalytics();
+  document.title = `${tabTitles[name][0]} — Maninho Criativos`;
+  document.getElementById('section-jump').value = name;
+  document.querySelectorAll('.snav-item[data-tab]').forEach(item => {
+    if (item.dataset.tab === name) item.setAttribute('aria-current', 'page');
+    else item.removeAttribute('aria-current');
+  });
   closeSidebar();
 }
 
@@ -65,11 +79,14 @@ function openSidebar() {
   sidebar?.classList.add('open');
   sidebarOverlay?.classList.add('open');
   document.body.style.overflow = 'hidden';
+  document.getElementById('sidebar-close-btn')?.focus();
 }
 function closeSidebar() {
+  const wasOpen = sidebar?.classList.contains('open');
   sidebar?.classList.remove('open');
   sidebarOverlay?.classList.remove('open');
   document.body.style.overflow = '';
+  if (wasOpen) document.getElementById('mobile-menu-btn')?.focus();
 }
 
 /* ══ Load data ══ */
@@ -108,7 +125,7 @@ async function loadLinks() {
   const { links } = await res.json();
   linksCache = links || [];
   renderLinkInsights();
-  renderLinks(linksCache);
+  filterLinks();
 }
 let linksCache=[];
 function filterLinks(){const q=getVal('links-search').toLowerCase(),sort=getVal('links-sort')||'order';const items=linksCache.filter(link=>`${link.title} ${link.url}`.toLowerCase().includes(q));items.sort((a,b)=>sort==='clicks'?(b.click_count||0)-(a.click_count||0):sort==='name'?a.title.localeCompare(b.title,'pt-BR'):(a.order_index||0)-(b.order_index||0));renderLinks(items);}
@@ -186,6 +203,13 @@ async function deleteLink(id) {
 }
 
 /* ══ Panel toggle ══ */
+function openNewPortfolio() {
+  const panel = document.getElementById('add-portfolio-panel');
+  panel.querySelector('form').reset();
+  setVal('pf-id', '');
+  document.getElementById('pf-submit').textContent = 'Adicionar ao portfólio';
+  if (!panel.classList.contains('open')) togglePanel('add-portfolio-panel');
+}
 function togglePanel(id) {
   const el = document.getElementById(id);
   if (el?.classList.contains('content-modal')) {
@@ -344,6 +368,7 @@ function resetColorDefaults() {
 
 /* ══ Helpers ══ */
 async function authFetch(url, opts = {}) {
+  try {
   const res = await fetch(url, {
     ...opts,
     headers: {
@@ -352,7 +377,15 @@ async function authFetch(url, opts = {}) {
     }
   });
   if (res.status === 401) { window.location.replace('/login.html'); return null; }
+  if (!res.ok && (!opts.method || opts.method === 'GET')) {
+    showRequestError('Não foi possível carregar os dados. Tente atualizar esta área.');
+    return null;
+  }
   return res;
+  } catch {
+    showRequestError('Conexão interrompida. Verifique sua rede e tente novamente.');
+    return null;
+  }
 }
 
 function getVal(id) { return document.getElementById(id)?.value ?? ''; }
@@ -385,7 +418,7 @@ async function loadPortfolioAdmin() {
   portfolioCache = items || [];
   const galleries=[...new Set(portfolioCache.map(item=>item.gallery_name).filter(Boolean))];
   const list=document.getElementById('portfolio-galleries');if(list)list.innerHTML=galleries.map(name=>`<option value="${esc(name)}"></option>`).join('');
-  renderPortfolioTable(portfolioCache);
+  filterPortfolio();
 }
 let portfolioCache=[];
 function filterPortfolio(){const category=getVal('portfolio-filter'),query=(getVal('portfolio-search')||'').toLowerCase();renderPortfolioTable(portfolioCache.filter(item=>(!category||item.category===category)&&(!query||`${item.title} ${item.gallery_name||''} ${item.category}`.toLowerCase().includes(query))));}
@@ -488,16 +521,23 @@ async function loadLeads() {
 
   let data;
   try {
-    const res = await fetch('/api/admin/leads');
-    if (!res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#f87171">Erro ao carregar.</td></tr>'; return; }
+    const res = await authFetch('/api/admin/leads');
+    if (!res?.ok) { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:#f87171">Erro ao carregar.</td></tr>'; return; }
     data = await res.json();
-  } catch { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#f87171">Erro de conexão.</td></tr>'; return; }
+  } catch { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:#f87171">Erro de conexão.</td></tr>'; return; }
   if (!data || !data.leads) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#f87171">Erro ao carregar leads.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:#f87171">Erro ao carregar leads.</td></tr>';
     return;
   }
 
-  const leads = data.leads;
+  leadsCache = data.leads;
+  renderLeads();
+}
+let leadsCache = [];
+function renderLeads() {
+  const tbody = document.getElementById('leads-tbody');
+  const stats = document.getElementById('leads-stats');
+  const leads = leadsCache;
   if (stats) {
     const total = leads.length;
     const hoje = leads.filter(l => l.created_at?.startsWith(new Date().toISOString().slice(0, 10))).length;
@@ -509,16 +549,17 @@ async function loadLeads() {
     `;
   }
 
-  if (leads.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#666">Nenhum lead ainda.</td></tr>';
+  const filtered = leads.filter(l => matchesSearch([l.name,l.phone,l.service,l.message], getVal('leads-search')) && (!getVal('leads-status-filter') || (l.status || 'new') === getVal('leads-status-filter')));
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:#666">Nenhuma oportunidade encontrada. Ajuste os filtros ou aguarde novos contatos.</td></tr>';
     return;
   }
 
-  tbody.innerHTML = leads.map(l => `
+  tbody.innerHTML = filtered.map(l => `
     <tr>
       <td>${l.id}</td>
       <td><strong>${esc(l.name)}</strong></td>
-      <td><a href="https://wa.me/55${l.phone.replace(/\D/g,'')}" target="_blank" class="lead-wa">${esc(l.phone)}</a></td>
+      <td><a href="https://wa.me/${whatsappNumber(l.phone)}" target="_blank" rel="noopener noreferrer" class="lead-wa">${esc(l.phone)}</a></td>
       <td>${l.instagram ? `<a href="https://instagram.com/${encodeURIComponent(String(l.instagram).replace(/^@/,''))}" target="_blank" rel="noopener noreferrer">${esc(l.instagram)}</a>` : '—'}</td>
       <td><span class="lead-tag">${esc(l.service || '—')}</span></td>
       <td class="lead-msg">${esc(l.message || '—')}</td>
@@ -571,8 +612,11 @@ async function loadProjectClientOptions() {
 }
 function renderProjectBoard() {
   const board=document.getElementById('project-board'); if(!board)return;
-  const stages=['briefing','creation','review','approved','delivered'];
-  board.innerHTML=stages.map(stage=>{const items=projectsCache.filter(p=>p.status===stage);return `<section class="project-column"><header><span>${projectStages[stage]}</span><b>${items.length}</b></header><div>${items.length?items.map(p=>`<article class="project-card" onclick="editProject(${p.id})"><small>${esc(p.service)}</small><h4>${esc(p.title)}</h4><p>${esc(p.client_name)}</p><div class="project-progress"><span style="width:${p.progress}%"></span></div><footer><span>${p.progress}%</span><time>${p.deadline?receiptDateLabel(p.deadline):'Sem prazo'}</time></footer></article>`).join(''):'<p class="project-empty">Nenhum projeto</p>'}</div></section>`}).join('');
+  const selectedStage=getVal('projects-status-filter');
+  const stages=selectedStage?[selectedStage]:Object.keys(projectStages);
+  const visible=projectsCache.filter(p=>matchesSearch([p.title,p.client_name,p.service],getVal('projects-search')));
+  document.getElementById('projects-count').textContent=visible.filter(p=>!selectedStage||p.status===selectedStage).length+' projetos encontrados';
+  board.innerHTML=stages.map(stage=>{const items=visible.filter(p=>p.status===stage);return `<section class="project-column"><header><span>${projectStages[stage]}</span><b>${items.length}</b></header><div>${items.length?items.map(p=>`<article class="project-card" role="button" tabindex="0" aria-label="Editar ${esc(p.title)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();editProject(${p.id})}" onclick="editProject(${p.id})"><small>${esc(p.service)}</small><h4>${esc(p.title)}</h4><p>${esc(p.client_name)}</p><div class="project-progress"><span style="width:${p.progress}%"></span></div><footer><span>${p.progress}%</span><time>${p.deadline?receiptDateLabel(p.deadline):'Sem prazo'}</time></footer></article>`).join(''):'<p class="project-empty">Nenhum projeto</p>'}</div></section>`}).join('');
 }
 async function submitProject(event) {
   event.preventDefault(); const id=Number(getVal('pr-id'))||null; const value=Number(getVal('pr-value'))||0;
@@ -585,19 +629,125 @@ function resetProjectForm(){document.getElementById('project-form').reset();setV
 /* ══ FINANCEIRO ══ */
 let cashCache=[];
 const cashCategories={income:['Contrato mensal','Desenvolvimento avulso','Manutenção e suporte','Hospedagem e domínio','Projetos de design','Identidade visual','Social media','Website','Consultoria','Outras receitas'],expense:['Software e assinaturas','Infraestrutura e hospedagem','Publicidade','Equipamentos','Freelancers','Impostos','Escritório','Outras despesas']};
+const householdCategories=['Mercado e feira','Salão e beleza','Farmácia e saúde','Restaurantes e delivery','Transporte e combustível','Aluguel e condomínio','Água, luz e gás','Internet e telefone','Limpeza e manutenção','Lazer e entretenimento','Roupas e compras','Educação','Pets','Outras despesas da casa'];
+let householdCache=[];
 const brl=cents=>(Number(cents||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-async function loadCashFlow(){const input=document.getElementById('finance-month');if(!input)return;if(!input.value)input.value=new Date().toISOString().slice(0,7);const res=await authFetch(`/api/admin/cash-flow?month=${input.value}`);if(!res?.ok)return;const data=await res.json();cashCache=data.transactions||[];const s=data.summary||{};document.getElementById('finance-kpis').innerHTML=[['Receitas recebidas',brl(s.income_paid),'income'],['Despesas pagas',brl(s.expense_paid),'expense'],['Saldo do mês',brl((s.income_paid||0)-(s.expense_paid||0)),'balance'],['A receber',brl(s.receivable),'pending'],['A pagar',brl(s.payable),'pending']].map(([l,v,t])=>`<div class="finance-kpi ${t}"><small>${l}</small><strong>${v}</strong></div>`).join('');document.getElementById('finance-period-label').textContent=new Date(`${data.month}-02T12:00:00`).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});renderCashTable();renderFinanceReport(data.monthly||[],data.categories||[]);}
-function renderCashTable(items=cashCache){const tbody=document.getElementById('cash-tbody');if(!tbody)return;const labels={pending:'Pendente',paid:'Pago',cancelled:'Cancelado'};tbody.innerHTML=items.length?items.map(t=>`<tr><td><span class="cash-date">${receiptDateLabel(t.due_date)}</span></td><td><strong>${esc(t.description)}</strong>${t.recurrence_frequency==='monthly'?` <span class="recurrence-chip">Mensal ${t.installment_number}/${t.installment_total}</span>`:''}<br><small>${esc(t.client_name||t.project_title||'Sem vínculo')}</small></td><td><span class="category-chip">${esc(t.category)}</span></td><td><span class="cash-status ${t.status}">${labels[t.status]}</span></td><td class="cash-value ${t.type}">${t.type==='expense'?'−':'+'} ${brl(t.amount_cents)}</td><td><button class="btn-secondary small" onclick="editCash(${t.id})">Editar</button></td></tr>`).join(''):'<tr><td colspan="6"><div class="crm-empty"><strong>Nenhum lançamento encontrado</strong><span>Ajuste os filtros ou registre uma nova movimentação.</span></div></td></tr>';}
-function filterCashFlow(){const query=(getVal('cash-search')||'').toLowerCase(),type=getVal('cash-type-filter'),status=getVal('cash-status-filter');renderCashTable(cashCache.filter(t=>(!query||`${t.description} ${t.category} ${t.client_name||''} ${t.project_title||''}`.toLowerCase().includes(query))&&(!type||t.type===type)&&(!status||t.status===status)));}
+async function loadCashFlow(){const input=document.getElementById('finance-month');if(!input)return;if(!input.value)input.value=new Date().toISOString().slice(0,7);const res=await authFetch(`/api/admin/cash-flow?month=${input.value}&scope=business`);if(!res?.ok)return;const data=await res.json();cashCache=data.transactions||[];const s=data.summary||{};document.getElementById('finance-kpis').innerHTML=[['Receitas recebidas',brl(s.income_paid),'income'],['Despesas pagas',brl(s.expense_paid),'expense'],['Saldo do mês',brl((s.income_paid||0)-(s.expense_paid||0)),'balance'],['A receber',brl(s.receivable),'pending'],['A pagar',brl(s.payable),'pending']].map(([l,v,t])=>`<div class="finance-kpi ${t}"><small>${l}</small><strong>${v}</strong></div>`).join('');document.getElementById('finance-period-label').textContent=new Date(`${data.month}-02T12:00:00`).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});renderIntegratedCost('finance-integrated-cost',data.combined_summary);filterCashFlow();renderFinanceReport(data.monthly||[],data.categories||[]);}
+function renderCashTable(items=cashCache){const tbody=document.getElementById('cash-tbody');if(!tbody)return;const labels={pending:'Pendente',paid:'Pago',cancelled:'Cancelado'};tbody.innerHTML=items.length?items.map(t=>{const channelList=[t.reminder_email&&'E-mail',t.reminder_sms&&'SMS',t.reminder_whatsapp&&'WhatsApp'].filter(Boolean),channels=channelList.join(' + '),planned=channelList.length*3,sent=Number(t.reminder_sent_count||0),party=t.type==='expense'?(t.counterparty_name||'Fornecedor não informado'):(t.client_name||t.project_title||'Sem vínculo');return `<tr class="clickable-cash-row" tabindex="0" onclick="openCashDetail(${t.id},'business')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCashDetail(${t.id},'business')}"><td><span class="cash-date">${receiptDateLabel(t.due_date)}</span></td><td><strong>${esc(t.description)}</strong>${t.recurrence_frequency==='monthly'?` <span class="recurrence-chip">Mensal ${t.installment_number}/${t.installment_total}</span>`:''}<br><small>${esc(party)}</small>${t.reminder_enabled?`<br><span class="cash-reminder-chip">${sent}/${planned} enviados · ${esc(channels)} · 09h, 13h e 17h</span>`:''}${t.payment_url?`<br><a class="cash-payment-link" href="${esc(t.payment_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Abrir link de pagamento ↗</a>`:''}</td><td><span class="category-chip">${esc(t.category)}</span></td><td><span class="cash-status ${t.status}">${labels[t.status]}</span></td><td class="cash-value ${t.type}">${t.type==='expense'?'−':'+'} ${brl(t.amount_cents)}</td><td><button class="btn-secondary small" onclick="event.stopPropagation();editCash(${t.id})">Editar</button></td></tr>`;}).join(''):'<tr><td colspan="6"><div class="crm-empty"><strong>Nenhum lançamento encontrado</strong><span>Ajuste os filtros ou registre uma nova movimentação.</span></div></td></tr>';}
+function filterCashFlow(){const query=(getVal('cash-search')||'').toLowerCase(),type=getVal('cash-type-filter'),status=getVal('cash-status-filter');renderCashTable(cashCache.filter(t=>(!query||`${t.description} ${t.category} ${t.client_name||''} ${t.project_title||''} ${t.counterparty_name||''}`.toLowerCase().includes(query))&&(!type||t.type===type)&&(!status||t.status===status)));}
+function revealCreatedCash(dueDate){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(dueDate||''))return;
+  setVal('finance-month',dueDate.slice(0,7));setVal('cash-search','');setVal('cash-type-filter','');setVal('cash-status-filter','');
+}
 function setFinanceView(view){const cash=view==='cash';document.getElementById('finance-view-cash')?.classList.toggle('active',cash);document.getElementById('finance-view-receipts')?.classList.toggle('active',!cash);document.getElementById('finance-tab-cash')?.classList.toggle('active',cash);document.getElementById('finance-tab-receipts')?.classList.toggle('active',!cash);sessionStorage.setItem('financeView',view);if(!cash)loadReceipts();}
-function exportCashFlow(){if(!cashCache.length){toast('Não há lançamentos para exportar',true);return;}const header=['Data','Tipo','Descrição','Categoria','Cliente ou projeto','Status','Valor'];const rows=cashCache.map(t=>[t.due_date,t.type==='income'?'Entrada':'Saída',t.description,t.category,t.client_name||t.project_title||'',t.status,(t.amount_cents/100).toFixed(2).replace('.',',')]);const quote=v=>`"${String(v??'').replaceAll('"','""')}"`;const csv='\ufeff'+[header,...rows].map(row=>row.map(quote).join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=`fluxo-caixa-${getVal('finance-month')}.csv`;a.click();URL.revokeObjectURL(url);toast('Relatório exportado ✓');}
+function exportCashFlow(){if(!cashCache.length){toast('Não há lançamentos para exportar',true);return;}const header=['Data','Tipo','Descrição','Categoria','Cliente, projeto ou fornecedor','Status','Valor'];const rows=cashCache.map(t=>[t.due_date,t.type==='income'?'Entrada':'Saída',t.description,t.category,t.type==='expense'?(t.counterparty_name||''):t.client_name||t.project_title||'',t.status,(t.amount_cents/100).toFixed(2).replace('.',',')]);const quote=v=>`"${String(v??'').replaceAll('"','""')}"`;const csv='\ufeff'+[header,...rows].map(row=>row.map(quote).join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=`fluxo-caixa-${getVal('finance-month')}.csv`;a.click();URL.revokeObjectURL(url);toast('Relatório exportado ✓');}
 function renderFinanceReport(monthly,categories){const max=Math.max(1,...monthly.flatMap(m=>[m.income||0,m.expense||0]));document.getElementById('finance-chart').innerHTML=monthly.length?monthly.map(m=>`<div class="finance-bar-group"><div class="finance-bars"><i class="bar-income" style="height:${Math.max(3,(m.income/max)*100)}%"></i><i class="bar-expense" style="height:${Math.max(3,(m.expense/max)*100)}%"></i></div><small>${m.month.slice(5)}/${m.month.slice(2,4)}</small></div>`).join(''):'<div class="crm-empty">Sem dados para o relatório.</div>';document.getElementById('finance-categories').innerHTML=categories.slice(0,6).map(c=>`<div><span>${esc(c.category)}</span><strong class="${c.type}">${brl(c.total)}</strong></div>`).join('');}
-async function openCashModal(transaction=null){if(!clientsCache.length)await fetchClients();if(!projectsCache.length){const r=await authFetch('/api/admin/projects');if(r?.ok)projectsCache=(await r.json()).projects||[];}document.getElementById('cf-client').innerHTML='<option value="">Sem cliente</option>'+clientsCache.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');document.getElementById('cf-project').innerHTML='<option value="">Sem projeto</option>'+projectsCache.map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('');document.getElementById('cash-form').reset();setVal('cf-id',transaction?.id||'');setVal('cf-type',transaction?.type||'income');setVal('cf-frequency','once');updateCashCategories();if(transaction){for(const [f,k]of[['cf-status','status'],['cf-description','description'],['cf-category','category'],['cf-due','due_date'],['cf-paid','paid_date'],['cf-client','client_id'],['cf-project','project_id'],['cf-payment','payment_method']])setVal(f,transaction[k]||'');setVal('cf-amount',(transaction.amount_cents/100).toFixed(2));}else{setVal('cf-due',new Date().toISOString().slice(0,10));}toggleCashRecurrence();document.getElementById('cash-modal-title').textContent=transaction?'Editar lançamento':'Novo lançamento';document.getElementById('cf-frequency').disabled=Boolean(transaction);document.getElementById('cash-modal').classList.add('open');document.body.classList.add('modal-open');}
+function renderIntegratedCost(targetId,summary={}){const business=Number(summary.business_expenses||0),household=Number(summary.household_expenses||0),total=business+household;document.getElementById(targetId).innerHTML=`<div class="integrated-cost-copy"><strong>Gasto total do mês</strong><small>Visão integrada das contas profissionais e de casa, incluindo valores pagos e pendentes.</small></div><div class="integrated-cost-value"><small>Empresa</small><strong>${brl(business)}</strong></div><div class="integrated-cost-value"><small>Casa</small><strong>${brl(household)}</strong></div><div class="integrated-cost-value total"><small>Total geral</small><strong>${brl(total)}</strong></div>`;}
+async function loadHouseholdExpenses(){
+  const input=document.getElementById('household-month');if(!input)return;
+  if(!input.value)input.value=new Date().toISOString().slice(0,7);
+  const res=await authFetch(`/api/admin/cash-flow?month=${input.value}&scope=household`);if(!res?.ok)return;
+  const data=await res.json();householdCache=data.transactions||[];const s=data.summary||{};
+  const paid=Number(s.expense_paid||0),pending=Number(s.payable||0),total=paid+pending;
+  document.getElementById('household-kpis').innerHTML=[['Total do mês',brl(total),'total'],['Já pago',brl(paid),'paid'],['Ainda a pagar',brl(pending),'pending'],['Lançamentos',String(householdCache.filter(t=>t.status!=='cancelled').length),'count']].map(([label,value,tone])=>`<div class="household-kpi ${tone}"><small>${label}</small><strong>${value}</strong></div>`).join('');
+  renderIntegratedCost('household-integrated-cost',data.combined_summary);
+  document.getElementById('household-period-label').textContent=new Date(`${data.month}-02T12:00:00`).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const categoryFilter=document.getElementById('household-category-filter'),current=categoryFilter.value;
+  categoryFilter.innerHTML='<option value="">Todas as categorias</option>'+householdCategories.map(category=>`<option>${category}</option>`).join('');categoryFilter.value=current;
+  const categoryTotals=(data.categories||[]).filter(item=>item.type==='expense');
+  document.getElementById('household-categories').innerHTML=categoryTotals.length?categoryTotals.map(item=>{const width=paid?Math.max(4,Math.round((Number(item.total)/paid)*100)):0;return `<div class="household-category-row"><div><span>${esc(item.category)}</span><strong>${brl(item.total)}</strong></div><i><b style="width:${width}%"></b></i></div>`;}).join(''):'<div class="crm-empty"><strong>Nenhum gasto pago</strong><span>As categorias aparecerão aqui.</span></div>';
+  filterHouseholdExpenses();
+}
+function renderHouseholdTable(items=householdCache){const tbody=document.getElementById('household-tbody');if(!tbody)return;const labels={pending:'Pendente',paid:'Pago',cancelled:'Cancelado'};tbody.innerHTML=items.length?items.map(t=>`<tr class="clickable-cash-row" tabindex="0" onclick="openCashDetail(${t.id},'household')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCashDetail(${t.id},'household')}"><td><span class="cash-date">${receiptDateLabel(t.due_date)}</span></td><td><strong>${esc(t.description)}</strong>${t.recurrence_frequency==='monthly'?` <span class="recurrence-chip">Mensal ${t.installment_number}/${t.installment_total}</span>`:''}<br><small>${esc(t.counterparty_name||'Não informado')}</small></td><td><span class="category-chip">${esc(t.category)}</span></td><td><span class="cash-status ${t.status}">${labels[t.status]}</span></td><td class="cash-value expense">− ${brl(t.amount_cents)}</td><td><button class="btn-secondary small" onclick="event.stopPropagation();editHouseholdExpense(${t.id})">Editar</button></td></tr>`).join(''):'<tr><td colspan="6"><div class="crm-empty"><strong>Nenhuma despesa de casa</strong><span>Registre seu primeiro gasto do mês.</span></div></td></tr>';}
+function filterHouseholdExpenses(){const query=getVal('household-search')||'',category=getVal('household-category-filter'),status=getVal('household-status-filter');renderHouseholdTable(householdCache.filter(t=>matchesSearch([t.description,t.category,t.counterparty_name],query)&&(!category||t.category===category)&&(!status||t.status===status)));}
+function openHouseholdExpenseModal(){openCashModal(null,'household');}
+function editHouseholdExpense(id){openCashModal(householdCache.find(t=>t.id===id),'household');}
+function openCashDetail(id,scope='business'){
+  const source=scope==='household'?householdCache:cashCache,transaction=source.find(item=>Number(item.id)===Number(id));if(!transaction)return;
+  const expense=transaction.type==='expense',statusLabels={pending:'Pendente',paid:expense?'Pago':'Recebido',cancelled:'Cancelado'},party=expense?(transaction.counterparty_name||'Não informado'):(transaction.client_name||'Sem cliente'),project=transaction.project_title||'Sem projeto';
+  document.getElementById('cash-detail-eyebrow').textContent=scope==='household'?'Despesa de casa':expense?'Despesa da empresa':'Entrada da empresa';
+  document.getElementById('cash-detail-title').textContent=transaction.description;
+  const amount=document.getElementById('cash-detail-amount');amount.className=`cash-detail-amount ${transaction.type}`;amount.innerHTML=`<small>Valor do lançamento</small><strong>${expense?'− ':'+ '}${brl(transaction.amount_cents)}</strong>`;
+  const details=[['Categoria',transaction.category],['Status',statusLabels[transaction.status]||transaction.status],[expense?'Vencimento':'Vencimento',receiptDateLabel(transaction.due_date)],[expense?'Pago em':'Recebido em',transaction.paid_date?receiptDateLabel(transaction.paid_date):'Não informado'],[expense?'Estabelecimento / empresa':'Cliente',party],['Forma de pagamento',transaction.payment_method||'Não informada']];
+  if(!expense)details.push(['Projeto',project]);
+  if(transaction.counterparty_document)details.push(['CPF/CNPJ',transaction.counterparty_document]);
+  document.getElementById('cash-detail-grid').innerHTML=details.map(([label,value])=>`<div class="cash-detail-item"><small>${esc(label)}</small><strong>${esc(value)}</strong></div>`).join('');
+  const notes=document.getElementById('cash-detail-notes');notes.hidden=!transaction.notes;notes.innerHTML=transaction.notes?`<strong>Observações</strong><br>${esc(transaction.notes)}`:'';
+  const recurrence=document.getElementById('cash-detail-recurrence');recurrence.hidden=transaction.recurrence_frequency!=='monthly';recurrence.innerHTML=transaction.recurrence_frequency==='monthly'?`<strong>Recorrência mensal</strong><br>Parcela ${Number(transaction.installment_number||1)} de ${Number(transaction.installment_total||1)}. Ao editar, você pode sincronizar valor e dados em toda a série.`:'';
+  document.getElementById('cash-detail-edit').onclick=()=>{closeCashDetail();openCashModal(transaction,scope);};
+  document.getElementById('cash-detail-modal').classList.add('open');document.body.classList.add('modal-open');
+}
+function closeCashDetail(event){if(event&&event.target!==document.getElementById('cash-detail-modal'))return;document.getElementById('cash-detail-modal').classList.remove('open');document.body.classList.remove('modal-open');}
+function exportHouseholdExpenses(){if(!householdCache.length){toast('Não há despesas de casa para exportar',true);return;}const header=['Data','Descrição','Categoria','Estabelecimento ou beneficiário','Status','Valor'];const rows=householdCache.map(t=>[t.due_date,t.description,t.category,t.counterparty_name||'',t.status,(t.amount_cents/100).toFixed(2).replace('.',',')]);const quote=value=>`"${String(value??'').replaceAll('"','""')}"`;const csv='\ufeff'+[header,...rows].map(row=>row.map(quote).join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=`despesas-de-casa-${getVal('household-month')}.csv`;a.click();URL.revokeObjectURL(url);toast('Despesas exportadas ✓');}
+async function openCashModal(transaction=null,requestedScope='business'){
+  const scope=transaction?.expense_scope||requestedScope;
+  if(!clientsCache.length)await fetchClients();
+  if(!projectsCache.length){const r=await authFetch('/api/admin/projects');if(r?.ok)projectsCache=(await r.json()).projects||[];}
+  document.getElementById('cf-client').innerHTML='<option value="">Sem cliente</option>'+clientsCache.map(c=>`<option value="${c.id}">${esc(c.name)} — ${esc(c.email||c.phone||'sem contato')}</option>`).join('');
+  document.getElementById('cf-project').innerHTML='<option value="">Sem projeto</option>'+projectsCache.map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('');
+  document.getElementById('cash-form').reset();
+  setVal('cf-id',transaction?.id||'');setVal('cf-scope',scope);setVal('cf-type',scope==='household'?'expense':(transaction?.type||'income'));setVal('cf-frequency','once');
+  document.getElementById('cf-infinitepay-auto').checked=!transaction;
+  document.getElementById('cf-reminder-email').checked=true;document.getElementById('cf-reminder-sms').checked=false;document.getElementById('cf-reminder-whatsapp').checked=false;
+  updateCashCategories();
+  if(transaction){
+    for(const [f,k]of[['cf-status','status'],['cf-description','description'],['cf-category','category'],['cf-due','due_date'],['cf-paid','paid_date'],['cf-client','client_id'],['cf-project','project_id'],['cf-payment','payment_method'],['cf-payment-url','payment_url'],['cf-counterparty-document','counterparty_document'],['cf-notes','notes']])setVal(f,transaction[k]||'');
+    const companyOptions=[...document.getElementById('cf-company').options].map(option=>option.value);
+    if(scope==='household'){setVal('cf-household-counterparty',transaction.counterparty_name||'');setVal('cf-household-document',transaction.counterparty_document||'');}
+    else if(companyOptions.includes(transaction.counterparty_name)){setVal('cf-company',transaction.counterparty_name);}
+    else{setVal('cf-company','__other');setVal('cf-counterparty',transaction.counterparty_name||'');}
+    setVal('cf-amount',(transaction.amount_cents/100).toFixed(2));
+    document.getElementById('cf-reminder-enabled').checked=Boolean(transaction.reminder_enabled);document.getElementById('cf-reminder-email').checked=Boolean(transaction.reminder_email);document.getElementById('cf-reminder-sms').checked=Boolean(transaction.reminder_sms);document.getElementById('cf-reminder-whatsapp').checked=Boolean(transaction.reminder_whatsapp);
+  }else{setVal('cf-due',new Date().toISOString().slice(0,10));document.getElementById('cf-reminder-enabled').checked=false;}
+  document.getElementById('cf-series-update').hidden=!transaction?.recurrence_group;document.getElementById('cf-update-series').checked=Boolean(transaction?.recurrence_group);
+  updateCashTypeUI();toggleCustomCashCompany();document.getElementById('cf-frequency').disabled=Boolean(transaction);document.getElementById('cf-type').disabled=scope==='household';
+  document.getElementById('cash-modal').classList.add('open');document.body.classList.add('modal-open');
+}
 function closeCashModal(event){if(event&&event.target!==document.getElementById('cash-modal'))return;document.getElementById('cash-modal').classList.remove('open');document.body.classList.remove('modal-open');}
-function updateCashCategories(){const type=getVal('cf-type')||'income',select=document.getElementById('cf-category'),current=select.value;select.innerHTML=cashCategories[type].map(c=>`<option>${c}</option>`).join('');if(cashCategories[type].includes(current))select.value=current;}
+function updateCashCategories(){const type=getVal('cf-type')||'income',scope=getVal('cf-scope')||'business',select=document.getElementById('cf-category'),current=select.value,categories=scope==='household'?householdCategories:cashCategories[type];select.innerHTML=categories.map(c=>`<option>${c}</option>`).join('');if(categories.includes(current))select.value=current;updateCashTypeUI();}
 function editCash(id){openCashModal(cashCache.find(t=>t.id===id));}
-function toggleCashRecurrence(){const monthly=getVal('cf-frequency')==='monthly';document.getElementById('cf-months-field').hidden=!monthly;document.getElementById('cf-recurrence-help').textContent=monthly?'O primeiro mês mantém o status escolhido; os meses seguintes serão criados como pendentes.':'Use mensal para clientes fixos, manutenção e contratos continuados.';}
-async function submitCashTransaction(event){event.preventDefault();const id=Number(getVal('cf-id'))||null,amount=Number(getVal('cf-amount')),frequency=getVal('cf-frequency')||'once',months=frequency==='monthly'?Number(getVal('cf-months')):1;const body={id,type:getVal('cf-type'),status:getVal('cf-status'),description:getVal('cf-description'),category:getVal('cf-category'),amount_cents:Math.round(amount*100),due_date:getVal('cf-due'),paid_date:getVal('cf-paid'),client_id:Number(getVal('cf-client'))||null,project_id:Number(getVal('cf-project'))||null,payment_method:getVal('cf-payment'),notes:'',recurrence_frequency:frequency,recurrence_months:months};const res=await authFetch('/api/admin/cash-flow',{method:id?'PUT':'POST',body:JSON.stringify(body)});if(res?.ok){const data=await res.json().catch(()=>({}));toast(data.created>1?`${data.created} lançamentos mensais criados ✓`:'Lançamento salvo ✓');closeCashModal();loadCashFlow();loadCrmDashboard();}else if(res){const d=await res.json().catch(()=>({}));toast(d.error||'Erro ao salvar lançamento',true);}}
+function updateCashTypeUI(){
+  const expense=getVal('cf-type')==='expense',household=getVal('cf-scope')==='household',editing=Boolean(getVal('cf-id'));
+  document.getElementById('cash-modal-title').textContent=household?(editing?'Editar despesa de casa':'Nova despesa de casa'):expense?(editing?'Editar despesa':'Nova despesa'):(editing?'Editar cobrança':'Nova cobrança');
+  document.getElementById('cash-modal-subtitle').textContent=household?'Registre um gasto pessoal sem misturar com as contas da empresa.':expense?'Registre uma conta a pagar e identifique a empresa do serviço.':'Registre uma entrada a receber e vincule ao cliente.';
+  document.getElementById('cf-status-paid').textContent=expense?'Pago':'Recebido';
+  document.getElementById('cf-paid-label').textContent=expense?'Pago em':'Recebido em';
+  document.getElementById('cf-frequency-label').textContent=expense?'Recorrência da despesa':'Recorrência da cobrança';
+  document.getElementById('cf-frequency-once').textContent=expense?'Despesa avulsa':'Cobrança avulsa';
+  document.getElementById('cf-frequency-monthly').textContent=expense?'Mensal / assinatura recorrente':'Mensal / contrato recorrente';
+  document.getElementById('cf-income-links').hidden=expense;document.getElementById('cf-expense-details').hidden=!expense||household;document.getElementById('cf-household-details').hidden=!household;
+  document.getElementById('cf-company').required=expense&&!household;document.getElementById('cf-household-counterparty').required=household;
+  toggleCustomCashCompany();toggleCashRecurrence();toggleCashReminder();
+}
+function toggleCustomCashCompany(){const custom=getVal('cf-type')==='expense'&&getVal('cf-scope')!=='household'&&getVal('cf-company')==='__other',field=document.getElementById('cf-custom-company-field'),input=document.getElementById('cf-counterparty');field.hidden=!custom;input.required=custom;if(!custom)input.value='';}
+function syncCashCompany(){const input=document.getElementById('cf-counterparty');if(input)input.value=input.value.trimStart();}
+function toggleCashRecurrence(){const monthly=getVal('cf-frequency')==='monthly',expense=getVal('cf-type')==='expense';document.getElementById('cf-months-field').hidden=!monthly;document.getElementById('cf-recurrence-help').textContent=monthly?(expense?'A primeira despesa mantém o status escolhido; as próximas serão criadas como pendentes.':'A primeira cobrança mantém o status escolhido; as próximas serão criadas como pendentes.'):(expense?'Use a recorrência mensal para assinaturas, aluguel e custos fixos.':'Use mensal para clientes fixos, manutenção e contratos continuados.');}
+function toggleCashReminder(){const master=document.getElementById('cf-reminder-enabled'),income=getVal('cf-type')==='income',eligible=income&&getVal('cf-status')==='pending';if(!master)return;document.getElementById('cf-reminder-box').hidden=!income;master.disabled=!eligible;if(!eligible)master.checked=false;document.getElementById('cf-reminder-settings').hidden=!eligible||!master.checked;toggleInfinitePay();}
+function toggleInfinitePay(){
+  const automatic=document.getElementById('cf-infinitepay-auto')?.checked;
+  const income=getVal('cf-type')==='income',eligible=income&&getVal('cf-status')==='pending';
+  const checkbox=document.getElementById('cf-infinitepay-auto');if(!checkbox)return;
+  document.getElementById('cf-infinitepay-box').hidden=!income;
+  checkbox.disabled=!eligible;if(!eligible)checkbox.checked=false;
+  document.getElementById('cf-manual-payment').hidden=!income||Boolean(eligible&&automatic);
+  document.getElementById('cash-submit').textContent=!income?'Salvar despesa':eligible&&automatic?'Salvar e gerar cobrança':'Salvar cobrança';
+}
+async function submitCashTransaction(event){
+  event.preventDefault();
+  const id=Number(getVal('cf-id'))||null,type=getVal('cf-type'),scope=getVal('cf-scope')||'business',expense=type==='expense',household=scope==='household',amount=Number(getVal('cf-amount')),frequency=getVal('cf-frequency')||'once',months=frequency==='monthly'?Number(getVal('cf-months')):1;
+  const reminderEnabled=!expense&&document.getElementById('cf-reminder-enabled').checked,generatePaymentLink=!expense&&document.getElementById('cf-infinitepay-auto').checked;
+  const selectedCompany=getVal('cf-company'),counterparty=household?getVal('cf-household-counterparty'):(selectedCompany==='__other'?getVal('cf-counterparty'):selectedCompany),counterpartyDocument=household?getVal('cf-household-document'):getVal('cf-counterparty-document');
+  if(expense&&!counterparty){toast(household?'Informe o estabelecimento ou beneficiário':'Escolha a empresa ou informe outro prestador',true);return;}
+  if((reminderEnabled||generatePaymentLink)&&!getVal('cf-client')){toast('Selecione o cliente da cobrança',true);return;}
+  if(reminderEnabled&&!generatePaymentLink&&!getVal('cf-payment-url')){toast('Informe ou gere o link de pagamento da InfinitePay',true);return;}
+  const body={id,type,expense_scope:scope,status:getVal('cf-status'),description:getVal('cf-description'),category:getVal('cf-category'),amount_cents:Math.round(amount*100),due_date:getVal('cf-due'),paid_date:getVal('cf-paid'),client_id:expense?null:Number(getVal('cf-client'))||null,project_id:expense?null:Number(getVal('cf-project'))||null,counterparty_name:expense?counterparty:'',counterparty_document:expense?counterpartyDocument:'',payment_method:getVal('cf-payment'),payment_url:expense?'':getVal('cf-payment-url'),generate_payment_link:generatePaymentLink,reminder_enabled:reminderEnabled,reminder_email:!expense&&document.getElementById('cf-reminder-email').checked,reminder_sms:!expense&&document.getElementById('cf-reminder-sms').checked,reminder_whatsapp:!expense&&document.getElementById('cf-reminder-whatsapp').checked,notes:getVal('cf-notes'),recurrence_frequency:frequency,recurrence_months:months,update_recurrence_group:Boolean(id&&document.getElementById('cf-update-series').checked)};
+  const button=document.getElementById('cash-submit');button.disabled=true;button.textContent=generatePaymentLink?'Gerando na InfinitePay...':'Salvando...';
+  try{
+    const res=await authFetch('/api/admin/cash-flow',{method:id?'PUT':'POST',body:JSON.stringify(body)});
+    if(res?.ok){const data=await res.json().catch(()=>({}));const synced=data.updated_series>1?` · ${data.updated_series} meses sincronizados`:'';toast((household?(data.created>1?`${data.created} despesas de casa criadas ✓`:'Despesa de casa salva ✓'):expense?(data.created>1?`${data.created} despesas mensais criadas ✓`:'Despesa salva ✓'):generatePaymentLink?(data.created>1?`${data.created} checkouts InfinitePay gerados ✓`:'Checkout InfinitePay gerado ✓'):data.created>1?`${data.created} cobranças mensais criadas ✓`:'Cobrança salva ✓')+synced);closeCashModal();if(household){setVal('household-month',body.due_date.slice(0,7));loadHouseholdExpenses();}else{revealCreatedCash(body.due_date);loadCashFlow();loadCrmDashboard();}}
+    else if(res){const d=await res.json().catch(()=>({}));toast(d.error||'Erro ao salvar lançamento',true);}
+  }finally{button.disabled=false;toggleInfinitePay();}
+}
 
 /* ══ CLIENTES ══ */
 let clientsCache = [];
@@ -610,36 +760,137 @@ async function fetchClients() {
 }
 
 async function loadClients() {
-  const tbody = document.getElementById('clients-tbody'); if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:28px">Carregando...</td></tr>';
-  const clients = await fetchClients();
+  const list = document.getElementById('clients-list'); if (!list) return;
+  list.innerHTML = '<div class="client-grid-empty">Carregando clientes...</div>';
+  await fetchClients();
+  renderClients();
+}
+function renderClients() {
+  const list = document.getElementById('clients-list');
+  const clients = clientsCache.filter(c=>matchesSearch([
+    c.name,c.email,c.phone,c.document,c.city,
+    ...(c.emails || []).flatMap(contact => [contact.value, contact.contact_name]),
+    ...(c.phones || []).flatMap(contact => [contact.value, contact.contact_name]),
+  ],getVal('clients-search')));
   document.getElementById('clients-count').textContent = `${clients.length} cliente${clients.length === 1 ? '' : 's'}`;
-  tbody.innerHTML = clients.length ? clients.map(client => `<tr>
-    <td><strong>${esc(client.name)}</strong><br><small>${esc(client.email)}</small></td><td>${esc(client.phone || '—')}</td>
-    <td>${esc(client.document || '—')}</td><td>${esc([client.city, client.state].filter(Boolean).join(' / ') || '—')}</td>
-    <td><button class="btn-secondary small" onclick="editClient(${client.id})">Editar</button> <button class="btn-danger-sm" onclick="archiveClient(${client.id})">Arquivar</button></td></tr>`).join('')
-    : '<tr><td colspan="5" style="text-align:center;padding:28px">Nenhum cliente cadastrado.</td></tr>';
+  list.innerHTML = clients.length ? clients.map(client => `<article class="client-list-card">
+    <header class="client-list-card-header">
+      <span class="client-avatar">${esc(clientInitials(client.name))}</span>
+      <div class="client-identity"><h4>${esc(client.name)}</h4><div class="client-meta">${client.document ? `<span>CPF/CNPJ ${esc(client.document)}</span>` : '<span>Documento não informado</span>'}${client.city || client.state ? `<span>⌖ ${esc([client.city,client.state].filter(Boolean).join(' / '))}</span>` : '<span>Local não informado</span>'}</div></div>
+    </header>
+    <div class="client-card-contacts">
+      <section><div class="client-contact-title"><span>✉</span><strong>E-mails</strong></div>${clientContactCards('email',client.emails,client.email,client.name)}</section>
+      <section><div class="client-contact-title"><span>☎</span><strong>Telefones</strong></div>${clientContactCards('phone',client.phones,client.phone,client.name)}</section>
+    </div>
+    <footer class="client-list-actions"><button class="btn-secondary small" onclick="editClient(${client.id})">Editar cadastro</button><button class="client-archive-action" onclick="archiveClient(${client.id})">Arquivar</button></footer>
+  </article>`).join('') : '<div class="client-grid-empty"><strong>Nenhum cliente encontrado</strong><span>Ajuste a busca ou cadastre um novo cliente.</span></div>';
+}
+
+function clientInitials(name) {
+  const words = String(name || '').trim().split(/\s+/).filter(Boolean);
+  return `${words[0]?.[0] || 'C'}${words.length > 1 ? words.at(-1)[0] : ''}`.toUpperCase();
+}
+
+function clientContactCards(type, contacts, fallbackValue, fallbackName) {
+  const list = contacts?.length ? contacts : (fallbackValue ? [{ value:fallbackValue, contact_name:fallbackName }] : []);
+  if (!list.length) return '<p class="client-contact-empty">Não informado</p>';
+  return `<div class="client-contact-items">${list.map((contact,index)=>{
+    const target=type==='email'?`mailto:${contact.value}`:`https://wa.me/${whatsappNumber(contact.value)}`;
+    return `<a class="client-contact-item" href="${esc(target)}" ${type==='phone'?'target="_blank" rel="noopener"':''}>
+      <span><b>${esc(contact.contact_name || fallbackName)}</b><small>${esc(contact.value)}</small></span>${index===0?'<em>Principal</em>':''}
+    </a>`;
+  }).join('')}</div>`;
+}
+
+function clientContactRow(type, contact = {}, index = 0) {
+  const isEmail = type === 'email';
+  return `<div class="client-contact-row" data-contact-row data-type="${type}">
+    <input class="admin-input" data-field="contact-name" maxlength="120" placeholder="Nome do responsável" aria-label="Nome do responsável" value="${esc(contact.contact_name || '')}">
+    <input class="admin-input" data-field="value" ${isEmail ? 'type="email"' : 'type="tel" inputmode="tel"'} maxlength="${isEmail ? 254 : 30}" placeholder="${isEmail ? 'email@empresa.com.br' : '(92) 99999-9999'}" aria-label="${isEmail ? 'E-mail' : 'Celular ou telefone'}" value="${esc(contact.value || '')}">
+    <span class="primary-chip" ${index === 0 ? '' : 'hidden'}>Principal</span>
+    <button type="button" class="contact-remove" title="Remover contato" aria-label="Remover contato" onclick="removeClientContact(this)">×</button>
+  </div>`;
+}
+
+function renderClientContacts(type, contacts = []) {
+  const container = document.getElementById(type === 'email' ? 'c-emails' : 'c-phones');
+  if (!container) return;
+  const list = contacts.length ? contacts : [{}];
+  container.innerHTML = list.map((contact, index) => clientContactRow(type, contact, index)).join('');
+}
+
+function addClientContact(type) {
+  if (!['email','phone'].includes(type)) return;
+  const container = document.getElementById(type === 'email' ? 'c-emails' : 'c-phones');
+  if (container.querySelectorAll('[data-contact-row]').length >= 10) return toast('Limite de 10 contatos por tipo', true);
+  container.insertAdjacentHTML('beforeend', clientContactRow(type, {}, container.querySelectorAll('[data-contact-row]').length));
+  container.lastElementChild?.querySelector('[data-field="contact-name"]')?.focus();
+}
+
+function removeClientContact(button) {
+  const row = button.closest('[data-contact-row]');
+  const container = row?.parentElement;
+  if (!row || !container) return;
+  const rows = [...container.querySelectorAll('[data-contact-row]')];
+  if (rows.length === 1) {
+    row.querySelectorAll('input').forEach(input => { input.value = ''; });
+    return;
+  }
+  row.remove();
+  [...container.querySelectorAll('[data-contact-row]')].forEach((item, index) => { item.querySelector('.primary-chip').hidden = index !== 0; });
+}
+
+function readClientContacts(type) {
+  const container = document.getElementById(type === 'email' ? 'c-emails' : 'c-phones');
+  return [...container.querySelectorAll('[data-contact-row]')].map(row => ({
+    contact_name: row.querySelector('[data-field="contact-name"]').value.trim(),
+    value: row.querySelector('[data-field="value"]').value.trim(),
+  })).filter(contact => contact.value || contact.contact_name);
 }
 
 async function submitClient(event) {
   event.preventDefault(); const id = Number(getVal('c-id')) || null;
-  const body = { id, name:getVal('c-name'), email:getVal('c-email'), phone:getVal('c-phone'), document:getVal('c-document'), address:getVal('c-address'), city:getVal('c-city'), state:getVal('c-state'), postal_code:getVal('c-postal'), notes:getVal('c-notes') };
+  const emails = readClientContacts('email'); const phones = readClientContacts('phone');
+  if (!emails.length) return toast('Cadastre pelo menos um e-mail', true);
+  if ([...emails, ...phones].some(contact => !contact.value || !contact.contact_name)) return toast('Preencha o contato e o nome do responsável em todas as linhas', true);
+  const body = { id, name:getVal('c-name'), email:emails[0].value, phone:phones[0]?.value || '', emails, phones, document:getVal('c-document'), address:getVal('c-address'), city:getVal('c-city'), state:getVal('c-state'), postal_code:getVal('c-postal'), notes:getVal('c-notes') };
   const res = await authFetch('/api/admin/clients', { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) });
-  if (res?.ok) { toast(id ? 'Cliente atualizado ✓' : 'Cliente cadastrado ✓'); resetClientForm(); loadClients(); }
+  if (res?.ok) { toast(id ? 'Cliente atualizado ✓' : 'Cliente cadastrado ✓'); closeClientModal(); loadClients(); }
   else if (res) { const data = await res.json().catch(() => ({})); toast(data.error || 'Erro ao salvar cliente', true); }
 }
 
 function editClient(id) {
   const client = clientsCache.find(item => item.id === id); if (!client) return;
-  for (const [field,key] of [['c-id','id'],['c-name','name'],['c-email','email'],['c-phone','phone'],['c-document','document'],['c-address','address'],['c-city','city'],['c-state','state'],['c-postal','postal_code'],['c-notes','notes']]) setVal(field, client[key] || '');
-  document.getElementById('client-submit').textContent = 'Salvar alterações'; document.getElementById('client-cancel').hidden = false;
-  document.getElementById('client-form').scrollIntoView({ behavior:'smooth', block:'start' });
+  resetClientForm();
+  for (const [field,key] of [['c-id','id'],['c-name','name'],['c-document','document'],['c-address','address'],['c-city','city'],['c-state','state'],['c-postal','postal_code'],['c-notes','notes']]) setVal(field, client[key] || '');
+  renderClientContacts('email', client.emails?.length ? client.emails : [{ value:client.email, contact_name:client.name }]);
+  renderClientContacts('phone', client.phones?.length ? client.phones : (client.phone ? [{ value:client.phone, contact_name:client.name }] : []));
+  document.getElementById('client-modal-title').textContent = 'Editar cliente';
+  document.getElementById('client-submit').textContent = 'Salvar alterações';
+  document.getElementById('client-modal').classList.add('open'); document.body.classList.add('modal-open');
 }
 
 function resetClientForm() {
   document.getElementById('client-form').reset(); setVal('c-id','');
-  document.getElementById('client-submit').textContent = 'Cadastrar cliente'; document.getElementById('client-cancel').hidden = true;
+  renderClientContacts('email'); renderClientContacts('phone');
+  document.getElementById('client-modal-title').textContent = 'Novo cliente';
+  document.getElementById('client-submit').textContent = 'Cadastrar cliente';
 }
+
+function openClientModal() {
+  resetClientForm();
+  document.getElementById('client-modal').classList.add('open'); document.body.classList.add('modal-open');
+  document.getElementById('c-name').focus();
+}
+
+function closeClientModal(event) {
+  const modal = document.getElementById('client-modal');
+  if (event && event.target !== modal) return;
+  modal.classList.remove('open'); document.body.classList.remove('modal-open'); resetClientForm();
+}
+
+renderClientContacts('email');
+renderClientContacts('phone');
 
 async function archiveClient(id) {
   if (!confirm('Arquivar este cliente? O histórico de recibos será preservado.')) return;
@@ -848,8 +1099,8 @@ async function loadAnalytics() {
 
   let d;
   try {
-    const res = await fetch('/api/admin/analytics');
-    if (!res.ok) {
+    const res = await authFetch('/api/admin/analytics');
+    if (!res?.ok) {
       loadingEl.textContent = 'Erro ao carregar analytics. Tente novamente.';
       return;
     }

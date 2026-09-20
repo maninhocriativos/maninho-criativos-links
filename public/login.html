@@ -219,7 +219,7 @@
           </div>
         </div>
 
-        <div class="error-box" id="error-box">
+        <div class="error-box" id="error-box" role="alert" aria-live="assertive">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
@@ -231,6 +231,7 @@
           <div class="spinner"></div>
         </button>
       </form>
+      <button type="button" id="restart-login" hidden onclick="restartLogin()" style="margin-top:16px;background:transparent;border:0;color:#9fc3ff;cursor:pointer;font:inherit">Usar outro e-mail ou solicitar novo código</button>
 
       <p class="card-footer">
         <a href="/">← Voltar para o site</a>
@@ -247,6 +248,27 @@
     function togglePwd() {
       const inp = document.getElementById('inp-pwd');
       inp.type = inp.type === 'password' ? 'text' : 'password';
+      const button = document.querySelector('.toggle-pwd');
+      button.title = inp.type === 'password' ? 'Mostrar senha' : 'Ocultar senha';
+      button.setAttribute('aria-label', button.title);
+      button.setAttribute('aria-pressed', String(inp.type === 'text'));
+    }
+
+    function restartLogin() {
+      challengeId = null;
+      document.getElementById('otp-step').hidden = true;
+      document.getElementById('email-step').hidden = false;
+      document.getElementById('password-step').hidden = false;
+      document.getElementById('inp-code').required = false;
+      document.getElementById('inp-code').value = '';
+      document.getElementById('inp-email').disabled = false;
+      document.getElementById('inp-pwd').disabled = false;
+      document.getElementById('inp-pwd').value = '';
+      document.getElementById('restart-login').hidden = true;
+      document.getElementById('error-box').classList.remove('show');
+      document.querySelector('.btn-text').textContent = 'Enviar código';
+      document.querySelector('.card-sub').textContent = 'Entre com seu e-mail e senha para receber um novo código.';
+      document.getElementById('inp-email').focus();
     }
 
     async function doLogin(e) {
@@ -255,6 +277,7 @@
       const password = document.getElementById('inp-pwd').value;
       const code     = document.getElementById('inp-code').value.trim();
       const btn      = document.getElementById('btn-login');
+      if (btn.disabled) return;
       const errBox   = document.getElementById('error-box');
       const errMsg   = document.getElementById('error-msg');
 
@@ -273,6 +296,7 @@
           const data = await res.json();
           if (data.requires_verification) {
             challengeId = data.challenge_id;
+            document.getElementById('restart-login').hidden = false;
             document.getElementById('otp-step').hidden = false;
             document.getElementById('email-step').hidden = true;
             document.getElementById('password-step').hidden = true;
