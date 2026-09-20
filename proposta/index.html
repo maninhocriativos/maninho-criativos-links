@@ -57,7 +57,7 @@
     @keyframes dust { 0% { transform: translate3d(0,0,0); opacity: 0; } 15% { opacity: .8; } 100% { transform: translate3d(var(--dx2), -160px, 0); opacity: 0; } }
 
     .gate { --gold: #d9b45f; --gold-hi: #f6e7b8; position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 22px; padding: 24px; overflow: hidden;
-      background: radial-gradient(ellipse at 50% 40%, #16305f 0%, #0a1626 60%, #050b16 100%); transition: opacity .8s ease, visibility .8s; }
+      background: radial-gradient(ellipse at 50% 40%, #16305f 0%, #0a1626 60%, #050b16 100%); transition: opacity .7s ease, visibility .7s; }
     .js .gate { display: flex; }
     .gate.is-leaving { opacity: 0; visibility: hidden; pointer-events: none; }
     .gate.is-gone { display: none; }
@@ -80,7 +80,7 @@
     /* durante a abertura, nada decorativo compete com a animação principal */
     .gate.is-opening .stars i, .gate.is-opening .dustwrap i, .gate.is-opening .gate-aurora { animation: none; }
 
-    .env-stage { position: relative; perspective: 1700px; --ew: min(600px, 88vw); animation: rise 1s .35s ease both; }
+    .env-stage { position: relative; perspective: 1700px; --ew: min(720px, 88vw, max(300px, calc((100vh - 350px) * 1.5625))); animation: rise 1s .35s ease both; }
     .env-glow { position: absolute; left: 50%; top: 46%; width: calc(var(--ew) * 1.5); height: calc(var(--ew) * 1.1); margin: calc(var(--ew) * -.55) 0 0 calc(var(--ew) * -.75); border-radius: 50%; pointer-events: none; opacity: .01; transform: scale(.6); will-change: transform, opacity;
       background: radial-gradient(circle, rgba(246,231,184,.5), rgba(217,180,95,.2) 38%, transparent 68%); transition: opacity .9s ease .5s, transform 1.2s ease .5s; }
     .gate.is-opening .env-glow { opacity: 1; transform: scale(1); }
@@ -100,9 +100,16 @@
 
     /* a carta é desenhada já no tamanho final (cobre a tela) e só é reduzida: nunca fica borrada e nunca precisa ser re-rasterizada */
     .env-letter { z-index: 2; visibility: hidden; text-align: center; color: #fff; transform-origin: 50% 50%; will-change: transform; backface-visibility: hidden; -webkit-backface-visibility: hidden;
-      background: linear-gradient(160deg, #0d1f3d, #0a1626 70%); box-shadow: 0 0 0 .07em rgba(217,180,95,.6); transition: transform .9s cubic-bezier(.3,.7,.2,1) .7s; }
+      background: linear-gradient(160deg, #0d1f3d, #0a1626 70%); box-shadow: 0 0 0 .07em rgba(217,180,95,.6); }
     .env-letter.ready { visibility: visible; }
-    .gate.is-pulling .env-letter { z-index: 9; transition: transform 1.15s cubic-bezier(.66,0,.18,1); }
+    .gate.is-pulling .env-letter { z-index: 9; }
+    /* ao chegar na tela cheia, o texto da carta some antes da capa aparecer (sem título duplicado) */
+    .lt-in, .lt-brand, .lt-frame { transition: opacity .28s ease; }
+    .gate.is-clearing .lt-in, .gate.is-clearing .lt-brand, .gate.is-clearing .lt-frame { opacity: 0; }
+    /* sensação de "puxar": as estrelas avançam para fora enquanto a carta vem */
+    .stars { transition: transform 1.7s cubic-bezier(.5,0,.3,1), opacity 1.3s ease; will-change: transform; }
+    .gate.is-pulling .stars { transform: scale(1.9); opacity: 0; }
+    .gate.is-pulling .gate-aurora { opacity: .4; transition: opacity 1s; }
     .lt-grid { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 42%, transparent 22%, rgba(10,22,38,.96) 88%), linear-gradient(rgba(96,165,250,.10) .06em, transparent .06em) 0 0 / 2.6em 2.6em, linear-gradient(90deg, rgba(96,165,250,.10) .06em, transparent .06em) 0 0 / 2.6em 2.6em; }
     .lt-glow { position: absolute; width: 70%; height: 85%; right: 0; top: 0; background: radial-gradient(circle, rgba(37,99,235,.42), transparent 62%); }
     .lt-frame { position: absolute; inset: .9em; border: .09em solid rgba(217,180,95,.6); }
@@ -113,7 +120,7 @@
     .lt-line { width: 3.4em; height: .07em; background: #d9b45f; }
     .lt-in b { font-size: .86em; letter-spacing: .3em; color: #f6e7b8; font-weight: 700; }
     .lt-brand { position: absolute; left: 0; right: 0; bottom: 1.7em; text-align: center; font-size: .66em; letter-spacing: .28em; text-transform: uppercase; color: rgba(255,255,255,.4); }
-    .gate.is-pulling .env-back, .gate.is-pulling .env-pocket, .gate.is-pulling .env-flap, .gate.is-pulling .env-seal, .gate.is-pulling .env-shadow, .gate.is-pulling .env-gloss { opacity: 0; }
+    .gate.is-pulling .env-back, .gate.is-pulling .env-pocket, .gate.is-pulling .env-flap, .gate.is-pulling .env-seal, .gate.is-pulling .env-shadow, .gate.is-pulling .env-gloss { opacity: 0; transition: opacity .55s ease; }
 
     .env-seal { left: 50%; top: 62%; z-index: 5; width: calc(var(--ew) * .165); height: calc(var(--ew) * .165); transform: translate(-50%,-50%); transition: transform .3s ease; will-change: transform; }
     .env-seal svg { width: 100%; height: 100%; overflow: visible; }
@@ -1058,7 +1065,11 @@
         var W0 = Math.max(vw, vh * 1.53) * 1.04, H0 = W0 / 1.53, k = (ew * 0.86) / W0;
         L.k = k; L.H0 = H0; L.ty = -1.12 * k * H0;
         var st = letter.style;
-        st.width = W0.toFixed(0) + 'px'; st.height = H0.toFixed(0) + 'px'; st.fontSize = (W0 / 40).toFixed(2) + 'px';
+        var portrait = vw < vh * 0.9, em = portrait ? vw / 16 : W0 / 40;
+        st.width = W0.toFixed(0) + 'px'; st.height = H0.toFixed(0) + 'px'; st.fontSize = em.toFixed(2) + 'px';
+        /* em telas verticais só a faixa central da carta fica visível: o texto se ajusta a ela */
+        var box = letter.querySelector('.lt-in'), tw = portrait ? vw * 0.86 : W0 - 5.2 * em;
+        box.style.left = '50%'; box.style.right = 'auto'; box.style.width = tw.toFixed(0) + 'px'; box.style.marginLeft = (-tw / 2).toFixed(0) + 'px';
         st.left = '50%'; st.marginLeft = (-W0 / 2).toFixed(0) + 'px';
         st.top = (eh * 0.51).toFixed(1) + 'px'; st.marginTop = (-H0 / 2).toFixed(0) + 'px';
         st.transition = 'none';
@@ -1102,21 +1113,39 @@
           setTimeout(function () { gate.classList.add('is-gone'); }, reduced ? 200 : 900);
         }); });
       }
-      function pull() {
-        var vw = window.innerWidth, vh = window.innerHeight;
-        var r = letter.getBoundingClientRect();
-        var lx = r.left + r.width / 2, ly = r.top + r.height / 2 - L.ty;
-        gate.classList.add('is-pulling');
-        letter.style.transform = 'translate3d(' + (vw / 2 - lx).toFixed(1) + 'px,' + (vh / 2 - ly).toFixed(1) + 'px,0) scale(1)';
-        setTimeout(function () { reveal(); fadeOut(); }, 1220);
-      }
+      /* Coreografia contínua (uma só animação, sem pausas):
+         a carta sobe do envelope e, sem parar, é puxada até cobrir a tela. */
       function openEnvelope() {
         if (opened) return; opened = true;
-        envelope.style.transform = 'none';
+        envelope.style.transition = 'none'; envelope.style.transform = 'none'; void envelope.offsetWidth; envelope.style.transition = '';
         gate.classList.add('is-opening');
-        if (reduced) { setTimeout(function () { reveal(); fadeOut(); }, 80); return; }
-        letter.style.transform = 'translate3d(0,' + L.ty.toFixed(1) + 'px,0) scale(' + L.k.toFixed(4) + ')';
-        setTimeout(pull, 1650);
+        if (reduced || !letter.animate) { setTimeout(function () { reveal(); fadeOut(); }, reduced ? 80 : 1300); return; }
+
+        var vw = window.innerWidth, vh = window.innerHeight, r = letter.getBoundingClientRect();
+        var X = vw / 2 - (r.left + r.width / 2), Y = vh / 2 - (r.top + r.height / 2);
+        var rest = 'translate3d(0,0,0) scale(' + L.k.toFixed(4) + ')';
+        var up = 'translate3d(0,' + L.ty.toFixed(1) + 'px,0) scale(' + (L.k * 1.03).toFixed(4) + ')';
+        var full = 'translate3d(' + X.toFixed(1) + 'px,' + Y.toFixed(1) + 'px,0) scale(1)';
+        var DELAY = 480, DUR = 1900, done = false;
+
+        var anim = letter.animate([
+          { transform: rest, offset: 0, easing: 'cubic-bezier(.25,.8,.25,1)' },
+          { transform: up, offset: 0.42, easing: 'cubic-bezier(.7,0,.2,1)' },
+          { transform: full, offset: 1 }
+        ], { duration: DUR, delay: DELAY, fill: 'forwards' });
+
+        /* quando a carta já saiu por completo, o envelope se dissolve e ela passa à frente */
+        setTimeout(function () { gate.classList.add('is-pulling'); }, DELAY + DUR * 0.42 - 60);
+
+        function landed() {
+          if (done) return; done = true;
+          letter.style.transform = full;
+          gate.classList.add('is-clearing');
+          reveal();                                   /* a capa começa a entrar enquanto o texto da carta some */
+          setTimeout(fadeOut, 240);
+        }
+        anim.onfinish = landed;
+        setTimeout(landed, DELAY + DUR + 600);   /* rede de segurança */
       }
       if (params.has('direto')) {
         opened = true; gate.classList.add('is-gone'); reveal();
