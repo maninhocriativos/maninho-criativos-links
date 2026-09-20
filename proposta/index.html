@@ -99,8 +99,9 @@
     .gate.is-opening .env-flap { transform: rotateX(180deg); z-index: 1; }
 
     /* a carta é desenhada já no tamanho final (cobre a tela) e só é reduzida: nunca fica borrada e nunca precisa ser re-rasterizada */
-    .env-letter { z-index: 2; text-align: center; color: #fff; transform-origin: 50% 50%; will-change: transform; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    .env-letter { z-index: 2; visibility: hidden; text-align: center; color: #fff; transform-origin: 50% 50%; will-change: transform; backface-visibility: hidden; -webkit-backface-visibility: hidden;
       background: linear-gradient(160deg, #0d1f3d, #0a1626 70%); box-shadow: 0 0 0 .07em rgba(217,180,95,.6); transition: transform .9s cubic-bezier(.3,.7,.2,1) .7s; }
+    .env-letter.ready { visibility: visible; }
     .gate.is-pulling .env-letter { z-index: 9; transition: transform 1.15s cubic-bezier(.66,0,.18,1); }
     .lt-grid { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 42%, transparent 22%, rgba(10,22,38,.96) 88%), linear-gradient(rgba(96,165,250,.10) .06em, transparent .06em) 0 0 / 2.6em 2.6em, linear-gradient(90deg, rgba(96,165,250,.10) .06em, transparent .06em) 0 0 / 2.6em 2.6em; }
     .lt-glow { position: absolute; width: 70%; height: 85%; right: 0; top: 0; background: radial-gradient(circle, rgba(37,99,235,.42), transparent 62%); }
@@ -913,7 +914,11 @@
         st.width = W0.toFixed(0) + 'px'; st.height = H0.toFixed(0) + 'px'; st.fontSize = (W0 / 40).toFixed(2) + 'px';
         st.left = '50%'; st.marginLeft = (-W0 / 2).toFixed(0) + 'px';
         st.top = (eh * 0.51).toFixed(1) + 'px'; st.marginTop = (-H0 / 2).toFixed(0) + 'px';
+        st.transition = 'none';
         st.transform = 'translate3d(0,0,0) scale(' + k.toFixed(4) + ')';
+        void letter.offsetWidth;            /* aplica já, sem animar */
+        st.transition = '';
+        letter.classList.add('ready');
       }
       layoutLetter();
 
