@@ -3,7 +3,7 @@
 Leia este arquivo inteiro antes de mexer no código. Ele resume o que existe, como rodar, como publicar e o que ainda está pendente.
 Detalhes históricos do sistema (versão inicial, tabelas antigas) estão em [SISTEMA.md](SISTEMA.md). Se algo aqui conflitar com o código, **o código vale mais**: corrija este arquivo.
 
-_Última atualização: 2026-09-20._
+_Última atualização: 2026-09-20 (fim do dia). Estado: tudo commitado e publicado; site de links + admin no Pages `maninho-criativos-links`, Worker `maninho-cobrancas` no ar, proposta em `proposta.maninhocriativos.com.br` (Pages `maninho-proposta`)._
 
 ## 1. O que é
 
@@ -112,6 +112,16 @@ Estado do banco remoto em 2026-09-20: migrations 0001–0015 **já aplicadas** e
 4. O Worker `maninho-cobrancas` foi publicado pela primeira vez em 2026-09-20 (antes disso nunca existiu na conta). Deploy é manual (`npm run deploy:billing`), com `workers_dev`/`preview_urls` desativados (só cron, sem URL pública). Precisa dos secrets Twilio/Z-API **no próprio Worker** (`npx wrangler secret put NOME --config wrangler.billing.jsonc`); sem eles, SMS/WhatsApp falham com erro registrado (e-mail funciona via binding). O token em `.env.local` precisa de Workers Scripts: Edit.
 5. Lixo versionado na raiz: `CRM THIAGO.zip`, `design_handoff_crm_thiago/` (referência de design do CRM) e vários scripts de conversão de imagem (`*.py`, `convert-*.mjs`). Não remover sem confirmar com o dono.
 6. `SISTEMA.md` é de 2026-05-31 e está parcialmente desatualizado (arquitetura pré-CRM).
+
+7. **Proposta Carlos Mota — pendências:** (a) falta a seção de **investimento, valores e prazos** (não inventar: pedir os pacotes ao dono); (b) o logotipo do menu foi trocado de "MINDORA" para "CARLOS MOTA" — confirmar se "Mindora" é uma marca real dele; (c) o botão final abre o WhatsApp da Maninho (+55 92 98609-6874) com mensagem pronta; (d) percentuais do simulador/painéis são **ilustrativos** e a página avisa; (e) nunca reintroduzir "5x mais escala"/"3 meses" (sem base); (f) checar sempre em navegador real depois de mexer no envelope (ver "Como testar" abaixo).
+8. **Token do Cloudflare** em `.env.local` (Pages, D1, Workers Scripts, DNS Edit, e-mail). O `GH_TOKEN` também fica lá; o push do Git só funciona injetando esse token (o Credential Manager do Windows tem uma credencial sem escrita). Nunca imprimir valores.
+
+## 8.1 Como testar a proposta (aprendizados de 2026-09-20)
+
+- Servir a pasta `proposta/` com um servidor http simples e abrir no Chrome. `/?direto` pula o envelope.
+- **Screenshots headless com `--virtual-time-budget` enganam** (transições/animações não acompanham os timers). Para ver a animação de verdade, use o **Chrome DevTools Protocol** por WebSocket a partir do Node (`--remote-debugging-port`, `Page.captureScreenshot` a cada ~100 ms após o clique). Foi assim que se descobriu a aba do envelope passando na frente da carta.
+- **Desempenho:** medir gaps de `requestAnimationFrame` em tempo real (via CDP `Runtime.evaluate`, `awaitPromise`), tanto na abertura do envelope quanto rolando a página inteira. Metas atuais: 0 quadros >50 ms; rolagem completa 0 quadros >25 ms.
+- Cuidados que já morderam: `overflow:hidden` em ancestor quebra `position:sticky`; `fill-mode: both` em animação anula classe de opacity; `preserve-3d` ignora `z-index`; `transform` e a propriedade CSS `translate` são independentes (usar `translate` para reveal/hover para não brigar com paralaxe); em heredoc do shell, barras invertidas e aspas somem — para patches grandes gravar um arquivo `.js` e executar.
 
 ## 9. Convenções para agentes
 
