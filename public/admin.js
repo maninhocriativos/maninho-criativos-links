@@ -930,6 +930,20 @@ async function loadClientOptions() {
   selectReceiptClient();
 }
 
+function toggleReceiptRecipientMode() {
+  const standalone = getVal('r-recipient-mode') === 'standalone';
+  document.getElementById('r-client-field').hidden = standalone;
+  document.getElementById('r-email-field').hidden = standalone;
+  document.getElementById('r-standalone-fields').hidden = !standalone;
+  document.getElementById('r-recipient-address-field').hidden = !standalone;
+  document.getElementById('r-client').required = !standalone;
+  document.getElementById('r-recipient-name').required = standalone;
+  document.getElementById('r-delivery-row').hidden = standalone;
+  if (standalone) setVal('r-mode', 'now');
+  toggleReceiptSchedule();
+  updateReceiptPreview();
+}
+
 function selectReceiptClient() {
   const client = clientsCache.find(item => item.id === Number(getVal('r-client')));
   setVal('r-email-preview', client?.email || '');
@@ -943,16 +957,19 @@ function receiptDateLabel(value) {
 }
 
 function updateReceiptPreview() {
-  const client = clientsCache.find(item => item.id === Number(getVal('r-client')));
+  const standalone = getVal('r-recipient-mode') === 'standalone';
+  const client = standalone ? null : clientsCache.find(item => item.id === Number(getVal('r-client')));
   const amount = Number(getVal('r-amount')) || 0;
-  document.getElementById('preview-client').textContent = client?.name || 'Selecione um cliente';
-  document.getElementById('preview-document').textContent = client?.document ? `CPF/CNPJ ${client.document}` : '';
+  const recipientName = standalone ? getVal('r-recipient-name') : client?.name;
+  const recipientDocument = standalone ? getVal('r-recipient-document') : client?.document;
+  document.getElementById('preview-client').textContent = recipientName || (standalone ? 'Nome do tomador' : 'Selecione um cliente');
+  document.getElementById('preview-document').textContent = recipientDocument ? `CPF/CNPJ ${recipientDocument}` : '';
   document.getElementById('preview-amount').textContent = amount.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
   document.getElementById('preview-service-amount').textContent = amount.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
   document.getElementById('preview-description').textContent = getVal('r-description') || 'Descrição do pagamento';
   document.getElementById('preview-payment').textContent = getVal('r-payment') || 'Não informada';
   document.getElementById('preview-date').textContent = receiptDateLabel(getVal('r-date'));
-  const address = client ? [client.address, [client.city, client.state].filter(Boolean).join(' / '), client.postal_code ? `CEP ${client.postal_code}` : ''].filter(Boolean).join(' • ') : '';
+  const address = standalone ? getVal('r-recipient-address') : (client ? [client.address, [client.city, client.state].filter(Boolean).join(' / '), client.postal_code ? `CEP ${client.postal_code}` : ''].filter(Boolean).join(' • ') : '');
   document.getElementById('preview-address').textContent = address;
 }
 
@@ -1018,23 +1035,33 @@ function toggleReceiptSchedule() {
   const scheduled = getVal('r-mode') === 'scheduled';
   document.getElementById('r-schedule-field').hidden = !scheduled;
   document.getElementById('r-scheduled').required = scheduled;
-  document.getElementById('receipt-submit').textContent = scheduled ? 'Agendar recibo' : 'Enviar recibo';
+  const standalone = getVal('r-recipient-mode') === 'standalone';
+  document.getElementById('receipt-submit').textContent = standalone ? 'Gerar recibo' : (scheduled ? 'Agendar recibo' : 'Enviar recibo');
 }
 
 async function submitReceipt(event) {
   event.preventDefault();
   const button = document.getElementById('receipt-submit');
+  const standalone = getVal('r-recipient-mode') === 'standalone';
   const amount = Number(getVal('r-amount'));
-  const scheduled = getVal('r-mode') === 'scheduled';
+  const scheduled = !standalone && getVal('r-mode') === 'scheduled';
   const scheduledValue = getVal('r-scheduled');
   if (!Number.isFinite(amount) || amount <= 0) { toast('Informe um valor válido', true); return; }
+  if (!standalone && !getVal('r-client')) { toast('Selecione um cliente', true); return; }
+  if (standalone && !getVal('r-recipient-name')) { toast('Informe o nome do tomador', true); return; }
   if (scheduled && !scheduledValue) { toast('Informe a data e hora do envio', true); return; }
   const body = {
-    client_id: Number(getVal('r-client')),
+    mode: standalone ? 'standalone' : 'client',
+    client_id: standalone ? null : Number(getVal('r-client')),
     description: getVal('r-description'), amount_cents: Math.round(amount * 100),
     payment_method: getVal('r-payment'), receipt_date: getVal('r-date'),
     scheduled_at: scheduled ? new Date(scheduledValue).toISOString() : null,
   };
+  if (standalone) {
+    body.recipient_name = getVal('r-recipient-name');
+    body.recipient_document = getVal('r-recipient-document');
+    body.recipient_address = getVal('r-recipient-address');
+  }
   button.disabled = true;
   try {
     body.signature_url = await uploadSignature();
@@ -1044,10 +1071,11 @@ async function submitReceipt(event) {
       event.target.reset();
       const now = new Date();
       document.getElementById('r-date').value = new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
-      toggleReceiptSchedule();
+      toggleReceiptRecipientMode();
       clearSignature();
       updateReceiptPreview();
-      toast(`${scheduled ? 'Recibo agendado' : 'Recibo enviado'} • ${created.document_code} ✓`);
+      toast(`${standalone ? 'Recibo avulso gerado' : (scheduled ? 'Recibo agendado' : 'Recibo enviado')} • ${created.document_code} ✓`);
+      if (standalone && created.pdf_url) window.open?.(created.pdf_url, '_blank', 'noopener');
       loadReceipts();
     } else if (res) {
       const data = await res.json().catch(() => ({}));
@@ -1067,9 +1095,9 @@ async function loadReceipts() {
   if (!receipts.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:28px">Nenhum recibo enviado.</td></tr>'; return; }
   const labels = { sent: 'Enviado', scheduled: 'Agendado', cancelled: 'Cancelado', failed: 'Falhou', pending: 'Processando' };
   tbody.innerHTML = receipts.map(receipt => `
-    <tr><td>#${receipt.id}</td><td><strong>${esc(receipt.recipient_name)}</strong><br><small>${esc(receipt.recipient_email)}</small></td>
+    <tr><td>#${receipt.id}</td><td><strong>${esc(receipt.recipient_name)}</strong><br><small>${receipt.delivery_mode === 'standalone' ? 'Recibo avulso' : esc(receipt.recipient_email)}</small></td>
     <td>${esc(receipt.description)}</td><td>${(receipt.amount_cents / 100).toLocaleString('pt-BR', { style:'currency', currency:'BRL' })}</td>
-    <td>${formatDate(receipt.scheduled_at || receipt.created_at)}</td><td><span class="lead-tag">${labels[receipt.status] || esc(receipt.status)}</span></td>
+    <td>${formatDate(receipt.scheduled_at || receipt.created_at)}</td><td><span class="lead-tag">${receipt.delivery_mode === 'standalone' ? 'Gerado' : (labels[receipt.status] || esc(receipt.status))}</span></td>
     <td><div style="display:flex;gap:6px">${receipt.pdf_url ? `<a class="btn-secondary small" href="/api/admin/receipts/${receipt.id}/pdf">PDF</a>` : ''}${receipt.status === 'scheduled' ? `<button class="btn-danger-sm" onclick="cancelReceipt(${receipt.id})">Cancelar</button>` : ''}</div></td></tr>`).join('');
 }
 
@@ -1085,7 +1113,8 @@ if (receiptDate) {
   const now = new Date(); const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
   receiptDate.value = localDate.toISOString().slice(0, 10);
 }
-['r-description','r-amount','r-payment','r-date'].forEach(id => document.getElementById(id)?.addEventListener('input', updateReceiptPreview));
+['r-description','r-amount','r-payment','r-date','r-recipient-name','r-recipient-document','r-recipient-address'].forEach(id => document.getElementById(id)?.addEventListener('input', updateReceiptPreview));
+toggleReceiptRecipientMode();
 updateReceiptPreview();
 setupSignaturePad();
 

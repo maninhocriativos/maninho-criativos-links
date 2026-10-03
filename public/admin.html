@@ -427,19 +427,25 @@
         <div class="finance-section-title"><div><h3>Recibos e documentos</h3><p>Gere, assine, envie e acompanhe comprovantes.</p></div></div>
         <div class="receipt-workspace">
         <div class="panel-card">
-          <div class="panel-card-header"><h3>✉️ Enviar recibo por e-mail</h3></div>
+          <div class="panel-card-header"><h3>✉️ Gerar recibo ou enviar por e-mail</h3></div>
           <form class="link-form" id="receipt-form" onsubmit="event.preventDefault(); submitReceipt(event)">
             <div class="form-row receipt-client-row">
-              <div class="form-field"><label>Cliente cadastrado *</label><select class="admin-input" id="r-client" onchange="selectReceiptClient()" required><option value="">Selecione um cliente</option></select></div>
-              <div class="form-field"><label>E-mail de destino</label><input class="admin-input" id="r-email-preview" readonly placeholder="Preenchido pelo cliente" /></div>
+              <div class="form-field"><label>Tipo de recibo *</label><select class="admin-input" id="r-recipient-mode" onchange="toggleReceiptRecipientMode()"><option value="client">Cliente cadastrado / enviar por e-mail</option><option value="standalone">Recibo avulso / gerar PDF</option></select></div>
+              <div class="form-field" id="r-client-field"><label>Cliente cadastrado *</label><select class="admin-input" id="r-client" onchange="selectReceiptClient()" required><option value="">Selecione um cliente</option></select></div>
+              <div class="form-field" id="r-email-field"><label>E-mail de destino</label><input class="admin-input" id="r-email-preview" readonly placeholder="Preenchido pelo cliente" /></div>
             </div>
+            <div class="form-row" id="r-standalone-fields" hidden>
+              <div class="form-field"><label>Nome do tomador *</label><input class="admin-input" id="r-recipient-name" maxlength="120" placeholder="Nome ou empresa" /></div>
+              <div class="form-field"><label>CPF/CNPJ</label><input class="admin-input" id="r-recipient-document" maxlength="30" placeholder="Opcional" /></div>
+            </div>
+            <div class="form-field" id="r-recipient-address-field" hidden><label>Endereço do tomador</label><input class="admin-input" id="r-recipient-address" maxlength="240" placeholder="Opcional" /></div>
             <div class="form-field"><label>Descrição do pagamento *</label><input class="admin-input" id="r-description" list="receipt-services" maxlength="500" placeholder="Escolha ou digite o serviço" required /><datalist id="receipt-services"><option value="Criação de identidade visual"><option value="Desenvolvimento de site"><option value="Gestão de redes sociais"><option value="Ensaio fotográfico com IA"><option value="Design gráfico"><option value="Consultoria criativa"></datalist></div>
             <div class="form-row three">
               <div class="form-field"><label>Valor (R$) *</label><input class="admin-input" id="r-amount" type="number" min="0.01" max="1000000" step="0.01" required /></div>
               <div class="form-field"><label>Forma de pagamento</label><select class="admin-input" id="r-payment"><option value="">Selecione</option><option>PIX</option><option>Transferência bancária</option><option>Cartão de crédito</option><option>Cartão de débito</option><option>Dinheiro</option><option>Boleto</option><option>Outro</option></select></div>
               <div class="form-field"><label>Data do recibo *</label><div class="date-control"><input class="admin-input" id="r-date" type="date" required /><button type="button" class="date-button" onclick="openDatePicker('r-date')" aria-label="Abrir calendário">📅</button></div></div>
             </div>
-            <div class="form-row">
+            <div class="form-row" id="r-delivery-row">
               <div class="form-field"><label>Quando enviar?</label><select class="admin-input" id="r-mode" onchange="toggleReceiptSchedule()"><option value="now">Enviar agora</option><option value="scheduled">Agendar envio</option></select></div>
               <div class="form-field" id="r-schedule-field" hidden><label>Data e hora do envio *</label><div class="date-control"><input class="admin-input" id="r-scheduled" type="datetime-local" /><button type="button" class="date-button" onclick="openDatePicker('r-scheduled')" aria-label="Abrir calendário">📅</button></div></div>
             </div>

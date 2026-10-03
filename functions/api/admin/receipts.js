@@ -45,17 +45,27 @@ export async function onRequestPost({ request, env }) {
   try {
     const denied = await requireAuth(request, env); if (denied) return denied;
     await rateLimit(env, request, 'admin-receipts', 30, 60 * 60);
-    if (!env.RESEND_API_KEY || !env.RESEND_FROM_EMAIL) throw new HttpError(503, 'Resend não configurado');
     const body = await readJson(request, 16_384);
-    const clientId = integer(body.client_id, { min: 1 });
-    const client = await env.DB.prepare(`SELECT * FROM clients WHERE id=? AND is_active=1`).bind(clientId).first();
-    if (!client) throw new HttpError(404, 'Cliente não encontrado ou arquivado');
+    const standalone = body.mode === 'standalone';
+    const clientId = standalone ? null : integer(body.client_id, { min: 1 });
+    const client = standalone ? null : await env.DB.prepare(`SELECT * FROM clients WHERE id=? AND is_active=1`).bind(clientId).first();
+    if (!standalone && !client) throw new HttpError(404, 'Cliente não encontrado ou arquivado');
+    if (!standalone && (!env.RESEND_API_KEY || !env.RESEND_FROM_EMAIL)) throw new HttpError(503, 'Resend não configurado');
+    if (standalone && body.scheduled_at) throw new HttpError(400, 'Recibos avulsos só podem ser gerados na hora');
+    const recipientName = standalone ? text(body.recipient_name, { required: true, max: 120 }) : text(client.name, { required: true, max: 120 });
+    const recipientDocument = standalone ? text(body.recipient_document, { max: 30 }) : text(client.document, { max: 30 });
+    const recipientAddress = standalone
+      ? text(body.recipient_address, { max: 240 })
+      : [client.address, [client.city, client.state].filter(Boolean).join(' / '), client.postal_code ? `CEP ${client.postal_code}` : ''].filter(Boolean).join(' • ');
     const receipt = {
-      client_id: client.id,
-      recipient_name: text(client.name, { required: true, max: 120 }),
-      recipient_email: validEmail(client.email),
-      client_document: client.document || '',
-      client_address: [client.address, [client.city, client.state].filter(Boolean).join(' / '), client.postal_code ? `CEP ${client.postal_code}` : ''].filter(Boolean).join(' • '),
+      client_id: client?.id || null,
+      recipient_name: recipientName,
+      recipient_email: standalone ? '' : validEmail(client.email),
+      recipient_document: recipientDocument,
+      recipient_address: recipientAddress,
+      client_document: recipientDocument,
+      client_address: recipientAddress,
+      delivery_mode: standalone ? 'standalone' : 'email',
       description: text(body.description, { required: true, max: 500 }),
       amount_cents: integer(body.amount_cents, { min: 1, max: 100_000_000 }),
       payment_method: text(body.payment_method, { max: 80 }),
@@ -77,10 +87,11 @@ export async function onRequestPost({ request, env }) {
     }
 
     const created = await env.DB.prepare(`INSERT INTO receipt_emails
-      (client_id, recipient_name, recipient_email, description, amount_cents, payment_method, receipt_date, scheduled_at, signature_url)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`)
-      .bind(receipt.client_id, receipt.recipient_name, receipt.recipient_email, receipt.description, receipt.amount_cents,
-        receipt.payment_method, receipt.receipt_date, receipt.scheduled_at, receipt.signature_url).first();
+      (client_id, recipient_name, recipient_email, recipient_document, recipient_address, delivery_mode, description, amount_cents, payment_method, receipt_date, scheduled_at, signature_url)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`)
+      .bind(receipt.client_id, receipt.recipient_name, receipt.recipient_email, receipt.recipient_document, receipt.recipient_address,
+        receipt.delivery_mode, receipt.description, receipt.amount_cents, receipt.payment_method, receipt.receipt_date,
+        receipt.scheduled_at, receipt.signature_url).first();
 
     receipt.document_code = `MC-${receipt.receipt_date.replaceAll('-', '')}-${String(created.id).padStart(6, '0')}`;
     await env.DB.prepare(`UPDATE receipt_emails SET document_code=? WHERE id=?`).bind(receipt.document_code, created.id).run();
@@ -89,6 +100,14 @@ export async function onRequestPost({ request, env }) {
     await env.STORAGE.put(pdfKey, pdf.bytes, { httpMetadata: { contentType: 'application/pdf', cacheControl: 'private, max-age=31536000, immutable' } });
     const pdfUrl = `/api/admin/receipts/${created.id}/pdf`;
     await env.DB.prepare(`UPDATE receipt_emails SET pdf_url=? WHERE id=?`).bind(pdfKey, created.id).run();
+
+    if (standalone) {
+      await env.DB.batch([
+        env.DB.prepare(`UPDATE receipt_emails SET status='sent', updated_at=datetime('now') WHERE id=?`).bind(created.id),
+        env.DB.prepare(`INSERT INTO cash_transactions(client_id,type,category,description,amount_cents,due_date,paid_date,status,payment_method,notes) VALUES(?,'income','Recibos',?,?,?,?,'paid',?,'Gerado por recibo avulso')`).bind(receipt.client_id, `Recibo ${receipt.document_code}`, receipt.amount_cents, receipt.receipt_date, receipt.receipt_date, receipt.payment_method),
+      ]);
+      return json({ id: created.id, status: 'sent', delivery_mode: 'standalone', document_code: receipt.document_code, pdf_url: pdfUrl }, 201);
+    }
 
     const payload = {
       from: env.RESEND_FROM_EMAIL,
@@ -116,6 +135,6 @@ export async function onRequestPost({ request, env }) {
     const statements = [env.DB.prepare(`UPDATE receipt_emails SET status=?, resend_id=?, updated_at=datetime('now') WHERE id=?`).bind(status, provider.id, created.id)];
     if (!receipt.scheduled_at) statements.push(env.DB.prepare(`INSERT INTO cash_transactions(client_id,type,category,description,amount_cents,due_date,paid_date,status,payment_method,notes) VALUES(?,'income','Recibos',?,?,?,?,'paid',?,'Gerado automaticamente pelo recibo')`).bind(receipt.client_id,`Recibo ${receipt.document_code}`,receipt.amount_cents,receipt.receipt_date,receipt.receipt_date,receipt.payment_method));
     await env.DB.batch(statements);
-    return json({ id: created.id, resend_id: provider.id, status, document_code: receipt.document_code, pdf_url: pdfUrl }, 201);
+    return json({ id: created.id, resend_id: provider.id, status, delivery_mode: 'email', document_code: receipt.document_code, pdf_url: pdfUrl }, 201);
   } catch (error) { return errorResponse(error); }
 }

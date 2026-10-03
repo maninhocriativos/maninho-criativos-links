@@ -136,6 +136,22 @@ test('automatic InfinitePay checkout replaces the manual link field', () => {
   assert.equal(elements.get('cf-manual-payment').hidden, false);
 });
 
+test('receipt form supports standalone PDF generation without a client', () => {
+  const { run, elements } = admin();
+  elements.get('r-recipient-mode').value = 'standalone';
+  run('toggleReceiptRecipientMode()');
+  assert.equal(elements.get('r-client-field').hidden, true);
+  assert.equal(elements.get('r-standalone-fields').hidden, false);
+  assert.equal(elements.get('r-client').required, false);
+  assert.equal(elements.get('r-recipient-name').required, true);
+  assert.equal(elements.get('receipt-submit').textContent, 'Gerar recibo');
+  elements.get('r-recipient-name').value = 'Pessoa avulsa';
+  elements.get('r-recipient-document').value = '000.000.000-00';
+  run('updateReceiptPreview()');
+  assert.equal(elements.get('preview-client').textContent, 'Pessoa avulsa');
+  assert.equal(elements.get('preview-document').textContent, 'CPF/CNPJ 000.000.000-00');
+});
+
 test('expense mode shows supplier fields and hides customer billing tools', () => {
   const { run, elements } = admin();
   elements.get('cf-type').value = 'expense';

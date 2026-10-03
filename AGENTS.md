@@ -84,6 +84,7 @@ Secrets (definidos no Cloudflare, **nunca** no repositório; `.env*` está no `.
 - **0013 `cash_counterparty`** — despesas exigem fornecedor/beneficiário (`counterparty_name`, `counterparty_document`); nunca ligadas a dados de cobrança de cliente.
 - **0014 `finance_alerts`** — tabela `finance_alert_deliveries` (alerta "três dias antes", e-mail/WhatsApp). **A tabela existe, mas nenhum código a usa ainda** (ver pendências).
 - **0015 `household_expenses`** — `expense_scope` (`business`/`household`): despesas pessoais separadas das da empresa, com aba própria no admin e categorias próprias; receita nunca pode ser `household`. `GET /api/admin/cash-flow?scope=business|household`.
+- **0016 `standalone_receipts`** — recibos avulsos podem ser gerados sem cliente cadastrado ou Resend, com nome/documento/endereço informados na hora; o PDF é salvo no R2 e a entrada é registrada no caixa como recebida. O fluxo de cliente + envio por e-mail permanece disponível.
 - **Admin UX** (`public/admin-ux.js`): busca sem acento, botão "Atualizar", estado `aria-busy`, banner de erro de requisição, labels ligados aos campos, login remodelado.
 - Testes: `admin`, `billing-reminders`, `cash-flow`, `clients`, `infinitepay`, `utils` (30 passando em 2026-09-20).
 
