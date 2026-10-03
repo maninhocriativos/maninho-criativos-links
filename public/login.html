@@ -151,6 +151,14 @@
     }
     .card-footer a { color: var(--cyan); text-decoration: none; }
     .card-footer a:hover { text-decoration: underline; }
+    .auth-switch { margin-top: 18px; text-align: center; font-size: .78rem; color: var(--text2); }
+    .auth-switch button { background: none; border: 0; color: #9fc3ff; cursor: pointer; font: inherit; padding: 0; }
+    .auth-switch button:hover { text-decoration: underline; }
+    .policy-check { display: flex; align-items: flex-start; gap: 8px; font-size: .72rem; line-height: 1.4; color: var(--text2); }
+    .policy-check input { margin-top: 2px; accent-color: var(--accent); }
+    .policy-check a { color: #9fc3ff; }
+    .success-box { display: none; background: rgba(74,222,128,.08); border: 1px solid rgba(74,222,128,.25); border-radius: 8px; padding: 10px 12px; font-size: .82rem; line-height: 1.45; color: #86efac; }
+    .success-box.show { display: block; }
 
     /* Spinner */
     .spinner {
@@ -233,6 +241,36 @@
       </form>
       <button type="button" id="restart-login" hidden onclick="restartLogin()" style="margin-top:16px;background:transparent;border:0;color:#9fc3ff;cursor:pointer;font:inherit">Usar outro e-mail ou solicitar novo código</button>
 
+      <div class="auth-switch" id="login-switch">Ainda não tem acesso? <button type="button" onclick="showRegistration()">Criar novo acesso</button></div>
+
+      <form class="form" id="registration-form" hidden onsubmit="doRegister(event)">
+        <div class="field" id="registration-fields">
+          <label for="register-name">Nome completo</label>
+          <div class="field-wrap"><input id="register-name" type="text" placeholder="Seu nome" autocomplete="name" maxlength="120" required /></div>
+        </div>
+        <div class="field" id="registration-email-field">
+          <label for="register-email">E-mail</label>
+          <div class="field-wrap"><input id="register-email" type="email" placeholder="seu@email.com" autocomplete="email" required /></div>
+        </div>
+        <div class="field" id="registration-password-field">
+          <label for="register-password">Senha</label>
+          <div class="field-wrap"><input id="register-password" type="password" placeholder="Mínimo de 8 caracteres" autocomplete="new-password" minlength="8" required /></div>
+        </div>
+        <div class="field" id="registration-confirm-field">
+          <label for="register-confirm">Confirme a senha</label>
+          <div class="field-wrap"><input id="register-confirm" type="password" placeholder="Repita sua senha" autocomplete="new-password" minlength="8" required /></div>
+        </div>
+        <label class="policy-check" id="registration-policy"><input id="register-policy" type="checkbox" required /><span>Li e aceito as <a href="/politicas.html" target="_blank" rel="noopener">políticas de acesso e privacidade</a>.</span></label>
+        <div class="field" id="registration-code-field" hidden>
+          <label for="register-code">Código enviado por e-mail</label>
+          <div class="field-wrap"><input id="register-code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code" /></div>
+        </div>
+        <div class="error-box" id="registration-error" role="alert"><span id="registration-error-msg"></span></div>
+        <div class="success-box" id="registration-success"></div>
+        <button type="submit" class="btn-login" id="register-submit"><span class="btn-text">Solicitar acesso</span><div class="spinner"></div></button>
+        <div class="auth-switch"><button type="button" onclick="showLogin()">Voltar para entrar</button></div>
+      </form>
+
       <p class="card-footer">
         <a href="/">← Voltar para o site</a>
       </p>
@@ -241,6 +279,7 @@
 
   <script>
     let challengeId = null;
+    let registrationChallengeId = null;
     fetch('/api/admin/verify').then(res => {
       if (res.ok) window.location.replace('/admin.html');
     }).catch(() => {});
@@ -269,6 +308,76 @@
       document.querySelector('.btn-text').textContent = 'Enviar código';
       document.querySelector('.card-sub').textContent = 'Entre com seu e-mail e senha para receber um novo código.';
       document.getElementById('inp-email').focus();
+    }
+
+    function showRegistration() {
+      registrationChallengeId = null;
+      ['registration-fields','registration-email-field','registration-password-field','registration-confirm-field','registration-policy'].forEach(id => { document.getElementById(id).hidden = false; });
+      document.getElementById('registration-code-field').hidden = true;
+      ['register-name','register-email','register-password','register-confirm','register-policy'].forEach(id => { document.getElementById(id).required = true; });
+      document.getElementById('register-code').required = false;
+      document.getElementById('register-submit').disabled = false;
+      document.getElementById('registration-form').querySelectorAll('input').forEach(element => { element.disabled = false; });
+      document.querySelector('#register-submit .btn-text').textContent = 'Solicitar acesso';
+      document.getElementById('registration-success').classList.remove('show');
+      document.getElementById('login-form').hidden = true;
+      document.getElementById('restart-login').hidden = true;
+      document.getElementById('login-switch').hidden = true;
+      document.getElementById('registration-form').hidden = false;
+      document.querySelector('.card-title').textContent = 'Solicitar acesso';
+      document.querySelector('.card-sub').textContent = 'Crie seu cadastro para entrar no painel';
+      document.getElementById('register-name').focus();
+    }
+
+    function showLogin() {
+      document.getElementById('registration-form').hidden = true;
+      document.getElementById('login-form').hidden = false;
+      document.getElementById('login-switch').hidden = false;
+      document.querySelector('.card-title').textContent = 'Painel Administrativo';
+      document.querySelector('.card-sub').textContent = 'Entre com suas credenciais para continuar';
+    }
+
+    function registrationError(message) {
+      document.getElementById('registration-error-msg').textContent = message;
+      document.getElementById('registration-error').classList.add('show');
+    }
+
+    async function doRegister(e) {
+      e.preventDefault();
+      const button = document.getElementById('register-submit');
+      if (button.disabled) return;
+      const verifying = Boolean(registrationChallengeId);
+      let finished = false;
+      const body = verifying
+        ? { challenge_id: registrationChallengeId, code: document.getElementById('register-code').value.trim() }
+        : { name: document.getElementById('register-name').value.trim(), email: document.getElementById('register-email').value.trim(), password: document.getElementById('register-password').value, password_confirmation: document.getElementById('register-confirm').value };
+      document.getElementById('registration-error').classList.remove('show');
+      button.disabled = true;
+      button.classList.add('loading');
+      try {
+        const res = await fetch(verifying ? '/api/admin/verify-registration' : '/api/admin/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { registrationError(data.error || 'Não foi possível concluir o cadastro'); return; }
+        if (!verifying && data.requires_verification) {
+          registrationChallengeId = data.challenge_id;
+          ['registration-fields','registration-email-field','registration-password-field','registration-confirm-field','registration-policy'].forEach(id => { document.getElementById(id).hidden = true; });
+          ['register-name','register-email','register-password','register-confirm','register-policy'].forEach(id => { document.getElementById(id).required = false; });
+          document.getElementById('registration-code-field').hidden = false;
+          document.getElementById('register-code').required = true;
+          document.querySelector('#register-submit .btn-text').textContent = 'Confirmar e-mail';
+          document.querySelector('.card-sub').textContent = 'Digite o código enviado para confirmar seu cadastro';
+          document.getElementById('register-code').focus();
+        } else if (data.pending_approval) {
+          finished = true;
+          document.getElementById('registration-form').querySelectorAll('input,button[type="submit"]').forEach(element => { element.disabled = true; });
+          document.getElementById('registration-code-field').hidden = true;
+          const success = document.getElementById('registration-success');
+          success.textContent = 'E-mail confirmado. Seu cadastro aguarda aprovação do proprietário do painel.';
+          success.classList.add('show');
+          document.querySelector('.card-sub').textContent = 'Cadastro recebido';
+        }
+      } catch { registrationError('Erro de conexão. Tente novamente.'); }
+      finally { button.classList.remove('loading'); if (!finished) button.disabled = false; }
     }
 
     async function doLogin(e) {

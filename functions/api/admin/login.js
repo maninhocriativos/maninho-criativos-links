@@ -1,5 +1,5 @@
 import { errorResponse, json, rateLimit, readJson, text } from '../_utils.js';
-import { hashToken } from './_auth.js';
+import { hashToken, verifyPassword } from './_auth.js';
 
 async function sameHash(a, b) {
   const enc = new TextEncoder();
@@ -35,19 +35,25 @@ export async function onRequestPost({ request, env }) {
     const email = text(body.email, { required: true, max: 254 }).toLowerCase();
     const password = text(body.password, { required: true, max: 256 });
     const validEmail = (env.ADMIN_EMAIL || '').trim().toLowerCase();
-    if (!env.ADMIN_PASSWORD || !validEmail || !env.RESEND_API_KEY || !env.RESEND_FROM_EMAIL ||
-        !await sameHash(email, validEmail) || !await sameHash(password, env.ADMIN_PASSWORD)) {
+    let account = null;
+    if (env.ADMIN_PASSWORD && validEmail && await sameHash(email, validEmail) && await sameHash(password, env.ADMIN_PASSWORD)) {
+      account = { email: validEmail, user_id: null, verifier: env.ADMIN_PASSWORD };
+    } else {
+      const user = await env.DB.prepare(`SELECT id,email,password_hash FROM admin_users WHERE lower(email)=? AND status='active' AND email_verified_at IS NOT NULL`).bind(email).first();
+      if (user && await verifyPassword(password, user.password_hash)) account = { email: user.email, user_id: user.id, verifier: user.password_hash };
+    }
+    if (!account || !env.RESEND_API_KEY || !env.RESEND_FROM_EMAIL) {
       return json({ error: 'E-mail ou senha incorretos' }, 401);
     }
 
     const challengeId = crypto.randomUUID();
     const code = createCode();
-    const codeHash = await hashToken(`${challengeId}:${code}:${env.ADMIN_PASSWORD}`);
+    const codeHash = await hashToken(`${challengeId}:${code}:${account.verifier}`);
     await env.DB.batch([
-      env.DB.prepare(`DELETE FROM admin_login_challenges WHERE expires_at <= datetime('now') OR email = ?`).bind(email),
+      env.DB.prepare(`DELETE FROM admin_login_challenges WHERE expires_at <= datetime('now') OR email = ?`).bind(account.email),
       env.DB.prepare(
-        `INSERT INTO admin_login_challenges (id, email, code_hash, expires_at) VALUES (?, ?, ?, datetime('now', '+10 minutes'))`
-      ).bind(challengeId, email, codeHash),
+        `INSERT INTO admin_login_challenges (id, email, code_hash, expires_at, user_id, purpose) VALUES (?, ?, ?, datetime('now', '+10 minutes'), ?, 'login')`
+      ).bind(challengeId, account.email, codeHash, account.user_id),
     ]);
 
     const sent = await fetch('https://api.resend.com/emails', {
@@ -59,7 +65,7 @@ export async function onRequestPost({ request, env }) {
       },
       body: JSON.stringify({
         from: env.RESEND_FROM_EMAIL,
-        to: [validEmail],
+        to: [account.email],
         subject: 'Código de acesso — Maninho Criativos',
         html: emailHtml(code),
         text: `Seu código de acesso é ${code}. Ele expira em 10 minutos.`,

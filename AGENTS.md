@@ -3,7 +3,7 @@
 Leia este arquivo inteiro antes de mexer no código. Ele resume o que existe, como rodar, como publicar e o que ainda está pendente.
 Detalhes históricos do sistema (versão inicial, tabelas antigas) estão em [SISTEMA.md](SISTEMA.md). Se algo aqui conflitar com o código, **o código vale mais**: corrija este arquivo.
 
-_Última atualização: 2026-09-20 (fim do dia). Estado: tudo commitado e publicado; site de links + admin no Pages `maninho-criativos-links`, Worker `maninho-cobrancas` no ar, proposta em `proposta.maninhocriativos.com.br` (Pages `maninho-proposta`)._
+_Última atualização: 2026-10-03. Estado: recibos avulsos publicados; cadastro de usuários/migração 0017 implementados localmente, aguardando publicação; site de links + admin no Pages `maninho-criativos-links`, Worker `maninho-cobrancas` no ar, proposta em `proposta.maninhocriativos.com.br` (Pages `maninho-proposta`)._
 
 ## 1. O que é
 
@@ -85,10 +85,11 @@ Secrets (definidos no Cloudflare, **nunca** no repositório; `.env*` está no `.
 - **0014 `finance_alerts`** — tabela `finance_alert_deliveries` (alerta "três dias antes", e-mail/WhatsApp). **A tabela existe, mas nenhum código a usa ainda** (ver pendências).
 - **0015 `household_expenses`** — `expense_scope` (`business`/`household`): despesas pessoais separadas das da empresa, com aba própria no admin e categorias próprias; receita nunca pode ser `household`. `GET /api/admin/cash-flow?scope=business|household`.
 - **0016 `standalone_receipts`** — recibos avulsos podem ser gerados sem cliente cadastrado ou Resend, com nome/documento/endereço informados na hora; o PDF é salvo no R2 e a entrada é registrada no caixa como recebida. O fluxo de cliente + envio por e-mail permanece disponível.
+- **0017 `admin_users`** — cadastro de usuários com confirmação por e-mail, aprovação do proprietário, contas desativáveis e perfis `admin`, `editor` e `finance`. O acesso legado por `ADMIN_EMAIL`/`ADMIN_PASSWORD` continua sendo o proprietário e gerencia a aprovação em Perfil.
 - **Admin UX** (`public/admin-ux.js`): busca sem acento, botão "Atualizar", estado `aria-busy`, banner de erro de requisição, labels ligados aos campos, login remodelado.
 - Testes: `admin`, `billing-reminders`, `cash-flow`, `clients`, `infinitepay`, `utils` (30 passando em 2026-09-20).
 
-Estado do banco remoto em 2026-09-20: migrations 0001–0015 **já aplicadas** em produção.
+Estado do banco remoto em 2026-10-03: migrations 0001–0016 **já aplicadas** em produção; 0017 está local e aguarda publicação.
 
 ## 7.1 Proposta comercial (Carlos Mota)
 

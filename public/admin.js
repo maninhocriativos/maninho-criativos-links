@@ -1,9 +1,13 @@
 /* ══ Auth ══ */
+let adminRole = 'owner';
 async function checkAuth() {
   try {
     const res = await fetch('/api/admin/verify');
     if (res.status === 401) return window.location.replace('/login.html');
     if (!res.ok) throw new Error('Falha ao verificar acesso');
+    const account = await res.json();
+    adminRole = account.role || 'owner';
+    applyAccessPolicy();
     showPanel();
   } catch {
     document.getElementById('auth-loading').innerHTML = '<strong>Não foi possível conectar ao painel.</strong><p>Verifique sua conexão e tente novamente.</p><button class="btn-primary" onclick="checkAuth()">Tentar novamente</button>';
@@ -13,8 +17,20 @@ async function checkAuth() {
 function showPanel() {
   document.getElementById('auth-loading').hidden = true;
   document.getElementById('admin-panel').style.display = 'grid';
-  loadAllData();
-  restoreTab();
+  if (adminRole === 'finance') setTab('receipts', null, false);
+  else { loadAllData(); restoreTab(); }
+}
+
+function canAccessTab(name) {
+  if (adminRole === 'finance') return name === 'receipts';
+  if (adminRole === 'editor') return !['receipts', 'household'].includes(name);
+  return true;
+}
+
+function applyAccessPolicy() {
+  document.querySelectorAll('.snav-item[data-tab]').forEach(item => { item.hidden = !canAccessTab(item.dataset.tab); });
+  const jump = document.getElementById('section-jump');
+  if (jump) [...jump.options].forEach(option => { option.hidden = !option.value || !canAccessTab(option.value); });
 }
 
 async function logout() {
@@ -29,8 +45,11 @@ async function logout() {
 const tabTitles = { dashboard: ['Visão geral','Seu estúdio em um só lugar'], links: ['Links públicos','Organize os destinos da sua página'], portfolio: ['Portfólio público','Gerencie os cases publicados'], profile: ['Configurações','Identidade e aparência da página'], leads: ['Funil comercial','Transforme contatos em clientes'], clients: ['Clientes','Relacionamento e dados cadastrais'], projects: ['Projetos','Produção, revisão e entregas'], receipts: ['Financeiro e recibos','Recebimentos, documentos e envios'], household: ['Despesas de casa','Seus gastos pessoais separados da empresa'], analytics: ['Marketing e Analytics','Desempenho dos canais digitais'] };
 
 function setTab(name, btn, persist = true) {
+  if (!canAccessTab(name)) name = adminRole === 'finance' ? 'receipts' : 'dashboard';
   if (!document.getElementById(`tab-${name}`)) name = 'dashboard';
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  const usersCard = document.getElementById('admin-users-card');
+  if (usersCard) usersCard.hidden = name !== 'profile';
   document.querySelectorAll('.snav-item').forEach(b => b.classList.remove('active'));
   document.getElementById(`tab-${name}`)?.classList.add('active');
   (btn || document.querySelector(`.snav-item[data-tab="${name}"]`))?.classList.add('active');
@@ -45,6 +64,7 @@ function setTab(name, btn, persist = true) {
   if (name === 'clients') loadClients();
   if (name === 'projects') loadProjects();
   if (name === 'dashboard') loadCrmDashboard();
+  if (name === 'profile') loadUsers();
   if (name === 'receipts') { loadClientOptions(); loadCashFlow(); setFinanceView(sessionStorage.getItem('financeView') || 'cash'); }
   if (name === 'household') loadHouseholdExpenses();
   if (name === 'analytics') loadAnalytics();
@@ -60,7 +80,8 @@ function setTab(name, btn, persist = true) {
 function restoreTab() {
   const hashTab = location.hash.replace('#', '');
   const savedTab = localStorage.getItem('mc_admin_tab');
-  setTab(hashTab || savedTab || 'dashboard', null, false);
+  const requested = hashTab || savedTab || 'dashboard';
+  setTab(canAccessTab(requested) ? requested : 'dashboard', null, false);
 }
 
 window.addEventListener('hashchange', () => restoreTab());
@@ -318,6 +339,32 @@ async function submitProfile(e) {
   const res = await authFetch('/api/admin/profile', { method: 'PUT', body: JSON.stringify(body) });
   if (res?.ok) toast('Perfil salvo ✓');
   else toast('Erro ao salvar perfil', true);
+}
+
+async function loadUsers() {
+  const card = document.getElementById('admin-users-card');
+  const tbody = document.getElementById('admin-users-tbody');
+  if (!card || !tbody) return;
+  const response = await fetch('/api/admin/users');
+  if (response.status === 401) return window.location.replace('/login.html');
+  if (response.status === 403) { card.hidden = true; return; }
+  if (!response.ok) { tbody.innerHTML = '<tr><td colspan="5">Não foi possível carregar os usuários.</td></tr>'; return; }
+  const { users = [] } = await response.json();
+  card.hidden = false;
+  const statusLabels = { pending: 'Aguardando aprovação', active: 'Ativo', disabled: 'Desativado' };
+  tbody.innerHTML = users.length ? users.map(user => `
+    <tr><td><strong>${esc(user.name)}</strong><br><small>${esc(user.email)}</small>${user.email_verified_at ? '' : '<br><small>E-mail não confirmado</small>'}</td>
+      <td><select class="admin-input user-role-select" id="user-role-${user.id}" aria-label="Perfil de ${esc(user.name)}"><option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrador</option><option value="editor" ${user.role === 'editor' ? 'selected' : ''}>Editor</option><option value="finance" ${user.role === 'finance' ? 'selected' : ''}>Financeiro</option></select></td>
+      <td><span class="lead-tag">${statusLabels[user.status] || esc(user.status)}</span></td><td>${formatDate(user.created_at)}</td>
+      <td>${user.status === 'pending' ? `<button class="btn-primary small" ${user.email_verified_at ? '' : 'disabled title="Aguardando confirmação de e-mail"'} onclick="updateAdminUser(${user.id},'active')">Aprovar</button>` : `<button class="btn-secondary small" onclick="updateAdminUser(${user.id},'${user.status === 'active' ? 'disabled' : 'active'}')">${user.status === 'active' ? 'Desativar' : 'Ativar'}</button>`}</td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:28px">Nenhum cadastro adicional.</td></tr>';
+}
+
+async function updateAdminUser(id, status) {
+  const role = document.getElementById(`user-role-${id}`)?.value || 'editor';
+  const response = await fetch('/api/admin/users', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status, role }) });
+  const data = await response.json().catch(() => ({}));
+  if (response.ok) { toast(status === 'active' ? 'Usuário aprovado ✓' : 'Usuário desativado'); loadUsers(); }
+  else toast(data.error || 'Não foi possível atualizar o usuário', true);
 }
 
 /* ══ Live preview for new link form ══ */
